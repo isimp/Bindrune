@@ -109,7 +109,9 @@ namespace Bindrune
         private static ConfigEntry<KeyboardShortcut> _hintsKey;
 
         /// <summary>The hint toggle as text, so the panel can name it rather than guess.</summary>
-        public static string HintsKeyText => _hintsKey != null ? _hintsKey.Value.ToString() : "the hints key";
+        public static string HintsKeyText => _hintsKey != null
+            ? KeyLabels.Of(new KeyCombo(_hintsKey.Value.MainKey, _hintsKey.Value.Modifiers))
+            : "the hints key";
         private bool _restored;
         private float _restoreAt;
         private int _restoreAttempts;
