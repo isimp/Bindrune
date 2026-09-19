@@ -59,7 +59,7 @@ It can also be run by hand:
 
 ```bash
 HEXIUM_TOKEN=... python3 tools/publish.py dist/hexium/Bindrune-0.1.0.zip --store hexium --team isimp --categories "Quality of Life,User Interface,Config,Open Source,Valheim 1.0"
-THUNDERSTORE_TOKEN=... python3 tools/publish.py dist/thunderstore/Bindrune-0.1.0.zip --store thunderstore --team isimp --categories "ai-generated,mods,tools,client-side"
+THUNDERSTORE_TOKEN=... python3 tools/publish.py dist/thunderstore/Bindrune-0.1.0.zip --store thunderstore --team isimp --categories "ai-generated,mods,tools,utility,client-side,deep-north-update"
 python3 tools/publish.py dist/hexium/Bindrune-0.1.0.zip --check-only   # validate only
 ```
 
