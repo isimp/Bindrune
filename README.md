@@ -2,6 +2,10 @@
 
 Bindrune shows every keybind in your game in one panel: the game's own controls and the keybinds of every installed mod. When two binds share a key, it tells you whether they will actually get in each other's way, and why. It never blocks a binding. It explains what will happen and leaves the choice to you.
 
+## AI notice
+
+Most of Bindrune was written by Claude Code (Anthropic), which did the heavy lifting on implementation and design. Heads-up so you can judge for yourself.
+
 ## Using it
 
 Press Insert in game to open the panel. Select a bind to see what it clashes with, change its key from the same place, or mute a clash you are happy with. Before a new key is saved, Bindrune shows what it would run into.
