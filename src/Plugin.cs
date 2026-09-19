@@ -23,6 +23,11 @@ namespace Bindrune
         private static ConfigEntry<float> _scrollSpeed;
         public static float ScrollSpeed => _scrollSpeed?.Value ?? 300f;
 
+        private static ConfigEntry<bool> _keyboardLabels;
+
+        /// <summary>Whether keys are shown as the player's keyboard labels them. See KeyLabels.</summary>
+        public static bool KeyboardLabels => _keyboardLabels == null || _keyboardLabels.Value;
+
         private static ConfigEntry<float> _panelWidth;
         private static ConfigEntry<float> _panelHeight;
 
@@ -124,6 +129,9 @@ namespace Bindrune
             _scrollSpeed = Config.Bind("Panel", "ScrollSpeed", 300f,
                 new ConfigDescription("Mouse wheel distance per notch in the bind list. Takes effect next time the panel is opened.",
                     new AcceptableValueRange<float>(20f, 1200f)));
+            _keyboardLabels = Config.Bind("Display", "KeyboardLayoutLabels", true,
+                "Show keys as your keyboard labels them, so the key marked Y on a German keyboard reads Y rather than Z. " +
+                "Only the display changes; keys are stored and compared the same way either way. Takes effect when the panel is reopened.");
 
             _hintsKey = Config.Bind("Hints", "ToggleKey", new KeyboardShortcut(KeyCode.H, KeyCode.LeftAlt),
                 "Shows or hides the on-screen key hints.");
@@ -150,7 +158,11 @@ namespace Bindrune
 
             // A setting changed from the in-game config manager should land straight away rather
             // than wait for the world to change under the overlay.
-            Config.SettingChanged += (sender, args) => HintOverlay.Invalidate();
+            Config.SettingChanged += (sender, args) =>
+            {
+                KeyLabels.Forget();
+                HintOverlay.Invalidate();
+            };
 
             // After binding, so the settings we do have are registered and only the ones we have
             // dropped count as orphans.

@@ -221,7 +221,7 @@ namespace Bindrune.UI
                 foreach (var bind in hinted.Take(10))
                 {
                     var row = HorizontalRow(_detail, 26f);
-                    FixedLabel($"{bind.Combo}   {bind.OwnerName} / {bind.Label}", row, width - 106f, 22f, 12,
+                    FixedLabel($"{KeyLabels.Of(bind.Combo)}   {bind.OwnerName} / {bind.Label}", row, width - 106f, 22f, 12,
                         new Color(1f, 1f, 1f, 0.7f));
 
                     FixedButton("Remove", row, 96f, 24f, () =>
@@ -285,6 +285,20 @@ namespace Bindrune.UI
 
             Wrapped("Raw key aliases the game reads internally, like LShift and MouseLeft. They are not controls you " +
                     "can change, and they are left out of conflicts.",
+                _detail, width, 11, new Color(1f, 1f, 1f, 0.4f));
+            Spacer(8f);
+
+            var storedButton = FixedButton(_storedNamesShown ? "Showing stored key names" : "Show stored key names",
+                _detail, width, 28f, () =>
+                {
+                    _storedNamesShown = !_storedNamesShown;
+                    Refresh(rescan: false);
+                });
+            TintButton(storedButton, _storedNamesShown);
+
+            Wrapped("Keys are shown as your keyboard labels them, but config files store each key by its position " +
+                    "on a US keyboard, so the key marked Y on a German keyboard is written as Z. This adds the " +
+                    "stored name to a bind wherever the two differ, which helps when editing a config by hand.",
                 _detail, width, 11, new Color(1f, 1f, 1f, 0.4f));
         }
     }

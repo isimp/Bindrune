@@ -77,7 +77,9 @@ namespace Bindrune.Conflicts
 
         private static Conflict SameKey(BindEntry a, BindEntry b)
         {
-            var key = a.Combo.Main != KeyCode.None ? a.Combo.Main.ToString() : a.Combo.RawPath;
+            // Only ever shown: the key label on conflict rows and in their sentences. Grouping and
+            // identity use MainToken, which keeps Unity's names.
+            var key = a.Combo.Main != KeyCode.None ? KeyLabels.Of(a.Combo.Main) : a.Combo.RawPath;
 
             // Situations win over key analysis: two binds that are never live at the same time
             // cannot collide no matter what they are bound to.
@@ -242,7 +244,7 @@ namespace Bindrune.Conflicts
                 return new Conflict
                 {
                     A = a, B = b, Severity = Severity.Hard, KeyLabel = key,
-                    Reason = $"{Name(a)} and {Name(b)} both act on exactly {a.Combo}, so one press triggers both."
+                    Reason = $"{Name(a)} and {Name(b)} both act on exactly {KeyLabels.Of(a.Combo)}, so one press triggers both."
                 };
             }
 
@@ -261,7 +263,7 @@ namespace Bindrune.Conflicts
             return new Conflict
             {
                 A = a, B = b, Severity = Severity.Note, KeyLabel = key,
-                Reason = $"Same key, different modifiers ({a.Combo} vs {b.Combo}), and both check modifiers exactly, so they should not interfere."
+                Reason = $"Same key, different modifiers ({KeyLabels.Of(a.Combo)} vs {KeyLabels.Of(b.Combo)}), and both check modifiers exactly, so they should not interfere."
             };
         }
 
@@ -278,7 +280,7 @@ namespace Bindrune.Conflicts
         /// </summary>
         private static string Unmatched(BindEntry loose, BindEntry other, string key)
         {
-            var press = $"pressing {other.Combo} for {Name(other)}";
+            var press = $"pressing {KeyLabels.Of(other.Combo)} for {Name(other)}";
 
             if (loose.Modifiers == ModifierBehavior.Unknown)
                 return $"{Name(loose)} is stored as text, so whether it ignores the modifiers on {key} " +

@@ -109,6 +109,7 @@ namespace Bindrune.UI
         private static bool _yoursOnly;
         private static bool _conflictsOnly;
         private static bool _internalShown;
+        private static bool _storedNamesShown;
         private static Text _yoursButtonLabel;
         private static Text _conflictsButtonLabel;
 
@@ -383,9 +384,10 @@ namespace Bindrune.UI
             {
                 KeyCapture.Begin(CapturePurpose.Search, combo =>
                 {
-                    // Writing the key's name rather than its character keeps punctuation keys
-                    // ("Quote", "DoubleQuote") out of the quoting syntax entirely.
-                    if (_search != null) _search.text = "\"" + combo.Main + "\"";
+                    // The label, so the box says what the rows say. A label can be punctuation,
+                    // even a quote mark on some layouts, which is safe because Matches strips
+                    // only the outer pair of quotes and takes everything between them.
+                    if (_search != null) _search.text = "\"" + KeyLabels.Of(combo.Main) + "\"";
                     Populate();
                 });
             });
@@ -531,9 +533,9 @@ namespace Bindrune.UI
             string group = null;
             foreach (var bind in shown)
             {
-                // MainLabel, not the KeyCode: a bind held as a raw input path has no KeyCode and
-                // would otherwise be headed "None".
-                var heading = _groupByKey ? bind.Combo.MainLabel : bind.OwnerName;
+                // The key's label, or its raw input path when it has no KeyCode; otherwise such a
+                // bind would be headed "None". Groups still form on MainToken, which is raw.
+                var heading = _groupByKey ? KeyLabels.Heading(bind.Combo) : bind.OwnerName;
 
                 if (heading != group)
                 {
@@ -624,19 +626,35 @@ namespace Bindrune.UI
 
             if (IsKeyName(query)) return UsesKey(bind, query);
 
-            return (bind.OwnerName + " " + bind.Label + " " + bind.Combo).ToLowerInvariant().Contains(query);
+            // Against what the row shows, so typing "ö" finds the rows reading Ö.
+            return (bind.OwnerName + " " + bind.Label + " " + KeyLabels.Of(bind.Combo)).ToLowerInvariant().Contains(query);
         }
 
-        private static bool IsKeyName(string query) =>
-            Enum.TryParse<KeyCode>(query, true, out var key)
-            && Enum.IsDefined(typeof(KeyCode), key)
-            // Rejects "8", which parses as the numeric value of Backspace rather than a key name.
-            && string.Equals(key.ToString(), query, StringComparison.OrdinalIgnoreCase);
+        /// <summary>
+        /// Whether the query names a key. With labels on, any single visible character does:
+        /// that is what a key looks like on the keycap, and letters were already treated so.
+        /// </summary>
+        private static bool IsKeyName(string query)
+        {
+            if (Plugin.KeyboardLabels && query.Length == 1 && !char.IsWhiteSpace(query[0])) return true;
+
+            return Enum.TryParse<KeyCode>(query, true, out var key)
+                   && Enum.IsDefined(typeof(KeyCode), key)
+                   // Rejects "8", which parses as the numeric value of Backspace rather than a key name.
+                   && string.Equals(key.ToString(), query, StringComparison.OrdinalIgnoreCase);
+        }
 
         private static bool UsesKey(BindEntry bind, string keyName)
         {
-            if (!Enum.TryParse<KeyCode>(keyName, true, out var key)) return false;
-            return bind.Combo.Main == key || bind.Combo.Modifiers.Contains(key);
+            // Labels off is today's search, unchanged.
+            if (!Plugin.KeyboardLabels)
+            {
+                if (!Enum.TryParse<KeyCode>(keyName, true, out var key)) return false;
+                return bind.Combo.Main == key || bind.Combo.Modifiers.Contains(key);
+            }
+
+            return KeyLabels.Answers(bind.Combo.Main, keyName) ||
+                   bind.Combo.Modifiers.Any(m => KeyLabels.Answers(m, keyName));
         }
 
         /// <summary>
@@ -706,7 +724,7 @@ namespace Bindrune.UI
 
             // A dot marks a key you set that survives profile syncs.
             var yours = PersonalKeys.IsPersonal(bind.Id);
-            var key = bind.Combo + (yours ? "  *" : "");
+            var key = KeyLabels.Of(bind.Combo) + (yours ? "  *" : "");
 
             var columns = Columns();
             Cell(row.transform, mark, columns.Mark, markColor, 13);

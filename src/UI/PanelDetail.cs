@@ -48,7 +48,14 @@ namespace Bindrune.UI
             Wrapped(bind.Label, _detail, width, 21, GUIManager.Instance.ValheimOrange, true);
             Spacer(6f);
 
-            Wrapped(bind.Combo.IsBound ? bind.Combo.ToString() : "not bound", _detail, width, 24, Color.white, true);
+            Wrapped(bind.Combo.IsBound ? KeyLabels.Of(bind.Combo) : "not bound", _detail, width, 24, Color.white, true);
+
+            // The config file holds Unity's name, not the label. Only asked for when editing a
+            // config by hand, so it waits behind the switch on the help page.
+            var stored = bind.Combo.ToString();
+            if (_storedNamesShown && bind.Combo.IsBound && KeyLabels.Of(bind.Combo) != stored)
+                Wrapped($"stored as {stored}", _detail, width, 12, new Color(1f, 1f, 1f, 0.45f));
+
             Spacer(8f);
 
             if (bind.Editable && _pendingFor == bind.Id)
@@ -171,7 +178,7 @@ namespace Bindrune.UI
         {
             var clashes = ConflictEngine.Preview(bind, _pending, BindRegistry.All);
 
-            Wrapped(_pending.IsBound ? _pending.ToString() : "nothing", _detail, width, 22,
+            Wrapped(_pending.IsBound ? KeyLabels.Of(_pending) : "nothing", _detail, width, 22,
                 GUIManager.Instance.ValheimOrange, true);
             Spacer(4f);
 
@@ -291,7 +298,7 @@ namespace Bindrune.UI
             {
                 var other = yours ? entry.Profile : entry.Personal;
                 if (other.IsBound)
-                    Wrapped(yours ? $"The profile's key is {other}." : $"Your key is {other}.",
+                    Wrapped(yours ? $"The profile's key is {KeyLabels.Of(other)}." : $"Your key is {KeyLabels.Of(other)}.",
                         _detail, width, 12, new Color(1f, 1f, 1f, 0.45f));
             }
 
@@ -363,7 +370,7 @@ namespace Bindrune.UI
             var entry = PersonalKeys.Get(bind.Id);
             if (entry == null || !entry.Profile.IsBound || entry.Profile.Equals(bind.Combo)) return "";
 
-            return "profile: " + entry.Profile;
+            return "profile: " + KeyLabels.Of(entry.Profile);
         }
 
         /// <summary>

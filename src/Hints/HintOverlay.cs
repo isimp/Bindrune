@@ -165,8 +165,8 @@ namespace Bindrune.Hints
             var action = Plugin.HintModNames ? $"{bind.OwnerName} - {bind.Label}" : bind.Label;
 
             return Plugin.HintOrder == HintOrder.KeyFirst
-                ? $"{bind.Combo}   {action}"
-                : $"{action}   {bind.Combo}";
+                ? $"{KeyLabels.Of(bind.Combo)}   {action}"
+                : $"{action}   {KeyLabels.Of(bind.Combo)}";
         }
 
         private static void Draw(List<string> rows, string signature)

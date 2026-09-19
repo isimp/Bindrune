@@ -15,6 +15,7 @@ namespace Bindrune.Discovery
             // entries are then skipped by the config scan so a bind is never listed twice.
             Context.KnownSituations.BeginScan();
             Hints.SelfHinting.BeginScan();
+            KeyLabels.Forget();
 
             var backingEntries = new HashSet<ConfigEntryBase>();
             var claimedButtonNames = new HashSet<string>();

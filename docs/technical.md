@@ -36,6 +36,12 @@ Bindrune reads the game's assemblies with Mono.Cecil, finds the code that reads 
 
 Jotunn is declared as a soft dependency, so Bindrune loads without it, but the panel and the hints are built with Jotunn's GUI and nothing is shown without it.
 
+## Key names
+
+Keys are shown the way the keyboard in use labels them, using the same names as the game's own controls settings. Config files and mods store keys by their position on a US keyboard instead, so on a German keyboard the key to the left of X is shown as Y but stored as Z, and the key to the right of L is shown as Ö but stored as Semicolon. Only keys that print a single character are renamed. Modifiers, function keys, arrows, mouse buttons and the numpad keep their usual names.
+
+Searching by key uses the shown names, and a single typed character is read as a key. Show stored key names, under Advanced on the ? page, adds the stored name to every bind where the two differ. The names only affect what is displayed; how a key is stored, compared and written is the same either way. Setting `KeyboardLayoutLabels` under `[Display]` to false shows the stored names everywhere.
+
 ## Limits
 
 A mod that writes its key directly into its code instead of a setting has nothing to read and does not appear. Keybind settings stored as free text are shown but cannot be changed from Bindrune. Gamepad buttons are listed while a controller is connected but are not editable and are left out of clashes. A bind with no description is compared with everything.

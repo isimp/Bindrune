@@ -48,12 +48,21 @@ namespace Bindrune
         public override bool Equals(object obj) => obj is KeyCombo other && Equals(other);
         public override int GetHashCode() => MainToken.GetHashCode() ^ Modifiers.Length;
 
-        public override string ToString()
+        /// <summary>
+        /// The raw form, Unity's own key names. This is what is stored, logged and compared, so it
+        /// must never change with the player's keyboard layout. For what to show, see KeyLabels.
+        /// </summary>
+        public override string ToString() => Format(k => k.ToString());
+
+        /// <summary>
+        /// The one place a combo is spelled out, so the raw form and the labelled form can never
+        /// disagree about order or separators, only about what each key is called.
+        /// </summary>
+        internal string Format(Func<KeyCode, string> name)
         {
             if (!IsBound) return "<unbound>";
-            var main = Main != KeyCode.None ? Main.ToString() : RawPath;
-            return Modifiers.Length == 0 ? main : string.Join(" + ", Modifiers.Select(m => m.ToString())) + " + " + main;
+            var main = Main != KeyCode.None ? name(Main) : RawPath;
+            return Modifiers.Length == 0 ? main : string.Join(" + ", Modifiers.Select(name).ToArray()) + " + " + main;
         }
-
     }
 }

@@ -188,7 +188,7 @@ namespace Bindrune.Personal
                 if (problem == null)
                 {
                     reapplied++;
-                    Restored[pair.Key] = $"{bind.OwnerName} / {bind.Label} - back to {entry.Personal}, the profile had {entry.Profile}";
+                    Restored[pair.Key] = $"{bind.OwnerName} / {bind.Label} - back to {KeyLabels.Of(entry.Personal)}, the profile had {KeyLabels.Of(entry.Profile)}";
                     Plugin.Log.LogInfo($"Bindrune: restored your key {entry.Personal} for {bind.OwnerName} / {bind.Label} (the profile said {entry.Profile}).");
                 }
                 else
