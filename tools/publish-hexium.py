@@ -19,7 +19,7 @@ uses) and falls back to `Token` once, reporting which one the server accepted.
 
 Usage:
     HEXIUM_TOKEN=... python3 tools/publish-hexium.py dist/Bindrune-0.1.0.zip \\
-        --team isimp --categories "Quality of Life,User Interface,Open Source"
+        --team isimp --categories "Quality of Life,User Interface,Config,Open Source,Valheim 1.0"
 
     python3 tools/publish-hexium.py dist/Bindrune-0.1.0.zip --check-only
 """
