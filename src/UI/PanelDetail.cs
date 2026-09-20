@@ -139,11 +139,20 @@ namespace Bindrune.UI
                 var muted = MuteStore.IsMuted(conflict);
 
                 var head = HorizontalRow(_detail, 30f);
-                // The tag takes all the slack so the mute button lands on the column's right edge.
-                var tagWidth = width - 96f - 28f;
+                // The tag takes all the slack so the two buttons land on the column's right edge.
+                var tagWidth = width - 96f - 86f - 38f;
                 var severity = conflict.Severity.ToString().ToLowerInvariant() + (conflict.Confirmed ? " - confirmed" : "");
                 FixedLabel(muted ? "muted" : severity, head, tagWidth, 24f, 14,
                     muted ? new Color(1f, 1f, 1f, 0.4f) : ColorFor(conflict.Severity), true);
+
+                // A clash is a pair, and half of it is always the bind you are not looking at.
+                var other = conflict.A.Id == bind.Id ? conflict.B : conflict.A;
+                FixedButton("Go to", head, 86f, 26f, () =>
+                {
+                    Select(other);
+                    Reveal(other);
+                    ShowDetail();
+                });
 
                 FixedButton(muted ? "Unmute" : "Mute", head, 96f, 26f, () =>
                 {

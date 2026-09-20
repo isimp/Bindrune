@@ -658,6 +658,45 @@ namespace Bindrune.UI
         }
 
         /// <summary>
+        /// Brings a bind into view in the list. Whatever is narrowing the list is dropped only
+        /// when it is what hides the bind, so a search someone is still using survives a jump to
+        /// a bind that search already shows.
+        /// </summary>
+        private static void Reveal(BindEntry bind)
+        {
+            if (bind == null) return;
+
+            if (!_rowBackgrounds.ContainsKey(bind.Id))
+            {
+                if (_search != null) _search.text = "";
+                _yoursOnly = false;
+                _mutedOnly = false;
+                Populate();
+            }
+
+            ScrollTo(bind.Id);
+        }
+
+        /// <summary>Puts a row in the middle of the list, or as close to it as the ends allow.</summary>
+        private static void ScrollTo(string bindId)
+        {
+            if (_content == null || !_rowBackgrounds.TryGetValue(bindId, out var row) || row == null) return;
+
+            var scroll = _content.GetComponentInParent<ScrollRect>();
+            if (scroll == null || scroll.viewport == null) return;
+
+            // The row was created this frame, so the layout has to run before it has a position.
+            LayoutRebuilder.ForceRebuildLayoutImmediate(_content);
+
+            var travel = _content.rect.height - scroll.viewport.rect.height;
+            if (travel <= 0f) return;
+
+            // Rows hang below the content's top edge, so their y is negative.
+            var down = -((RectTransform)row.transform).anchoredPosition.y - scroll.viewport.rect.height / 2f;
+            scroll.verticalNormalizedPosition = Mathf.Clamp01(1f - down / travel);
+        }
+
+        /// <summary>
         /// Moves the highlight by recolouring the two rows involved, without rebuilding the list.
         /// </summary>
         private static void Select(BindEntry bind)
