@@ -20,7 +20,9 @@ namespace Bindrune.Conflicts
 
         public static void Rebuild(IEnumerable<BindEntry> binds)
         {
-            All = ConflictEngine.Find(binds);
+            var compared = binds as IList<BindEntry> ?? binds.ToList();
+
+            All = ConflictEngine.Find(compared);
             _byBind = new Dictionary<string, List<Conflict>>();
 
             foreach (var conflict in All)
@@ -28,6 +30,11 @@ namespace Bindrune.Conflicts
                 Attach(conflict.A.Id, conflict);
                 Attach(conflict.B.Id, conflict);
             }
+
+            // Here rather than in the panel because what is left of a mute is a fact about the
+            // binds too, and this is the one place that knows both what was compared and what
+            // came of it.
+            MuteStore.Settle(compared.Select(b => b.Id), All);
         }
 
         /// <summary>Everything found against a bind, muted or not.</summary>

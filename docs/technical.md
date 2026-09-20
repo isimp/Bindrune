@@ -6,6 +6,8 @@ A hard clash is the same key with the same modifiers. A soft clash is one where 
 
 Alt, Ctrl and Shift on their own are never reported as clashes, since mods share them on purpose to qualify clicks and other keys.
 
+Muting one is about the clash in front of you, not the pair for good. It records what was waved through, so the same pair is reported again if it turns into something worse, and the mute is dropped once the clash is gone rather than waiting to suppress a future one. Mutes for binds that are not loaded are always kept, since a bind a mod registers when a world loads is missing rather than gone. A mute from before 0.2.1 says only that the pair is fine; the first scan that finds the clash it was hiding records that clash against it, so it hides no more than it did before and no less.
+
 ## Where a bind applies
 
 A bind is described along two independent axes: where it is live (World, Build placement, Build menu, Inventory, Container, Crafting, Map, Chat, Vehicle, Custom) and what has to be in your hands (a skill, an item type, or one specific item). Two binds are only ruled out when one axis rules them out. If one describes a place and the other an item, nothing is proven and the pair is still reported.

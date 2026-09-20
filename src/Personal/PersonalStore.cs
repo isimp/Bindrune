@@ -33,7 +33,13 @@ namespace Bindrune.Personal
         private static readonly Dictionary<string, string[]> Notes = new Dictionary<string, string[]>
         {
             { Keys, new[] { "# bind id, your key, the profile's key, whether yours is live." } },
-            { Muted, new[] { "# Clashes Bindrune should stop flagging, as the two bind ids." } },
+            {
+                Muted, new[]
+                {
+                    "# Clashes Bindrune should stop flagging: the two bind ids, then what was",
+                    "# waved through. A line with no severity mutes the pair whatever it does."
+                }
+            },
             {
                 Hints, new[]
                 {

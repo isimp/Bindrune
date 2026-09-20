@@ -87,7 +87,8 @@ namespace Bindrune.UI
             LegendOrphans(width);
 
             Wrapped("Nothing is ever blocked: Bindrune only tells you what will happen, so you can keep a clash if you want it. " +
-                    "Mute one you have decided is fine and it stops counting. Alt, Ctrl and Shift on their own are never " +
+                    "Mute one you have decided is fine and it stops counting, until that pair turns into something worse " +
+                    "than what you waved through. Alt, Ctrl and Shift on their own are never " +
                     "reported, because mods share them on purpose to qualify clicks and other keys.",
                 _detail, width, 12, new Color(1f, 1f, 1f, 0.55f));
             Spacer(10f);
