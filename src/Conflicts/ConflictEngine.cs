@@ -263,7 +263,10 @@ namespace Bindrune.Conflicts
             return new Conflict
             {
                 A = a, B = b, Severity = Severity.Note, KeyLabel = key,
-                Reason = $"Same key, different modifiers ({KeyLabels.Of(a.Combo)} vs {KeyLabels.Of(b.Combo)}), and both check modifiers exactly, so they should not interfere."
+                // Named like every other sentence here: two of these can sit in one list, and
+                // "same key, different modifiers" alone reads the same on both.
+                Reason = $"{Name(a)} is on {KeyLabels.Of(a.Combo)} and {Name(b)} on {KeyLabels.Of(b.Combo)}: " +
+                         "the same key with different modifiers, and both check modifiers exactly, so they should not interfere."
             };
         }
 
