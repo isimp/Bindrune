@@ -18,7 +18,7 @@ Any bind can also be pinned to a small list of hints on screen, which only shows
 
 ## Your own keys
 
-When a shared modpack profile is synced, it overwrites your config files and your rebinds with them. Bindrune can keep the keys you mark as your own outside the synced config and puts them back after every sync.
+When a shared modpack profile is synced, it overwrites your config files and your rebinds with them. Bindrune can keep the keys you mark as your own outside the synced config and puts them back after every sync. The clashes you have waved through and the hints you have pinned are kept there too.
 
 ## Requirements
 

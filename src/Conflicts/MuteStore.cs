@@ -1,29 +1,23 @@
 using System.Collections.Generic;
-using System.IO;
 using System.Linq;
-using BepInEx;
+using Bindrune.Personal;
 
 namespace Bindrune.Conflicts
 {
-    /// <summary>Remembers which conflicts you have already decided are fine.</summary>
+    /// <summary>
+    /// Remembers which conflicts you have already decided are fine.
+    ///
+    /// Kept with your keys rather than in BepInEx/config: which clashes you have looked at and
+    /// waved through is your own decision about your own modlist, and a profile sync would both
+    /// hand you someone else's and delete yours. Held as pairs of bind ids, so a mute survives
+    /// either bind moving to another key.
+    /// </summary>
     public static class MuteStore
     {
         private static HashSet<string> _muted;
 
-        private static string FilePath => TextStore.Ours(Paths.ConfigPath, "muted.txt");
-
-        private static HashSet<string> Muted
-        {
-            get
-            {
-                if (_muted != null) return _muted;
-
-                _muted = new HashSet<string>(
-                    TextStore.Read(FilePath).Where(line => !TextStore.IsNoise(line)).Select(line => line.Trim()));
-
-                return _muted;
-            }
-        }
+        private static HashSet<string> Muted =>
+            _muted ?? (_muted = new HashSet<string>(PersonalStore.Lines(PersonalStore.Muted)));
 
         public static bool IsMuted(Conflict conflict) => Muted.Contains(conflict.PairKey);
 
@@ -31,9 +25,7 @@ namespace Bindrune.Conflicts
         {
             if (!Muted.Add(conflict.PairKey)) Muted.Remove(conflict.PairKey);
 
-            TextStore.Write(FilePath,
-                new[] { "# Conflicts Bindrune should stop flagging." },
-                Muted.OrderBy(k => k));
+            PersonalStore.Replace(PersonalStore.Muted, Muted.OrderBy(k => k));
         }
     }
 }

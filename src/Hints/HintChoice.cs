@@ -1,17 +1,16 @@
 using System;
 using System.Collections.Generic;
-using System.IO;
 using System.Linq;
-using BepInEx;
+using Bindrune.Personal;
 
 namespace Bindrune.Hints
 {
     /// <summary>
     /// The binds you asked Bindrune to show on screen. Opt-in, one id per line.
     ///
-    /// Lives in BepInEx/config with the situations and the mutes: which hints are worth having is
-    /// knowledge about a modlist, so it should travel with a profile the way they do. See
-    /// PersonalKeys for the one kind of state that deliberately does not.
+    /// Kept with your keys rather than in BepInEx/config: which of your binds are worth a line on
+    /// your screen is as personal as the keys themselves, and a profile sync would replace the
+    /// list with the profile owner's.
     /// </summary>
     public static class HintChoice
     {
@@ -20,26 +19,8 @@ namespace Bindrune.Hints
         /// <summary>Raised when the set changes, so the overlay can rebuild without polling it.</summary>
         public static Action Changed;
 
-        private static string FilePath => TextStore.Ours(Paths.ConfigPath, "hints.txt");
-
-        private static HashSet<string> Chosen
-        {
-            get
-            {
-                if (_chosen != null) return _chosen;
-
-                _chosen = new HashSet<string>();
-                foreach (var line in TextStore.Read(FilePath))
-                {
-                    if (TextStore.IsNoise(line)) continue;
-
-                    var id = line.Trim();
-                    if (id.Length > 0) _chosen.Add(id);
-                }
-
-                return _chosen;
-            }
-        }
+        private static HashSet<string> Chosen =>
+            _chosen ?? (_chosen = new HashSet<string>(PersonalStore.Lines(PersonalStore.Hints)));
 
         public static int Count => Chosen.Count;
 
@@ -66,14 +47,7 @@ namespace Bindrune.Hints
 
         private static void Save()
         {
-            TextStore.Write(FilePath,
-                new[]
-                {
-                    "# Binds Bindrune shows on screen, one id per line.",
-                    "# Each is shown only while its situations say it applies."
-                },
-                Chosen.OrderBy(id => id));
-
+            PersonalStore.Replace(PersonalStore.Hints, Chosen.OrderBy(id => id));
             Changed?.Invoke();
         }
     }

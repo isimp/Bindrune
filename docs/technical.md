@@ -24,11 +24,13 @@ It lives in `config` on purpose, so it travels with a modpack and everyone follo
 
 ## Your keys and the profile's
 
-Keys marked as your own are stored in `BepInEx/bindrune.keys`, outside `config` and with an extension no profile sync picks up, and reapplied once the game is running. Each bind can be switched between your own key and the profile's key, and both are remembered.
+Keys marked as your own are stored in `BepInEx/bindrune.keys`, outside `config` and with an extension no profile sync picks up, and reapplied once the game is running. Each bind can be switched between your own key and the profile's key, and both are remembered. Muted clashes and pinned hints sit in the same file, for the same reason: a sync would hand you the profile owner's and delete yours.
+
+Versions before 0.2.1 kept those two in `BepInEx/config/Bindrune/`. They are moved into `bindrune.keys` on the first launch after the update and the old files are removed. A copy a sync puts back afterwards is ignored, and the log says so.
 
 ## Files
 
-Settings are in `BepInEx/config/isimp.Bindrune.cfg`. Situations you set, muted clashes and pinned hints are in `BepInEx/config/Bindrune/`. Data derived from the game is cached in `BepInEx/cache/Bindrune/` and rebuilt after a game update. All of these are plain text and safe to edit or delete.
+Settings are in `BepInEx/config/isimp.Bindrune.cfg`. Situations you set and the shared list are in `BepInEx/config/Bindrune/`, so they travel with a profile. Your own keys, muted clashes and pinned hints are in `BepInEx/bindrune.keys`, so they do not. Data derived from the game is cached in `BepInEx/cache/Bindrune/` and rebuilt after a game update. All of these are plain text and safe to edit or delete.
 
 ## How it reads the game
 

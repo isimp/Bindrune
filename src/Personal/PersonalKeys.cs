@@ -1,8 +1,6 @@
 using System;
 using System.Collections.Generic;
-using System.IO;
 using System.Linq;
-using BepInEx;
 using BepInEx.Configuration;
 using Bindrune.Discovery;
 
@@ -40,15 +38,12 @@ namespace Bindrune.Personal
     /// Keys you set that must survive a profile sync.
     ///
     /// Gale rewrites and deletes files under BepInEx/config on every pull, which is where mod
-    /// keybinds live, so a subscriber's own rebinds are wiped each launch. This file sits in the
-    /// BepInEx root with an extension outside Gale's allowlist - both are required for it to be
-    /// skipped by the same predicate Gale uses for export and for deletion. LogOutput.log lives
-    /// here for the same machine-local reason.
+    /// keybinds live, so a subscriber's own rebinds are wiped each launch. These are kept in the
+    /// keys section of PersonalStore, which sits outside config and is named so that no sync
+    /// picks it up either.
     /// </summary>
     public static class PersonalKeys
     {
-        private const string Version = "# bindrune personal keys v2";
-
         private static Dictionary<string, PersonalEntry> _entries;
 
         /// <summary>
@@ -60,8 +55,6 @@ namespace Bindrune.Personal
         public static int RestoredCount => Restored.Count;
 
         public static IEnumerable<string> RestoredKeys => Restored.Values;
-
-        private static string FilePath => Path.Combine(Paths.BepInExRootPath, "bindrune.keys");
 
         private static Dictionary<string, PersonalEntry> Entries
         {
@@ -221,10 +214,8 @@ namespace Bindrune.Personal
         {
             _entries = new Dictionary<string, PersonalEntry>();
 
-            foreach (var line in TextStore.Read(FilePath))
+            foreach (var line in PersonalStore.Lines(PersonalStore.Keys))
             {
-                if (TextStore.IsNoise(line)) continue;
-
                 var parts = line.Split('\t');
                 if (parts.Length < 2) continue;
 
@@ -260,18 +251,9 @@ namespace Bindrune.Personal
 
         private static void Save()
         {
-            // Atomic: this is the one file holding keys the user set by hand and cannot get back
-            // from anywhere else, so a crash mid-write must not be able to truncate it.
-            TextStore.Write(FilePath,
-                new[]
-                {
-                    Version,
-                    "# bind id, your key, the profile's key, whether yours is live.",
-                    "# Kept out of BepInEx/config on purpose so profile syncs cannot delete it."
-                },
+            PersonalStore.Replace(PersonalStore.Keys,
                 Entries.OrderBy(e => e.Key).Select(e =>
-                    $"{e.Key}\t{Serialize(e.Value.Personal)}\t{Serialize(e.Value.Profile)}\t{(e.Value.Active ? "1" : "0")}"),
-                atomic: true);
+                    $"{e.Key}\t{Serialize(e.Value.Personal)}\t{Serialize(e.Value.Profile)}\t{(e.Value.Active ? "1" : "0")}"));
         }
     }
 }

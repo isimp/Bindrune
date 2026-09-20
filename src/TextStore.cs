@@ -24,15 +24,28 @@ namespace Bindrune
 
         public static IEnumerable<string> Read(string path)
         {
+            TryRead(path, out var lines);
+            return lines;
+        }
+
+        /// <summary>
+        /// Reads, and says whether it worked. A missing file counts as read, being nothing rather
+        /// than a failure; a file that is there but unreadable does not, which matters to a caller
+        /// about to move its contents somewhere else and delete it.
+        /// </summary>
+        public static bool TryRead(string path, out IEnumerable<string> lines)
+        {
+            lines = new string[0];
+
             try
             {
-                if (!File.Exists(path)) return new string[0];
-                return File.ReadAllLines(path);
+                if (File.Exists(path)) lines = File.ReadAllLines(path);
+                return true;
             }
             catch (Exception ex)
             {
                 Plugin.Log.LogWarning($"Bindrune: could not read {Path.GetFileName(path)}: {ex.Message}");
-                return new string[0];
+                return false;
             }
         }
 
