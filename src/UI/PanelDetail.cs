@@ -71,12 +71,16 @@ namespace Bindrune.UI
 
                 FixedButton(capturing ? "press a key..." : "Rebind", buttons, 140f, 32f, () => BeginRebind(bind));
 
-                FixedButton(capturing ? "Cancel" : "Clear", buttons, 110f, 32f, () =>
+                var cancel = FixedButton(capturing ? "Cancel" : "Clear", buttons, 110f, 32f, () =>
                 {
                     if (KeyCapture.Active) KeyCapture.Cancel();
                     else BindWriter.Apply(bind, KeyCombo.None, SaveTarget.Personal);
                     Refresh();
                 });
+
+                // Told each time it is drawn: this pane is rebuilt when the capture starts, so the
+                // button the capture began with is not the one anyone ends up clicking.
+                if (capturing) KeyCapture.QuitsOver((RectTransform)cancel.transform);
 
                 var fallback = BindWriter.DefaultOf(bind);
                 if (!capturing && fallback.IsBound && !fallback.Equals(bind.Combo))

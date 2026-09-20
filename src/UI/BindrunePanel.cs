@@ -380,8 +380,17 @@ namespace Bindrune.UI
             });
             AnchorLeft(clear, Margin + 306f, filterRow);
 
-            var pressKey = Button("Press key", _root.transform, 120f, 32f, () =>
+            // Declared first so its own handler can name it: this button both starts the capture
+            // and is how you get out of one.
+            GameObject pressKey = null;
+            pressKey = Button("Press key", _root.transform, 120f, 32f, () =>
             {
+                if (KeyCapture.IsCapturingFor(CapturePurpose.Search))
+                {
+                    KeyCapture.Cancel();
+                    return;
+                }
+
                 KeyCapture.Begin(CapturePurpose.Search, combo =>
                 {
                     // The label, so the box says what the rows say. A label can be punctuation,
@@ -390,6 +399,10 @@ namespace Bindrune.UI
                     if (_search != null) _search.text = "\"" + KeyLabels.Of(combo.Main) + "\"";
                     Populate();
                 });
+
+                // After Begin, which clears it: clicking this button again is how the search
+                // capture is called off, so that click has to reach it.
+                KeyCapture.QuitsOver((RectTransform)pressKey.transform);
             });
             AnchorLeft(pressKey, Margin + 348f, filterRow);
             _pressKeyLabel = pressKey.GetComponentInChildren<Text>();
