@@ -24,8 +24,10 @@ namespace Bindrune.Hints
         private static HashSet<string> _where = new HashSet<string>();
         private static HashSet<string> _held = new HashSet<string>();
 
-        // Changes exactly when what is on screen should change, and is cheap to compare.
-        private static string _signature = "";
+        // Each sample reads into these and they are swapped in only when they differ, so a sample
+        // that finds nothing new, which is nearly all of them, allocates nothing.
+        private static HashSet<string> _nextWhere = new HashSet<string>();
+        private static HashSet<string> _nextHeld = new HashSet<string>();
 
         /// <summary>True while there is a player to have a situation at all.</summary>
         public static bool InGame { get; private set; }
@@ -36,19 +38,21 @@ namespace Bindrune.Hints
             if (UnityEngine.Time.realtimeSinceStartup < _nextSample) return false;
             _nextSample = UnityEngine.Time.realtimeSinceStartup + Interval;
 
-            var where = new HashSet<string>();
-            var held = new HashSet<string>();
-            InGame = Read(where, held);
+            _nextWhere.Clear();
+            _nextHeld.Clear();
+            var inGame = Read(_nextWhere, _nextHeld);
 
-            var signature = InGame
-                ? string.Join(",", where.OrderBy(w => w).Concat(held.OrderBy(h => h)).ToArray())
-                : "";
+            if (inGame == InGame && _nextWhere.SetEquals(_where) && _nextHeld.SetEquals(_held)) return false;
 
-            if (signature == _signature) return false;
+            InGame = inGame;
 
-            _where = where;
-            _held = held;
-            _signature = signature;
+            var where = _where;
+            _where = _nextWhere;
+            _nextWhere = where;
+
+            var held = _held;
+            _held = _nextHeld;
+            _nextHeld = held;
             return true;
         }
 
@@ -84,8 +88,8 @@ namespace Bindrune.Hints
 
                 // The accessors are protected, so read the fields the game keeps them in. Both
                 // hands, because a bind can want the shield as easily as the weapon.
-                Add(held, Equipped(player, RightItem));
-                Add(held, Equipped(player, LeftItem));
+                Add(held, Equipped(player, RightItem), ref _right);
+                Add(held, Equipped(player, LeftItem), ref _left);
                 return true;
             }
             catch (Exception ex)
@@ -106,12 +110,27 @@ namespace Bindrune.Hints
         private static ItemDrop.ItemData Equipped(Humanoid player, System.Reflection.FieldInfo field) =>
             field?.GetValue(player) as ItemDrop.ItemData;
 
-        private static void Add(HashSet<string> held, ItemDrop.ItemData item)
+        /// <summary>The last item seen in a hand and its name, kept while the same item stays there.</summary>
+        private struct InHand
+        {
+            public UnityEngine.GameObject Prefab;
+            public string Name;
+        }
+
+        private static InHand _right;
+        private static InHand _left;
+
+        private static void Add(HashSet<string> held, ItemDrop.ItemData item, ref InHand last)
         {
             // The prefab name is what EquippedItems keys on, so a tag and a held item can be
             // compared without going through display names, which are localised.
             var prefab = item?.m_dropPrefab;
-            if (prefab != null) held.Add(prefab.name);
+            if (prefab == null) return;
+
+            // Unity builds a new string every time an object's name is read, so it is read once
+            // per item that enters the hand rather than five times a second.
+            if (!ReferenceEquals(prefab, last.Prefab)) last = new InHand { Prefab = prefab, Name = prefab.name };
+            held.Add(last.Name);
         }
 
         /// <summary>

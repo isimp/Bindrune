@@ -16,6 +16,11 @@ namespace Bindrune
         /// <summary>Set when the main key could not be mapped to a KeyCode (unmapped vanilla input path).</summary>
         public readonly string RawPath;
 
+        // Built once, here. Every clash check and equality test compares it, and building it means
+        // formatting an enum, which is slow and allocates on the game's runtime - a suggestion
+        // pass compares it tens of thousands of times.
+        private readonly string _token;
+
         public KeyCombo(KeyCode main, IEnumerable<KeyCode> modifiers, string rawPath = null)
         {
             Main = main;
@@ -24,6 +29,7 @@ namespace Bindrune
                 ? Array.Empty<KeyCode>()
                 : modifiers.Where(k => IsModifier(k) && k != main).Distinct().OrderBy(k => (int)k).ToArray();
             RawPath = rawPath;
+            _token = Token(main, rawPath);
         }
 
         public bool IsBound => Main != KeyCode.None || !string.IsNullOrEmpty(RawPath);
@@ -33,8 +39,11 @@ namespace Bindrune
             Main != KeyCode.None ? Main.ToString() : (string.IsNullOrEmpty(RawPath) ? "not bound" : RawPath);
 
         /// <summary>Identity used to group binds that fight over the same physical key.</summary>
-        public string MainToken =>
-            Main != KeyCode.None ? "key:" + Main : (string.IsNullOrEmpty(RawPath) ? "none" : "path:" + RawPath.ToLowerInvariant());
+        public string MainToken => _token ?? Token(Main, RawPath);
+
+        // The fallback above is for a default(KeyCombo), which never ran the constructor.
+        private static string Token(KeyCode main, string rawPath) =>
+            main != KeyCode.None ? "key:" + main : (string.IsNullOrEmpty(rawPath) ? "none" : "path:" + rawPath.ToLowerInvariant());
 
         public static bool IsModifier(KeyCode k) =>
             k == KeyCode.LeftControl || k == KeyCode.RightControl ||

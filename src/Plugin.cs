@@ -114,7 +114,9 @@ namespace Bindrune
             : "the hints key";
         private bool _restored;
         private float _restoreAt;
-        private int _restoreAttempts;
+
+        /// <summary>Set when the menu pass left keys whose mod had not bound its settings yet.</summary>
+        private bool _restoreInWorld;
 
         private void Awake()
         {
@@ -224,10 +226,33 @@ namespace Bindrune
         /// Puts your own keys back once the game is up. A profile sync happens at launch, before
         /// the game starts, so by here any overwrite has already landed. Waiting for ZInput keeps
         /// us clear of mod Awake methods, which config writes would otherwise reach mid-startup.
+        ///
+        /// At most two scans a session, because each one reads every mod's settings: one at the
+        /// main menu, and one shortly after your character first appears, only if the first left
+        /// keys whose mod had not bound its settings yet. Mods that bind late do it when a world
+        /// loads, so that second pass catches them however long the menu was open. Anything later
+        /// still is caught when the panel opens, which reconciles on every scan.
         /// </summary>
         private void RestoreOnce()
         {
             if (_restored || ZInput.instance == null) return;
+
+            if (_restoreInWorld)
+            {
+                // A logout before the pass ran starts the wait again on the next character.
+                if (Player.m_localPlayer == null)
+                {
+                    _restoreAt = 0f;
+                    return;
+                }
+
+                if (_restoreAt == 0f) _restoreAt = Time.realtimeSinceStartup + 2f;
+                if (Time.realtimeSinceStartup < _restoreAt) return;
+
+                BindRegistry.Refresh();
+                _restored = true;
+                return;
+            }
 
             if (_restoreAt == 0f) _restoreAt = Time.realtimeSinceStartup + 3f;
             if (Time.realtimeSinceStartup < _restoreAt) return;
@@ -239,14 +264,17 @@ namespace Bindrune
                 return;
             }
 
+            // The scan reconciles as part of it; asking again only counts what it left unplaced.
             BindRegistry.Refresh();
 
-            // Mods bind their configs at their own pace, some only once a world loads, so a single
-            // early pass would quietly leave those keys on whatever the sync wrote. Keep looking
-            // until every recorded bind has turned up, then stop.
-            _restoreAttempts++;
-            if (PersonalKeys.Reconcile() == 0 || _restoreAttempts >= 8) _restored = true;
-            else _restoreAt = Time.realtimeSinceStartup + 30f;
+            if (PersonalKeys.Reconcile() == 0)
+            {
+                _restored = true;
+                return;
+            }
+
+            _restoreInWorld = true;
+            _restoreAt = 0f;
         }
 
         public static string ResolveModName(string guid)
