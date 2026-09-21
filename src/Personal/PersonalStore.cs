@@ -61,6 +61,13 @@ namespace Bindrune.Personal
 
         private static Dictionary<string, List<string>> _sections;
         private static List<string> _order;
+        private static string _stamp;
+
+        /// <summary>
+        /// Raised when the file turned out to have changed since it was read, so that everything
+        /// holding a parsed copy of a section drops it and reads the section again.
+        /// </summary>
+        public static event Action Reloaded;
 
         private static string FilePath => Path.Combine(Paths.BepInExRootPath, "bindrune.keys");
 
@@ -85,6 +92,21 @@ namespace Bindrune.Personal
             Write();
         }
 
+        /// <summary>
+        /// Checks the file against what was read, and reads it again if something else wrote it:
+        /// a hand edit made while the game runs would otherwise be undone by the next change,
+        /// since the file is always written whole. Called before every change and when the panel
+        /// opens, so owners call it first and then change what they read.
+        /// </summary>
+        public static void Sync()
+        {
+            if (_sections == null || !TextStore.ChangedSince(FilePath, _stamp)) return;
+
+            _sections = null;
+            Plugin.Log.LogInfo($"Bindrune: {Path.GetFileName(FilePath)} was changed outside the game; reading it again.");
+            Reloaded?.Invoke();
+        }
+
         private static void Ensure()
         {
             if (_sections == null) Load();
@@ -105,6 +127,7 @@ namespace Bindrune.Personal
         {
             _sections = new Dictionary<string, List<string>>();
             _order = new List<string>();
+            _stamp = TextStore.Stamp(FilePath);
 
             // A file from an earlier version is all keys and carries no section line, so that is
             // where its lines belong. A section line found anywhere is also the one thing that
@@ -224,6 +247,8 @@ namespace Bindrune.Personal
                     "# Kept out of BepInEx/config, with an extension no sync picks up, for that reason."
                 },
                 lines, atomic: true);
+
+            _stamp = TextStore.Stamp(FilePath);
         }
     }
 }

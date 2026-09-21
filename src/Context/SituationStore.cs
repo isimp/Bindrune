@@ -1,5 +1,4 @@
 using System.Collections.Generic;
-using System.IO;
 using System.Linq;
 using BepInEx;
 
@@ -8,10 +7,15 @@ namespace Bindrune.Context
     /// <summary>
     /// The situations you said a bind applies to: both the "where" tags and the held items,
     /// stored as one set per bind because that is how they are asked for. See SituationTags.
+    ///
+    /// Kept in memory once read, but checked against the file before every change and whenever
+    /// the panel opens: the file is written whole, so without that an edit made by hand while
+    /// the game runs would be undone by the next click.
     /// </summary>
     public static class SituationStore
     {
         private static Dictionary<string, HashSet<string>> _situations;
+        private static string _stamp;
 
         private static string FilePath => TextStore.Ours(Paths.ConfigPath, "situations.txt");
 
@@ -22,6 +26,7 @@ namespace Bindrune.Context
                 if (_situations != null) return _situations;
 
                 _situations = new Dictionary<string, HashSet<string>>();
+                _stamp = TextStore.Stamp(FilePath);
 
                 foreach (var line in TextStore.Read(FilePath))
                 {
@@ -38,11 +43,20 @@ namespace Bindrune.Context
             }
         }
 
+        /// <summary>Forgets what was read if the file has changed since, so the next look reads it again.</summary>
+        public static void Sync()
+        {
+            if (_situations != null && TextStore.ChangedSince(FilePath, _stamp)) _situations = null;
+        }
+
         public static HashSet<string> For(string bindId) =>
             Situations.TryGetValue(bindId, out var set) ? set : new HashSet<string>();
 
         public static void Toggle(string bindId, string tag)
         {
+            // The change goes onto what the file says now, not onto what it said when first read.
+            Sync();
+
             if (!Situations.TryGetValue(bindId, out var set))
                 Situations[bindId] = set = new HashSet<string>();
 
@@ -53,9 +67,13 @@ namespace Bindrune.Context
             Save();
         }
 
-        private static void Save() =>
+        private static void Save()
+        {
             TextStore.Write(FilePath,
                 new[] { "# Situations you marked each bind as applying to." },
                 _situations.OrderBy(kv => kv.Key).Select(kv => kv.Key + "=" + string.Join("|", kv.Value.ToArray())));
+
+            _stamp = TextStore.Stamp(FilePath);
+        }
     }
 }

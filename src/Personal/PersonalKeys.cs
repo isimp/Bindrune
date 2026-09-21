@@ -46,6 +46,8 @@ namespace Bindrune.Personal
     {
         private static Dictionary<string, PersonalEntry> _entries;
 
+        static PersonalKeys() => PersonalStore.Reloaded += () => _entries = null;
+
         /// <summary>
         /// Keys put back since the game started, by bind id so repeated reconciles do not list
         /// the same one twice. Session-only, because it reports what happened this session.
@@ -83,6 +85,8 @@ namespace Bindrune.Personal
         /// <summary>Records a rebind against whichever side is live, leaving the other side untouched.</summary>
         public static void RecordRebind(string bindId, KeyCombo combo, bool personal)
         {
+            PersonalStore.Sync();
+
             var entry = Entry(bindId);
 
             if (personal)
@@ -113,6 +117,8 @@ namespace Bindrune.Personal
         /// </summary>
         public static void UsePersonal(BindEntry bind)
         {
+            PersonalStore.Sync();
+
             var entry = Entry(bind.Id);
 
             // While the profile side is live, the config holds the profile's key by definition,
@@ -129,6 +135,8 @@ namespace Bindrune.Personal
         /// <summary>Hands the bind back to the profile, keeping your key aside for later.</summary>
         public static void UseProfile(BindEntry bind)
         {
+            PersonalStore.Sync();
+
             var entry = Get(bind.Id);
             if (entry == null) return;
 
@@ -142,6 +150,8 @@ namespace Bindrune.Personal
         /// <summary>Drops both keys, used when a bind goes back to what the mod shipped with.</summary>
         public static void Forget(string bindId)
         {
+            PersonalStore.Sync();
+
             if (Entries.Remove(bindId)) Save();
         }
 
@@ -153,6 +163,8 @@ namespace Bindrune.Personal
         /// </summary>
         public static int Reconcile()
         {
+            PersonalStore.Sync();
+
             if (Entries.Count == 0) return 0;
 
             int reapplied = 0, missing = 0;

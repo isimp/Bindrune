@@ -49,6 +49,33 @@ namespace Bindrune
             }
         }
 
+        /// <summary>
+        /// When a file was last written and how long it is, so a store that keeps its file in
+        /// memory can tell that someone else changed it since. Taken before reading, not after:
+        /// a change landing in between then shows as a change, rather than being marked as seen.
+        /// </summary>
+        public static string Stamp(string path)
+        {
+            try
+            {
+                var file = new FileInfo(path);
+                return file.Exists ? file.LastWriteTimeUtc.Ticks + ":" + file.Length : "missing";
+            }
+            catch (Exception)
+            {
+                // Unreadable counts as unchanged: dropping what is in memory for a file that cannot
+                // be read back would lose it.
+                return null;
+            }
+        }
+
+        /// <summary>Whether a file has been written since it was stamped, by anything but us.</summary>
+        public static bool ChangedSince(string path, string stamp)
+        {
+            var now = Stamp(path);
+            return now != null && stamp != null && now != stamp;
+        }
+
         /// <summary>True for blank lines and comments, which every caller skips the same way.</summary>
         public static bool IsNoise(string line) => line.Length == 0 || line.StartsWith("#");
 

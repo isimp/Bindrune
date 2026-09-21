@@ -247,6 +247,10 @@ namespace Bindrune.UI
 
         private static void Rescan()
         {
+            // Files edited by hand while the game runs are read again, so the panel shows them.
+            SituationStore.Sync();
+            PersonalStore.Sync();
+
             BindRegistry.Refresh();
             EquippedItems.Refresh();
 

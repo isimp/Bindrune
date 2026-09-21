@@ -22,12 +22,20 @@ namespace Bindrune.Hints
         private static HashSet<string> Chosen =>
             _chosen ?? (_chosen = new HashSet<string>(PersonalStore.Lines(PersonalStore.Hints)));
 
+        // A list read again from the file can show different hints, so the overlay hears of it too.
+        static HintChoice() => PersonalStore.Reloaded += () =>
+        {
+            _chosen = null;
+            Changed?.Invoke();
+        };
+
         public static int Count => Chosen.Count;
 
         public static bool Shows(string bindId) => Chosen.Contains(bindId);
 
         public static void Toggle(string bindId)
         {
+            PersonalStore.Sync();
             if (!Chosen.Add(bindId)) Chosen.Remove(bindId);
             Save();
         }
@@ -35,12 +43,14 @@ namespace Bindrune.Hints
         /// <summary>Adds several at once, for "show all of this mod's binds".</summary>
         public static void Add(IEnumerable<string> bindIds)
         {
+            PersonalStore.Sync();
             var added = bindIds.Count(id => Chosen.Add(id));
             if (added > 0) Save();
         }
 
         public static void Remove(IEnumerable<string> bindIds)
         {
+            PersonalStore.Sync();
             var removed = bindIds.Count(id => Chosen.Remove(id));
             if (removed > 0) Save();
         }

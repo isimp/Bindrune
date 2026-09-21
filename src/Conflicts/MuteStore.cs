@@ -33,6 +33,8 @@ namespace Bindrune.Conflicts
 
         private static Dictionary<string, Mute> Muted => _muted ?? (_muted = Load());
 
+        static MuteStore() => PersonalStore.Reloaded += () => _muted = null;
+
         public static bool IsMuted(Conflict conflict)
         {
             if (!Muted.TryGetValue(conflict.PairKey, out var mute)) return false;
@@ -50,6 +52,8 @@ namespace Bindrune.Conflicts
 
         public static void Toggle(Conflict conflict)
         {
+            PersonalStore.Sync();
+
             // By what the button says, not by what is on file: a mute that has stopped applying
             // reads as unmuted, and clicking it has to mute what the clash is now.
             if (IsMuted(conflict)) Muted.Remove(conflict.PairKey);
@@ -69,6 +73,8 @@ namespace Bindrune.Conflicts
         /// </summary>
         public static void Settle(IEnumerable<string> compared, IEnumerable<Conflict> found)
         {
+            PersonalStore.Sync();
+
             if (Muted.Count == 0) return;
 
             var present = new HashSet<string>(compared);

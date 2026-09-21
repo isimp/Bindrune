@@ -40,7 +40,7 @@ Versions before 0.2.1 kept those two in `BepInEx/config/Bindrune/`. They are mov
 
 ## Files
 
-Settings are in `BepInEx/config/isimp.Bindrune.cfg`. Situations you set and the shared list are in `BepInEx/config/Bindrune/`, so they travel with a profile. Your own keys, muted clashes and pinned hints are in `BepInEx/bindrune.keys`, so they do not. Data derived from the game is cached in `BepInEx/cache/Bindrune/` and rebuilt after a game update. All of these are plain text and safe to edit or delete.
+Settings are in `BepInEx/config/isimp.Bindrune.cfg`. Situations you set and the shared list are in `BepInEx/config/Bindrune/`, so they travel with a profile. Your own keys, muted clashes and pinned hints are in `BepInEx/bindrune.keys`, so they do not. Data derived from the game is cached in `BepInEx/cache/Bindrune/` and rebuilt after a game update. All of these are plain text and safe to edit or delete, also while the game runs: an edited file is read again when the panel opens, and before Bindrune next writes to it.
 
 ## How it reads the game
 
