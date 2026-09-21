@@ -22,6 +22,11 @@ namespace Bindrune.Context
         private static readonly string[] Chat = { "Chat" };
         private static readonly string[] Movement = { "World", "Vehicle" };
 
+        private static readonly string[] Everywhere =
+        {
+            "World", "Vehicle", "Build placement", "Build menu", "Inventory", "Container", "Crafting", "Map", "Chat"
+        };
+
         public static readonly Dictionary<string, string[]> ByName = new Dictionary<string, string[]>
         {
             { "Forward", Movement },
@@ -68,7 +73,11 @@ namespace Bindrune.Context
             { "ScrollChatDown", Chat },
 
             { "Hotbar1", World }, { "Hotbar2", World }, { "Hotbar3", World }, { "Hotbar4", World },
-            { "Hotbar5", World }, { "Hotbar6", World }, { "Hotbar7", World }, { "Hotbar8", World }
+            { "Hotbar5", World }, { "Hotbar6", World }, { "Hotbar7", World }, { "Hotbar8", World },
+
+            // The keys the game reads in its own code (GameKeys), polled whatever screen is open.
+            { "Network panel", Everywhere }, { "Gamepad layout", Everywhere }, { "Screenshot", Everywhere },
+            { "Mouse capture", Everywhere }, { "Hide HUD", Everywhere }
         };
     }
 }

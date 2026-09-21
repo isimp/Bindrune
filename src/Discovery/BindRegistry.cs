@@ -23,8 +23,9 @@ namespace Bindrune.Discovery
             var configs = Guarded("config", () => BepInExScanner.Scan(backingEntries));
             var vanilla = Guarded("vanilla", () => VanillaScanner.Scan(claimedButtonNames));
             var gamepad = Guarded("gamepad", GamepadButtons.Scan);
+            var game = Guarded("game keys", () => GameKeys.Scan(jotunn.Concat(configs)));
 
-            All = vanilla.Concat(gamepad).Concat(jotunn).Concat(configs)
+            All = vanilla.Concat(game).Concat(gamepad).Concat(jotunn).Concat(configs)
                 .OrderBy(b => b.OwnerName)
                 .ThenBy(b => b.Section)
                 .ThenBy(b => b.Label)

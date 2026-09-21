@@ -29,32 +29,6 @@ namespace Bindrune.Conflicts
     public static class FreeKeys
     {
         /// <summary>
-        /// Keys the game reads straight from the keyboard, with no bind behind them, for anyone in
-        /// the world: taken whatever the bind list says. Found in Valheim 1.0.7's code. Keys it
-        /// reads only in debug mode, in menus or inside a dialog are left out.
-        /// </summary>
-        private static readonly GameKey[] ReadByGame =
-        {
-            new GameKey(KeyCode.F2, null, "the network panel"),
-            new GameKey(KeyCode.F9, null, "switching gamepad layout"),
-            new GameKey(KeyCode.F11, null, "screenshots"),
-            new GameKey(KeyCode.F1, KeyCode.LeftControl, "capturing the mouse"),
-            new GameKey(KeyCode.F3, KeyCode.LeftControl, "hiding the HUD")
-        };
-
-        private class GameKey
-        {
-            public readonly KeyCombo Combo;
-            public readonly string What;
-
-            public GameKey(KeyCode key, KeyCode? modifier, string what)
-            {
-                Combo = new KeyCombo(key, modifier.HasValue ? new[] { modifier.Value } : null);
-                What = what;
-            }
-        }
-
-        /// <summary>
         /// A candidate this costly is no longer near what was pressed, and suggesting it is no
         /// help: better to offer nothing than a key across the keyboard.
         /// </summary>
@@ -171,27 +145,12 @@ namespace Bindrune.Conflicts
         }
 
         /// <summary>
-        /// Whether nothing Bindrune can see uses this key: no bind at all, not even one that
-        /// would never interfere, and no read by the game outside its binds.
+        /// Whether nothing Bindrune can see uses this key: no bind at all, not even one that would
+        /// never interfere. The keys the game reads in its own code are binds too (GameKeys), so
+        /// they count.
         /// </summary>
         public static bool Unused(BindEntry bind, KeyCombo combo) =>
-            GameUse(bind, combo) == null && ConflictEngine.Preview(bind, combo, BindRegistry.All).Count == 0;
-
-        /// <summary>
-        /// What the game does with this key without any bind behind it, or null when it does not
-        /// read it that way. The clash check leaves these out, because they are not binds, so
-        /// this is the only thing standing between them and a key that looks free.
-        /// </summary>
-        public static string GameUse(BindEntry bind, KeyCombo combo)
-        {
-            // A single key fires whatever modifiers are held, so it meets the game's read on any
-            // combination; an exact shortcut only does when it holds the modifier the game waits for.
-            // The game's raw aliases, such as MouseForward or Tab, are not in here: nothing in its
-            // code reads them by name, and the controls that do use those keys are binds already.
-            var read = ReadByGame.FirstOrDefault(g => g.Combo.Main == combo.Main &&
-                (bind.Modifiers != ModifierBehavior.Strict || g.Combo.Modifiers.All(combo.Modifiers.Contains)));
-            return read?.What;
-        }
+            ConflictEngine.Preview(bind, combo, BindRegistry.All).Count == 0;
 
         private static bool Usable(BindEntry bind, FreeKey option)
         {
@@ -202,8 +161,6 @@ namespace Bindrune.Conflicts
 
             // The game can only be given a key it has an input path for.
             if (bind.Source == BindSource.Vanilla && KeyPaths.ToPath(combo.Main) == null) return false;
-
-            if (GameUse(bind, combo) != null) return false;
 
             var clashes = ConflictEngine.Preview(bind, combo, BindRegistry.All);
             if (clashes.Any(c => c.Severity != Severity.Note)) return false;

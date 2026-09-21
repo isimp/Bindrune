@@ -6,13 +6,15 @@ A hard clash is the same key with the same modifiers. A soft clash is one where 
 
 Alt, Ctrl and Shift on their own are never reported as clashes, since mods share them on purpose to qualify clicks and other keys.
 
+Five keys the game reads in its own code, rather than through a control, are listed with its binds and locked: F2 for the network panel, F9 to change gamepad layout, F11 for a screenshot, Ctrl+F1 to free the mouse and Ctrl+F3 to hide the HUD. They are read whatever screen is open, and clash with anything on the same key. With Extra Slots installed, its Rebind Connect Panel setting replaces F2 and stands in for the network panel.
+
 Muting one is about the clash in front of you, not the pair for good. It records what was waved through, so the same pair is reported again if it turns into something worse, and the mute is dropped once the clash is gone rather than waiting to suppress a future one. Mutes for binds that are not loaded are always kept, since a bind a mod registers when a world loads is missing rather than gone. A mute from before 0.2.1 says only that the pair is fine; the first scan that finds the clash it was hiding records that clash against it, so it hides no more than it did before and no less.
 
 ## Free keys
 
 A key pressed for a bind is saved at once when nothing else uses it, neither another bind nor the game on its own; anything else is shown first, with what it would run into. When it clashes, Bindrune offers up to three others, and picking one works the same way. The first is the same key with a modifier added, swapped or taken away, where the bind can hold one; the rest are the nearest keys on the keyboard, keeping any modifier that was held. A key is offered when nothing it would run into is worse than a note, so one shared with a bind that is never live at the same time is offered too, marked as shared; picking that one still shows the preview first.
 
-Keys the game reads directly rather than through a bind are never offered: F2 for the network panel, F9 to change gamepad layout, F11 for a screenshot, Ctrl+F1 for mouse capture and Ctrl+F3 to hide the HUD. A key a mod reads in its own code, with no setting behind it, cannot be seen, so a suggestion is free only as far as Bindrune can tell.
+A key a mod reads in its own code, with no setting behind it, cannot be seen, so a suggestion is free only as far as Bindrune can tell.
 
 ## Where a bind applies
 

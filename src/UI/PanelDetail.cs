@@ -210,36 +210,23 @@ namespace Bindrune.UI
         private static void ShowPendingKey(BindEntry bind, float width)
         {
             var clashes = ConflictEngine.Preview(bind, _pending, BindRegistry.All);
-            var modifierOnly = KeyCombo.IsModifier(_pending.Main);
-            var gameUse = modifierOnly ? null : FreeKeys.GameUse(bind, _pending);
-            var free = clashes.Count == 0 && gameUse == null;
 
             Wrapped(_pending.IsBound ? KeyLabels.Of(_pending) : "nothing", _detail, width, 22,
                 GUIManager.Instance.ValheimOrange, true);
             Spacer(4f);
 
-            // Saying "free" about Alt would be a half truth: nothing is reported on a modifier
-            // because mods share them deliberately, which is not the same as nothing using it.
-            if (modifierOnly)
+            // A key nothing uses is written without coming here (see Propose), so there is no
+            // "free" case to show: what reaches the preview is a clash, a note or a lone modifier.
+            // Saying "free" about Alt would be a half truth anyway: nothing is reported on a
+            // modifier because mods share them deliberately, which is not the same as nothing using it.
+            if (KeyCombo.IsModifier(_pending.Main))
             {
                 Wrapped("A modifier on its own. Bindrune does not report clashes on Alt, Ctrl or Shift, because mods " +
                         "share them on purpose - so it cannot tell you whether this one is free.",
                     _detail, width, 13, new Color(1f, 0.8f, 0.4f));
             }
-            else if (free)
-            {
-                Wrapped("Free: nothing else here uses it.", _detail, width, 14, new Color(0.6f, 0.9f, 0.6f));
-            }
             else
             {
-                // Not a bind, so not in the clash list, but pressing the key does it all the same.
-                if (gameUse != null)
-                {
-                    Wrapped($"The game reads this key itself for {gameUse}, outside any bind, so pressing it " +
-                            "does that as well.", _detail, width, 13, ColorFor(Severity.Soft), true);
-                    Spacer(6f);
-                }
-
                 foreach (var clash in clashes.Take(4))
                 {
                     var other = clash.A.Id == bind.Id ? clash.B : clash.A;
@@ -255,14 +242,14 @@ namespace Bindrune.UI
                     Wrapped($"...and {clashes.Count - 4} more.", _detail, width, 12, new Color(1f, 1f, 1f, 0.55f));
 
                 // Only when the key needs replacing: one with nothing worse than a note is fine as it is.
-                if (gameUse != null || clashes.Any(c => c.Severity != Severity.Note)) ShowFreeKeys(bind, width);
+                if (clashes.Any(c => c.Severity != Severity.Note)) ShowFreeKeys(bind, width);
             }
 
             Spacer(8f);
 
             var row = HorizontalRow(_detail, 34f);
 
-            FixedButton(free ? "Use it" : "Use it anyway", row, 150f, 32f, () =>
+            FixedButton(clashes.Count == 0 ? "Use it" : "Use it anyway", row, 150f, 32f, () =>
             {
                 var problem = BindWriter.Apply(bind, _pending, SaveTarget.Personal);
                 _pendingFor = null;
@@ -717,6 +704,10 @@ namespace Bindrune.UI
             string modifiers;
             if (bind.Source == BindSource.Gamepad)
                 modifiers = "A gamepad button, read from whichever controller layout you picked. Modifiers do not enter into it.";
+            // Only the keys the game reads in its own code carry a modifier on the game's side,
+            // and it checks that one is down, not that nothing else is.
+            else if (bind.Source == BindSource.Vanilla && bind.Modifiers == ModifierBehavior.Strict)
+                modifiers = "Fires while this modifier is held, whatever else is held with it.";
             else if (bind.Modifiers == ModifierBehavior.Strict)
                 modifiers = "Needs exactly these modifiers, and will not fire while any other key is held (including movement keys).";
             else if (bind.Modifiers == ModifierBehavior.Unknown)

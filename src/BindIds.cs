@@ -24,6 +24,12 @@ namespace Bindrune
         public static string Vanilla(string buttonName) => "vanilla:" + buttonName;
 
         /// <summary>
+        /// A key the game reads in its own code rather than through a button. Its own prefix, so
+        /// a button the game adds later under the same name cannot take over its mutes or situations.
+        /// </summary>
+        public static string Game(string name) => "game:" + name;
+
+        /// <summary>
         /// A gamepad button, which the game keys by name and layout because the same name means
         /// a different button under another layout.
         /// </summary>
