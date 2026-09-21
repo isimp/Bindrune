@@ -12,7 +12,7 @@ Muting one is about the clash in front of you, not the pair for good. It records
 
 A key pressed for a bind is saved at once when nothing else uses it, neither another bind nor the game on its own; anything else is shown first, with what it would run into. When it clashes, Bindrune offers up to three others, and picking one works the same way. The first is the same key with a modifier added, swapped or taken away, where the bind can hold one; the rest are the nearest keys on the keyboard, keeping any modifier that was held. A key is offered when nothing it would run into is worse than a note, so one shared with a bind that is never live at the same time is offered too, marked as shared; picking that one still shows the preview first.
 
-Keys the game reads directly rather than through a bind are never offered: F2 for the network panel, F9 to change gamepad layout, F11 for a screenshot, Ctrl+F1 for mouse capture and Ctrl+F3 to hide the HUD, along with the raw keys its interface reads for chat and menus. A key a mod reads in its own code, with no setting behind it, cannot be seen, so a suggestion is free only as far as Bindrune can tell.
+Keys the game reads directly rather than through a bind are never offered: F2 for the network panel, F9 to change gamepad layout, F11 for a screenshot, Ctrl+F1 for mouse capture and Ctrl+F3 to hide the HUD. A key a mod reads in its own code, with no setting behind it, cannot be seen, so a suggestion is free only as far as Bindrune can tell.
 
 ## Where a bind applies
 

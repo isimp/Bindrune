@@ -35,6 +35,10 @@ namespace Bindrune
                 .Select(p => p.Key);
         }
 
+        /// <summary>How far apart two keys are, in key widths, or null when either has no place.</summary>
+        public static float? Distance(KeyCode a, KeyCode b) =>
+            Places.TryGetValue(a, out var from) && Places.TryGetValue(b, out var to) ? Distance(from, to) : (float?)null;
+
         private static float Distance(Spot a, Spot b) =>
             (float)Math.Sqrt((a.X - b.X) * (a.X - b.X) + (a.Y - b.Y) * (a.Y - b.Y));
 
