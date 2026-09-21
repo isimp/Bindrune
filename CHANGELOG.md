@@ -1,5 +1,15 @@
 # Changelog
 
+## 0.3.1
+
+Five keys the game reads in its own code, such as F11 for screenshots and Ctrl+F1 to free the mouse, are now listed with its binds and reported when a mod uses them too.
+
+Editing `situations.txt` or `bindrune.keys` by hand while the game runs is no longer undone by the next change in the panel, and opening the panel picks the edit up.
+
+Putting your keys back after a profile sync now scans at most twice a session, at the main menu and once your character is in the world, instead of every 30 seconds for up to four minutes. Keys whose mod only binds them in the world are now restored however long the main menu stays open.
+
+Key suggestions in the rebind preview are much cheaper to work out, and the on-screen hints no longer allocate anything while nothing on screen changes.
+
 ## 0.3.0
 
 When a key you press for a bind clashes, Bindrune now suggests up to three nearby that would not, adding a modifier where the bind can take one. It prefers the modifiers your setup already uses, and never puts one on a key the game reads regardless of modifiers. A key shared with a bind that is never live at the same time is offered too, marked as shared.
