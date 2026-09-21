@@ -1,5 +1,13 @@
 # Changelog
 
+## 0.3.0
+
+When a key you press for a bind clashes, Bindrune now suggests up to three that would not: the same key with a modifier, or its neighbours on the keyboard. A key shared with a bind that is never live at the same time is offered too, marked as shared.
+
+A key nothing else uses is now bound as soon as you press it.
+
+Keys the game reads on its own, such as F2 for the network panel or F11 for screenshots, are no longer shown as free.
+
 ## 0.2.1
 
 Muted clashes and pinned hints now live in `BepInEx/bindrune.keys` with your own keys, where a profile sync cannot replace them with the profile owner's. Existing ones are moved there on the first launch.
