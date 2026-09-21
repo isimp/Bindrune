@@ -94,7 +94,8 @@ namespace Bindrune.UI
                 }
 
                 if (capturing)
-                    Wrapped("Press any key, or press and release a modifier on its own to bind it. Esc cancels.",
+                    Wrapped("Press any key, or press and release a modifier on its own to bind it. A key nothing else " +
+                            "uses is set straight away. Esc cancels.",
                         _detail, width, 13, new Color(1f, 0.85f, 0.4f));
             }
             else
@@ -177,19 +178,41 @@ namespace Bindrune.UI
         private static void BeginRebind(BindEntry bind)
         {
             var id = bind.Id;
+            KeyCapture.Begin(CapturePurpose.Rebind, combo => Propose(id, combo));
+        }
 
-            KeyCapture.Begin(CapturePurpose.Rebind, combo =>
+        /// <summary>
+        /// Takes a key for a bind, pressed or picked from the suggestions. One nothing else uses
+        /// is written straight away, since there is nothing to weigh; anything else goes to the
+        /// preview first, where the clash is seen before a thing is written. A modifier on its
+        /// own always goes to the preview, which explains why it cannot be judged.
+        /// </summary>
+        private static void Propose(string id, KeyCombo combo)
+        {
+            // The entry the capture began with may have been replaced by a rescan since.
+            var bind = BindRegistry.All.FirstOrDefault(b => b.Id == id);
+
+            if (bind != null && combo.IsBound && !KeyCombo.IsModifier(combo.Main) && FreeKeys.Unused(bind, combo))
             {
-                _pendingFor = id;
-                _pending = combo;
-                Refresh(rescan: false);
-            });
+                var problem = BindWriter.Apply(bind, combo, SaveTarget.Personal);
+                _pendingFor = null;
+                Refresh();
+                if (problem != null) Note(problem);
+                return;
+            }
+
+            _pendingFor = id;
+            _pending = combo;
+            Refresh(rescan: false);
         }
 
         /// <summary>The pressed key, what it would run into, and what to do about it.</summary>
         private static void ShowPendingKey(BindEntry bind, float width)
         {
             var clashes = ConflictEngine.Preview(bind, _pending, BindRegistry.All);
+            var modifierOnly = KeyCombo.IsModifier(_pending.Main);
+            var gameUse = modifierOnly ? null : FreeKeys.GameUse(bind, _pending);
+            var free = clashes.Count == 0 && gameUse == null;
 
             Wrapped(_pending.IsBound ? KeyLabels.Of(_pending) : "nothing", _detail, width, 22,
                 GUIManager.Instance.ValheimOrange, true);
@@ -197,18 +220,26 @@ namespace Bindrune.UI
 
             // Saying "free" about Alt would be a half truth: nothing is reported on a modifier
             // because mods share them deliberately, which is not the same as nothing using it.
-            if (KeyCombo.IsModifier(_pending.Main))
+            if (modifierOnly)
             {
                 Wrapped("A modifier on its own. Bindrune does not report clashes on Alt, Ctrl or Shift, because mods " +
                         "share them on purpose - so it cannot tell you whether this one is free.",
                     _detail, width, 13, new Color(1f, 0.8f, 0.4f));
             }
-            else if (clashes.Count == 0)
+            else if (free)
             {
                 Wrapped("Free: nothing else here uses it.", _detail, width, 14, new Color(0.6f, 0.9f, 0.6f));
             }
             else
             {
+                // Not a bind, so not in the clash list, but pressing the key does it all the same.
+                if (gameUse != null)
+                {
+                    Wrapped($"The game reads this key itself for {gameUse}, outside any bind, so pressing it " +
+                            "does that as well.", _detail, width, 13, ColorFor(Severity.Soft), true);
+                    Spacer(6f);
+                }
+
                 foreach (var clash in clashes.Take(4))
                 {
                     var other = clash.A.Id == bind.Id ? clash.B : clash.A;
@@ -222,13 +253,16 @@ namespace Bindrune.UI
 
                 if (clashes.Count > 4)
                     Wrapped($"...and {clashes.Count - 4} more.", _detail, width, 12, new Color(1f, 1f, 1f, 0.55f));
+
+                // Only when the key needs replacing: one with nothing worse than a note is fine as it is.
+                if (gameUse != null || clashes.Any(c => c.Severity != Severity.Note)) ShowFreeKeys(bind, width);
             }
 
             Spacer(8f);
 
             var row = HorizontalRow(_detail, 34f);
 
-            FixedButton(clashes.Count == 0 ? "Use it" : "Use it anyway", row, 150f, 32f, () =>
+            FixedButton(free ? "Use it" : "Use it anyway", row, 150f, 32f, () =>
             {
                 var problem = BindWriter.Apply(bind, _pending, SaveTarget.Personal);
                 _pendingFor = null;
@@ -252,6 +286,41 @@ namespace Bindrune.UI
             Wrapped("Nothing has been written yet. Bindrune never refuses a key; this shows the clash before you " +
                     "decide.",
                 _detail, width, 12, new Color(1f, 1f, 1f, 0.55f));
+        }
+
+        /// <summary>
+        /// A few keys near the one pressed that would not clash. Picking one puts it in this
+        /// preview as if it had been pressed, so nothing is written until Use it.
+        /// </summary>
+        private static void ShowFreeKeys(BindEntry bind, float width)
+        {
+            var options = FreeKeys.For(bind, _pending, 3);
+            if (options.Count == 0) return;
+
+            Spacer(4f);
+            Wrapped("Free as far as Bindrune can see", _detail, width, 14, new Color(0.6f, 0.9f, 0.6f), true);
+            Spacer(2f);
+
+            foreach (var option in options)
+            {
+                var combo = option.Combo;
+                var row = HorizontalRow(_detail, 30f);
+
+                FixedButton(KeyLabels.Of(combo), row, 190f, 28f, () => Propose(bind.Id, combo));
+                FixedLabel(option.Why, row, width - 200f, 28f, 13, new Color(1f, 1f, 1f, 0.75f));
+
+                // A shared key is offered on purpose, but it should say so.
+                if (option.Shared.Count > 0)
+                    Wrapped(SharedWith(option.Shared, bind), _detail, width, 12, new Color(1f, 1f, 1f, 0.5f));
+            }
+        }
+
+        private static string SharedWith(List<Conflict> shared, BindEntry bind)
+        {
+            if (shared.Count > 1) return $"Shared with {shared.Count} binds, none of which should interfere.";
+
+            var other = shared[0].A.Id == bind.Id ? shared[0].B : shared[0].A;
+            return $"Shared with {other.OwnerName}'s \"{other.Label}\", which should not interfere.";
         }
 
         /// <summary>

@@ -10,7 +10,7 @@ Most of Bindrune was written by Claude Code (Anthropic), which did the heavy lif
 
 ## Using it
 
-Press Insert in game to open the panel. Select a bind to see what it clashes with, change its key from the same place, or mute a clash you are happy with. Before a new key is saved, Bindrune shows what it would run into.
+Press Insert in game to open the panel. Select a bind to see what it clashes with, change its key from the same place, or mute a clash you are happy with. A new key nothing else uses is saved straight away. One that clashes is shown with what it would run into, and a few nearby keys that would not, before anything is saved.
 
 You can tell Bindrune where a bind is used, for example only in the build menu or only with a pickaxe in hand. Binds that can never be active at the same time are then no longer reported as clashes.
 
