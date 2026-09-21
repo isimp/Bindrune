@@ -20,7 +20,6 @@ namespace Bindrune.Context
         private static readonly string[] Build = { "Build placement" };
         private static readonly string[] Map = { "Map" };
         private static readonly string[] Chat = { "Chat" };
-        private static readonly string[] Inventory = { "Inventory" };
         private static readonly string[] Movement = { "World", "Vehicle" };
 
         public static readonly Dictionary<string, string[]> ByName = new Dictionary<string, string[]>
@@ -46,19 +45,23 @@ namespace Bindrune.Context
             // Interacting opens chests and stations, so Use is live in those too.
             { "Use", new[] { "World", "Container", "Crafting" } },
 
-            { "BuildMenu", new[] { "Build menu" } },
+            // A key that opens a screen is read while that screen is still closed, so it is live
+            // where you open it from as well as in the screen itself. Tagging these with the
+            // screen alone would pass any world bind on the same key as never live alongside them.
+            { "BuildMenu", new[] { "Build placement", "Build menu" } },
             { "AltPlace", Build },
             { "Remove", Build },
             { "TabLeft", Build },
             { "TabRight", Build },
 
-            { "Inventory", Inventory },
+            // Opened from the world, closed from any of the screens the inventory panel shows.
+            { "Inventory", new[] { "World", "Inventory", "Container", "Crafting" } },
 
-            { "Map", Map },
+            { "Map", new[] { "World", "Map" } },
             { "MapZoomIn", Map },
             { "MapZoomOut", Map },
 
-            { "Chat", Chat },
+            { "Chat", new[] { "World", "Chat" } },
             { "ChatUp", Chat },
             { "ChatDown", Chat },
             { "ScrollChatUp", Chat },
