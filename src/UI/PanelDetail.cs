@@ -178,7 +178,13 @@ namespace Bindrune.UI
         private static void BeginRebind(BindEntry bind)
         {
             var id = bind.Id;
-            KeyCapture.Begin(CapturePurpose.Rebind, combo => Propose(id, combo));
+
+            // A key set from the keyboard has no button to click, so it gets the sound of an item
+            // going into its slot. A suggestion is a button and already clicks, so it gets none.
+            KeyCapture.Begin(CapturePurpose.Rebind, combo =>
+            {
+                if (Propose(id, combo)) Sfx.Play(Sfx.KeySet);
+            });
         }
 
         /// <summary>
@@ -187,7 +193,8 @@ namespace Bindrune.UI
         /// preview first, where the clash is seen before a thing is written. A modifier on its
         /// own always goes to the preview, which explains why it cannot be judged.
         /// </summary>
-        private static void Propose(string id, KeyCombo combo)
+        /// <returns>True when the key was written as it was given, without anything to report.</returns>
+        private static bool Propose(string id, KeyCombo combo)
         {
             // The entry the capture began with may have been replaced by a rescan since.
             var bind = BindRegistry.All.FirstOrDefault(b => b.Id == id);
@@ -198,12 +205,13 @@ namespace Bindrune.UI
                 _pendingFor = null;
                 Refresh();
                 if (problem != null) Note(problem);
-                return;
+                return problem == null;
             }
 
             _pendingFor = id;
             _pending = combo;
             Refresh(rescan: false);
+            return false;
         }
 
         /// <summary>The pressed key, what it would run into, and what to do about it.</summary>

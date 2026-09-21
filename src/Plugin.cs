@@ -181,7 +181,7 @@ namespace Bindrune
 
         private void OnDestroy()
         {
-            BindrunePanel.Close();
+            BindrunePanel.Close(quietly: true);
             HintOverlay.Close();
         }
 
@@ -213,7 +213,13 @@ namespace Bindrune
                 }
 
                 if (_openKey.Value.IsDown()) BindrunePanel.Toggle();
-                else if (_hintsKey.Value.IsDown()) HintOverlay.Toggle();
+                else if (_hintsKey.Value.IsDown())
+                {
+                    HintOverlay.Toggle();
+
+                    // The hints button on the Hints page clicks on its own; the key has no button.
+                    Sfx.Play(Sfx.HintsToggled);
+                }
                 else if (BindrunePanel.IsOpen && Input.GetKeyDown(KeyCode.Escape)) BindrunePanel.Close();
             }
             catch (Exception ex)

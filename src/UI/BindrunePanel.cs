@@ -186,10 +186,15 @@ namespace Bindrune.UI
 
             // While you are in here, the hints can be dragged into place.
             Hints.HintOverlay.Movable = true;
+
+            if (_root != null) Sfx.Play(Sfx.PanelOpen);
         }
 
-        public static void Close()
+        /// <param name="quietly">For the game shutting down, which is no moment to play a sound.</param>
+        public static void Close(bool quietly = false)
         {
+            if (_root != null && !quietly) Sfx.Play(Sfx.PanelClose);
+
             KeyCapture.Changed = null;
             KeyCapture.Cancel();
             _pendingFor = null;
@@ -351,7 +356,7 @@ namespace Bindrune.UI
             var title = Label("Bindrune", _root.transform, 200f, 32f, 26, GUIManager.Instance.ValheimOrange, true);
             AnchorLeft(title, Margin, titleRow);
 
-            var close = Button("Close", _root.transform, 110f, 32f, Close);
+            var close = Button("Close", _root.transform, 110f, 32f, () => Close());
             AnchorRight(close, -Margin, titleRow);
 
             var rescan = Button("Rescan", _root.transform, 110f, 32f, () =>
