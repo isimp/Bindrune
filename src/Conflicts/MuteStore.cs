@@ -80,12 +80,7 @@ namespace Bindrune.Conflicts
             var resolved = Muted.Keys.Where(pair => !live.ContainsKey(pair) && BothPresent(pair, present)).ToList();
             foreach (var pair in resolved) Muted.Remove(pair);
 
-            if (recorded == 0 && resolved.Count == 0) return;
-
-            Save();
-
-            if (recorded > 0) Plugin.Log.LogDebug($"Bindrune: wrote down what {recorded} older mute(s) dismissed.");
-            if (resolved.Count > 0) Plugin.Log.LogDebug($"Bindrune: dropped {resolved.Count} mute(s) whose clash is gone.");
+            if (recorded > 0 || resolved.Count > 0) Save();
         }
 
         /// <summary>
