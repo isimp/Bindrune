@@ -23,7 +23,6 @@ namespace Bindrune.Discovery
 
             var getPath = AccessTools.Method(typeof(ZInput.ButtonDef), "GetActionPath");
             var rebindable = AccessTools.PropertyGetter(typeof(ZInput.ButtonDef), "Rebindable");
-            VanillaExposure.Ensure();
 
             foreach (DictionaryEntry e in buttons)
             {
@@ -79,10 +78,10 @@ namespace Bindrune.Discovery
                     Handle = def,
                     // Plumbing, by two facts that agree: the game refuses to let the player
                     // rebind it, and it is not one of the controls we know are player facing.
-                    // "LShift" and "MouseLeft" are how the UI reads a raw key, not extra binds.
-                    Internal = !canRebind
-                               && !Context.VanillaDefaults.ByName.ContainsKey(def.Name)
-                               && !VanillaExposure.IsExplicitlyExposed(def.Name)
+                    // "LShift" and "MouseLeft" are how the UI reads a raw key, not extra binds,
+                    // and the camera zoom pair is a row the settings screen draws for a bind no
+                    // code reads. A bind the player can set is never plumbing, whatever its name.
+                    Internal = !canRebind && !Context.VanillaDefaults.ByName.ContainsKey(def.Name)
                 });
             }
 

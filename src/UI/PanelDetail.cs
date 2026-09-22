@@ -108,6 +108,23 @@ namespace Bindrune.UI
             else
             {
                 Wrapped("Locked: " + bind.ReadOnlyReason, _detail, width, 13, new Color(1f, 0.8f, 0.4f));
+
+                var alternate = Alternate(bind);
+                if (alternate != null)
+                {
+                    Spacer(4f);
+                    Wrapped($"The game keeps this key and lets you set {alternate.Label} instead. " +
+                            "Both reach the same thing, so it answers to either.",
+                        _detail, width, 13, new Color(1f, 1f, 1f, 0.65f));
+
+                    var row = HorizontalRow(_detail, 30f);
+                    FixedButton("Go to", row, 86f, 26f, () =>
+                    {
+                        Select(alternate);
+                        Reveal(alternate);
+                        ShowDetail();
+                    });
+                }
             }
 
             if (!string.IsNullOrEmpty(_note))
@@ -182,6 +199,20 @@ namespace Bindrune.UI
                 Wrapped(conflict.Reason, _detail, width, 13,
                     muted ? new Color(1f, 1f, 1f, 0.35f) : new Color(1f, 1f, 1f, 0.85f));
             }
+        }
+
+        /// <summary>
+        /// The bind the game offers in place of one it keeps fixed: the same name with Alt on the
+        /// end, which is how the hotbar digits are set. Null unless that bind exists and is one
+        /// the player can actually set, since pointing at a second locked bind helps nobody.
+        /// </summary>
+        private static BindEntry Alternate(BindEntry bind)
+        {
+            if (bind.Source != BindSource.Vanilla) return null;
+
+            var id = BindIds.Vanilla(bind.Label + "Alt");
+            var alternate = BindRegistry.All.FirstOrDefault(b => b.Id == id);
+            return alternate != null && alternate.Editable ? alternate : null;
         }
 
         /// <summary>
