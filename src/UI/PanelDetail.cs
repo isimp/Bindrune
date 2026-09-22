@@ -73,9 +73,16 @@ namespace Bindrune.UI
 
                 var cancel = FixedButton(capturing ? "Cancel" : "Clear", buttons, 110f, 32f, () =>
                 {
-                    if (KeyCapture.Active) KeyCapture.Cancel();
-                    else BindWriter.Apply(bind, KeyCombo.None, SaveTarget.Personal);
+                    if (KeyCapture.Active)
+                    {
+                        KeyCapture.Cancel();
+                        Refresh();
+                        return;
+                    }
+
+                    var problem = BindWriter.Apply(bind, KeyCombo.None, SaveTarget.Personal);
                     Refresh();
+                    if (problem != null) Note(problem);
                 });
 
                 // Told each time it is drawn: this pane is rebuilt when the capture starts, so the
@@ -101,6 +108,12 @@ namespace Bindrune.UI
             else
             {
                 Wrapped("Locked: " + bind.ReadOnlyReason, _detail, width, 13, new Color(1f, 0.8f, 0.4f));
+            }
+
+            if (!string.IsNullOrEmpty(_note))
+            {
+                Spacer(6f);
+                Wrapped(_note, _detail, width, 13, new Color(1f, 0.7f, 0.4f));
             }
 
             Spacer(10f);
@@ -178,6 +191,9 @@ namespace Bindrune.UI
         private static void BeginRebind(BindEntry bind)
         {
             var id = bind.Id;
+
+            // What the last key you pressed had to say is spent once you press another.
+            _note = null;
 
             // A key set from the keyboard has no button to click, so it gets the sound of an item
             // going into its slot. A suggestion is a button and already clicks, so it gets none.
@@ -752,9 +768,15 @@ namespace Bindrune.UI
             }
         }
 
+        /// <summary>
+        /// Says what just happened to the selected bind. Callers redraw first and note after, so
+        /// this keeps the message and draws the pane again rather than adding to the one on screen,
+        /// which would put it below every section instead of beside the controls it answers.
+        /// </summary>
         private static void Note(string message)
         {
-            Wrapped(message, _detail, DetailWidth - 40f, 13, new Color(1f, 0.7f, 0.4f));
+            _note = message;
+            ShowDetail();
         }
     }
 }

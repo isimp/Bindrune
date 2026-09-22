@@ -141,6 +141,7 @@ namespace Bindrune.UI
         private static void Show(DetailPage page)
         {
             _page = _page == page && _selected != null ? DetailPage.Bind : page;
+            _note = null;
             Refresh(rescan: false);
         }
 
@@ -153,6 +154,13 @@ namespace Bindrune.UI
         /// </summary>
         private static string _pendingFor;
         private static KeyCombo _pending;
+
+        /// <summary>
+        /// What the last thing you did to this bind has to say, such as why a key was not set.
+        /// Held rather than drawn on the spot, so it lands beside the controls it answers however
+        /// many times the pane is rebuilt after.
+        /// </summary>
+        private static string _note;
 
         /// <summary>Row backgrounds by bind id, so selecting one recolours two images instead of
         /// rebuilding every row in the list.</summary>
@@ -736,6 +744,7 @@ namespace Bindrune.UI
             // it abandons a key you pressed for a different one without agreeing to it.
             _page = DetailPage.Bind;
             _pendingFor = null;
+            _note = null;
             _selected = bind;
 
             if (bind != null && _rowBackgrounds.TryGetValue(bind.Id, out var current) && current != null)
