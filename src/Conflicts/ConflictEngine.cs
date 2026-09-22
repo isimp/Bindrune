@@ -79,7 +79,7 @@ namespace Bindrune.Conflicts
         {
             // Only ever shown: the key label on conflict rows and in their sentences. Grouping and
             // identity use MainToken, which keeps Unity's names.
-            var key = a.Combo.Main != KeyCode.None ? KeyLabels.Of(a.Combo.Main) : a.Combo.RawPath;
+            var key = a.Combo.Main != KeyCode.None ? KeyLabels.Of(a.Combo.Main) : KeyLabels.OfPath(a.Combo.RawPath);
 
             // Situations win over key analysis: two binds that are never live at the same time
             // cannot collide no matter what they are bound to.

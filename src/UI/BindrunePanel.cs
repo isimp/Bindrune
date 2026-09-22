@@ -405,7 +405,7 @@ namespace Bindrune.UI
                     // The label, so the box says what the rows say. A label can be punctuation,
                     // even a quote mark on some layouts, which is safe because Matches strips
                     // only the outer pair of quotes and takes everything between them.
-                    if (_search != null) _search.text = "\"" + KeyLabels.Of(combo.Main) + "\"";
+                    if (_search != null) _search.text = "\"" + KeyLabels.Heading(combo) + "\"";
                     Populate();
                 });
 
@@ -668,6 +668,10 @@ namespace Bindrune.UI
 
         private static bool UsesKey(BindEntry bind, string keyName)
         {
+            // A key with no KeyCode is known by its path, which is also what it is called with
+            // labels off, and by its label with them on.
+            if (bind.Combo.Main == KeyCode.None && KeyLabels.Answers(bind.Combo.RawPath, keyName)) return true;
+
             // Labels off is today's search, unchanged.
             if (!Plugin.KeyboardLabels)
             {

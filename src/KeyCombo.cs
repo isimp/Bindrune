@@ -67,10 +67,11 @@ namespace Bindrune
         /// The one place a combo is spelled out, so the raw form and the labelled form can never
         /// disagree about order or separators, only about what each key is called.
         /// </summary>
-        internal string Format(Func<KeyCode, string> name)
+        /// <param name="path">What to call a main key known only by its path; the path itself when null.</param>
+        internal string Format(Func<KeyCode, string> name, Func<string, string> path = null)
         {
             if (!IsBound) return "<unbound>";
-            var main = Main != KeyCode.None ? name(Main) : RawPath;
+            var main = Main != KeyCode.None ? name(Main) : path != null ? path(RawPath) : RawPath;
             return Modifiers.Length == 0 ? main : string.Join(" + ", Modifiers.Select(name).ToArray()) + " + " + main;
         }
     }

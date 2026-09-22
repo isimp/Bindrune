@@ -2,6 +2,7 @@ using System;
 using System.Linq;
 using BepInEx;
 using UnityEngine;
+using UnityEngine.InputSystem;
 
 namespace Bindrune.UI
 {
@@ -90,6 +91,17 @@ namespace Bindrune.UI
                 return;
             }
 
+            // Unity's older input, which BepInEx and so every mod reads, has no KeyCode for some
+            // keys: the one beside left Shift on ISO keyboards is the known case. The game's own
+            // controls read the newer Input System, which does see them, so a key only it saw
+            // comes back as its path, for a game control to take. See PanelDetail.Propose.
+            var unseen = SeenOnlyByInputSystem();
+            if (unseen != null)
+            {
+                Complete(new KeyCombo(KeyCode.None, modifiers, unseen));
+                return;
+            }
+
             // Releasing a modifier on its own binds that modifier, which is how mods that want a
             // held key (Alt to drag, Shift to favourite) are set.
             foreach (var key in _candidates.Where(KeyCombo.IsModifier))
@@ -100,6 +112,27 @@ namespace Bindrune.UI
                     return;
                 }
             }
+        }
+
+        /// <summary>
+        /// The path of a key pressed this frame that has no KeyCode, or null. Keys that have one
+        /// are left alone: the older input saw those too and has already answered for them.
+        /// </summary>
+        private static string SeenOnlyByInputSystem()
+        {
+            var keyboard = Keyboard.current;
+            if (keyboard == null) return null;
+
+            foreach (var key in keyboard.allKeys)
+            {
+                if (key == null || !key.wasPressedThisFrame) continue;
+
+                // The form the game stores its own rebinds in, so a key set here reads back the same.
+                var path = "<Keyboard>/" + key.name;
+                if (KeyPaths.FromPath(path) == KeyCode.None) return path;
+            }
+
+            return null;
         }
 
         /// <summary>True while the pointer is over the control that ends this capture.</summary>

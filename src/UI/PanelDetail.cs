@@ -199,6 +199,16 @@ namespace Bindrune.UI
             // The entry the capture began with may have been replaced by a rescan since.
             var bind = BindRegistry.All.FirstOrDefault(b => b.Id == id);
 
+            // A key only the Input System sees cannot go on a mod's bind at all, so there is nothing
+            // to preview: say why, and leave the bind as it was.
+            if (bind != null && bind.Source != BindSource.Vanilla && combo.Main == KeyCode.None && combo.IsBound)
+            {
+                _pendingFor = null;
+                Refresh(rescan: false);
+                Note("Not set: " + BindWriter.UnseenByMods + ".");
+                return false;
+            }
+
             if (bind != null && combo.IsBound && !KeyCombo.IsModifier(combo.Main) && FreeKeys.Unused(bind, combo))
             {
                 var problem = BindWriter.Apply(bind, combo, SaveTarget.Personal);

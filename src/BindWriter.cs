@@ -11,10 +11,19 @@ namespace Bindrune
     /// <summary>Writes a new combo back to whichever system owns the bind.</summary>
     public static class BindWriter
     {
+        /// <summary>Why a key only the Input System sees cannot go on a mod's bind.</summary>
+        public const string UnseenByMods =
+            "mods read keys through Unity's older input, which cannot see this key, so only the game's own controls can use it";
+
         /// <summary>Returns null on success, or a message explaining why nothing was written.</summary>
         public static string Apply(BindEntry bind, KeyCombo combo, SaveTarget target = SaveTarget.Personal)
         {
             if (!bind.Editable) return bind.ReadOnlyReason ?? "this bind cannot be changed from here";
+
+            // A mod's setting holds a KeyCode, and a key known only by its path has none: written
+            // anyway it would come out as no key at all, clearing the bind instead of setting it.
+            if (bind.Source != BindSource.Vanilla && combo.Main == KeyCode.None && combo.IsBound)
+                return UnseenByMods;
 
             try
             {
@@ -195,7 +204,10 @@ namespace Bindrune
             if (combo.Modifiers.Length > 0)
                 return "the game stores one key per bind and has no modifier support, so pick a single key";
 
-            var path = KeyPaths.ToPath(combo.Main);
+            // A key the older input has no KeyCode for arrives as its path already, in the form the
+            // game stores its own rebinds in. Everything else is named by its KeyCode, including
+            // the unbound combo, whose path is the None control the game parks cleared binds on.
+            var path = !string.IsNullOrEmpty(combo.RawPath) ? combo.RawPath : KeyPaths.ToPath(combo.Main);
             if (path == null) return $"the game has no input path for {combo.Main}";
 
             def.Rebind(path);
@@ -203,7 +215,12 @@ namespace Bindrune
             var zinput = ZInput.instance;
             if (zinput != null) AccessTools.Method(typeof(ZInput), "Save")?.Invoke(zinput, null);
 
-            bind.Combo = new KeyCombo(combo.Main, null);
+            // A cleared bind sits on the None control, which is a path like any other and would
+            // otherwise read back as a key of that name.
+            bind.Combo = !combo.IsBound ? KeyCombo.None
+                : combo.Main != KeyCode.None ? new KeyCombo(combo.Main, null)
+                : new KeyCombo(KeyCode.None, null, path);
+
             return null;
         }
 
