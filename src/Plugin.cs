@@ -30,10 +30,14 @@ namespace Bindrune
         /// runs every frame or once per bind cannot bury the log. The call's own file and line
         /// tell one site from another, so there is no key to pass or keep in step.
         /// </summary>
-        public static void WarnOnce(string message,
+        /// <param name="detail">
+        /// An exception whose stack is worth having. Spelled out only for the one that warns,
+        /// since writing a stack costs far more than the message and the rest are repeats.
+        /// </param>
+        public static void WarnOnce(string message, Exception detail = null,
             [CallerFilePath] string file = null, [CallerLineNumber] int line = 0)
         {
-            if (Warned.Add(file + ":" + line)) Log.LogWarning(message);
+            if (Warned.Add(file + ":" + line)) Log.LogWarning(detail != null ? message + "\n" + detail : message);
             else Log.LogDebug(message);
         }
 
@@ -241,9 +245,10 @@ namespace Bindrune
             }
             catch (Exception ex)
             {
-                // The whole exception, not just its message: this catch sits over every per-frame
-                // path, so which one threw is only readable from the stack.
-                WarnOnce($"Bindrune input check failed: {ex}");
+                // The stack as well as the message: this catch sits over every per-frame path, so
+                // which one threw is only readable from it. Handed over rather than spelled into
+                // the message, so a throw that repeats every frame does not write one each time.
+                WarnOnce($"Bindrune input check failed: {ex.Message}", ex);
             }
         }
 

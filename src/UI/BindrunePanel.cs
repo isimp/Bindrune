@@ -219,6 +219,9 @@ namespace Bindrune.UI
             KeyCapture.Changed = null;
             KeyCapture.Cancel();
             _pendingFor = null;
+            // What the last thing you did had to say is spent: it would otherwise be waiting on
+            // the same bind the next time the panel opens, as though it had just happened.
+            _note = null;
             RememberPlace();
             if (_root != null) UnityEngine.Object.Destroy(_root);
             _root = null;
@@ -690,7 +693,7 @@ namespace Bindrune.UI
             // labels off, and by its label with them on.
             if (bind.Combo.Main == KeyCode.None && KeyLabels.Answers(bind.Combo.RawPath, keyName)) return true;
 
-            // Labels off is today's search, unchanged.
+            // For a key with a KeyCode, labels off is today's search, unchanged.
             if (!Plugin.KeyboardLabels)
             {
                 if (!Enum.TryParse<KeyCode>(keyName, true, out var key)) return false;
@@ -736,13 +739,14 @@ namespace Bindrune.UI
             if (_search != null && _searchText.Length > 0)
             {
                 _search.text = _searchText;
-
-                // Writing the text asks the field's own listener for a redraw a moment later,
-                // which would rebuild the rows after the scroll below had already been set and
-                // leave the list back at the top. The rows are drawn here instead, in time.
-                _repopulateAt = 0f;
                 Populate();
             }
+
+            // Writing the text asks the field's own listener for a redraw a moment later, and one
+            // the last window asked for can still be waiting, since the timer outlives the window
+            // it was set in. Either would rebuild the rows after the scroll below was set and
+            // leave the list back at the top. The rows are drawn above instead, in time.
+            _repopulateAt = 0f;
 
             var scroll = ListScroll();
             if (scroll == null) return;
