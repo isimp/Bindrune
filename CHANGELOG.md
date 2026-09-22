@@ -1,5 +1,19 @@
 # Changelog
 
+## 0.3.2
+
+The alternate hotbar keys and the alternate dodge are now listed. The game ships them without a key, and binds in that state were being missed.
+
+A bind the game will not let you change now names the one you can change instead, with a button that goes straight to it. This is how the hotbar digits work.
+
+Keys found only on non-US keyboards, such as the one beside left Shift, can now be set on the game's own controls. Mods cannot see those keys, so a mod bind says so rather than taking one.
+
+A key that could not be set now says why, beside the buttons you set it with.
+
+The panel keeps your search and your place in the list when you close, reopen or resize it.
+
+Problems Bindrune works around are now written to the log once each.
+
 ## 0.3.1
 
 Five keys the game reads in its own code, such as F11 for screenshots and Ctrl+F1 to free the mouse, are now listed with its binds and reported when a mod uses them too.
