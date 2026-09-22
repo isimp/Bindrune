@@ -12,6 +12,8 @@ A key that could not be set now says why, beside the buttons you set it with.
 
 The panel keeps your search and your place in the list when you close, reopen or resize it.
 
+Typing in the search box at the start menu no longer reaches the menu behind it, where Return pressed whatever was selected.
+
 Problems Bindrune works around are now written to the log once each.
 
 ## 0.3.1

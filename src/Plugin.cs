@@ -5,6 +5,7 @@ using BepInEx;
 using BepInEx.Bootstrap;
 using BepInEx.Configuration;
 using BepInEx.Logging;
+using HarmonyLib;
 using Bindrune.Discovery;
 using Bindrune.Hints;
 using Bindrune.Personal;
@@ -188,6 +189,17 @@ namespace Bindrune
                 KeyLabels.Forget();
                 HintOverlay.Invalidate();
             };
+
+            // The one thing Bindrune changes in the game rather than reads from it, and only
+            // while you are typing into the panel. See StartMenuKeys.
+            try
+            {
+                StartMenuKeys.Apply(new Harmony(Guid));
+            }
+            catch (Exception ex)
+            {
+                WarnOnce($"Bindrune: could not hold the start menu's keys back while you type: {ex.Message}", ex);
+            }
 
             // After binding, so the settings we do have are registered and only the ones we have
             // dropped count as orphans.
