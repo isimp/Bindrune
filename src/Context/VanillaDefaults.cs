@@ -35,6 +35,7 @@ namespace Bindrune.Context
             { "Right", Movement },
             { "Jump", World },
             { "Crouch", World },
+            { "AltDodge", World },
             { "Run", World },
             { "AutoRun", World },
             { "Sit", World },
@@ -74,6 +75,11 @@ namespace Bindrune.Context
 
             { "Hotbar1", World }, { "Hotbar2", World }, { "Hotbar3", World }, { "Hotbar4", World },
             { "Hotbar5", World }, { "Hotbar6", World }, { "Hotbar7", World }, { "Hotbar8", World },
+
+            // The second key each slot answers to, read beside the digit in the same test, so it
+            // is live exactly where the digit is.
+            { "Hotbar1Alt", World }, { "Hotbar2Alt", World }, { "Hotbar3Alt", World }, { "Hotbar4Alt", World },
+            { "Hotbar5Alt", World }, { "Hotbar6Alt", World }, { "Hotbar7Alt", World }, { "Hotbar8Alt", World },
 
             // The keys the game reads in its own code (GameKeys), polled whatever screen is open.
             { "Network panel", Everywhere }, { "Gamepad layout", Everywhere }, { "Screenshot", Everywhere },

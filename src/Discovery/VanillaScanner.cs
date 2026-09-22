@@ -33,14 +33,31 @@ namespace Bindrune.Discovery
                 if (claimedButtonNames.Contains(def.Name)) continue;
 
                 string path = null;
-                try { path = getPath?.Invoke(def, new object[] { true }) as string; }
-                catch (Exception ex) { Plugin.Log.LogDebug($"VanillaScanner: path read failed for {def.Name}: {ex.Message}"); }
+                var read = false;
+                if (getPath != null)
+                {
+                    try
+                    {
+                        path = getPath.Invoke(def, new object[] { true }) as string;
+                        read = true;
+                    }
+                    catch (Exception ex)
+                    {
+                        // A button with no binding behind it at all, such as the one standing for
+                        // the whole hotbar in the key hints. Nothing to read and nothing to set.
+                        Plugin.WarnOnce($"VanillaScanner: path read failed for {def.Name}: {ex.Message}");
+                    }
+                }
 
-                if (!KeyPaths.IsKeyboardOrMouse(path)) continue;
+                // A bind the game ships unset holds an empty path rather than a keyboard one. It
+                // is still a keyboard bind, and one the player can fill in, so it belongs in the
+                // list as unbound instead of being taken for another device's.
+                var blank = read && string.IsNullOrEmpty(path);
+                if (blank ? def.Source != ZInput.InputSource.KeyboardMouse : !KeyPaths.IsKeyboardOrMouse(path)) continue;
 
-                var key = KeyPaths.FromPath(path);
+                var key = blank ? KeyCode.None : KeyPaths.FromPath(path);
                 // The game parks unbound actions on a "None" control rather than clearing them.
-                var unbound = key == KeyCode.None && path.EndsWith("/None", StringComparison.OrdinalIgnoreCase);
+                var unbound = blank || (key == KeyCode.None && path.EndsWith("/None", StringComparison.OrdinalIgnoreCase));
                 var canRebind = true;
                 try { canRebind = rebindable == null || (bool)rebindable.Invoke(def, null); }
                 catch { /* assume rebindable */ }
