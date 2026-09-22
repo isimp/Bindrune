@@ -94,7 +94,7 @@ namespace Bindrune.Hints
             }
             catch (Exception ex)
             {
-                Plugin.Log.LogDebug($"Bindrune: could not read the current situation: {ex.Message}");
+                Plugin.WarnOnce($"Bindrune: could not read the current situation: {ex.Message}");
                 return false;
             }
         }

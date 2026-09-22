@@ -44,7 +44,7 @@ namespace Bindrune.UI
             }
             catch (Exception ex)
             {
-                Plugin.Log.LogDebug($"Bindrune: could not play {name}: {ex.Message}");
+                Plugin.WarnOnce($"Bindrune: could not play {name}: {ex.Message}");
             }
         }
     }

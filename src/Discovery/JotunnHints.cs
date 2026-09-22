@@ -61,7 +61,7 @@ namespace Bindrune.Discovery
             }
             catch (Exception ex)
             {
-                Plugin.Log.LogDebug($"Bindrune: could not read key hints: {ex.Message}");
+                Plugin.WarnOnce($"Bindrune: could not read key hints: {ex.Message}");
             }
         }
     }

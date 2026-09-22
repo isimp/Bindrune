@@ -86,7 +86,7 @@ namespace Bindrune.Discovery
             catch (Exception ex)
             {
                 // Better to list them than to hide them over a failed check.
-                Plugin.Log.LogDebug($"Bindrune: could not tell whether a gamepad is connected ({ex.Message}); listing anyway.");
+                Plugin.WarnOnce($"Bindrune: could not tell whether a gamepad is connected ({ex.Message}); listing anyway.");
                 return true;
             }
         }
@@ -100,7 +100,7 @@ namespace Bindrune.Discovery
             }
             catch (Exception ex)
             {
-                Plugin.Log.LogDebug($"Bindrune: could not read {property} off a gamepad button: {ex.Message}");
+                Plugin.WarnOnce($"Bindrune: could not read {property} off a gamepad button: {ex.Message}");
                 return null;
             }
         }
@@ -125,7 +125,7 @@ namespace Bindrune.Discovery
             }
             catch (Exception ex)
             {
-                Plugin.Log.LogDebug($"Bindrune: could not read a gamepad button's layout: {ex.Message}");
+                Plugin.WarnOnce($"Bindrune: could not read a gamepad button's layout: {ex.Message}");
                 return "";
             }
         }

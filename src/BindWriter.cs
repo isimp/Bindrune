@@ -68,7 +68,7 @@ namespace Bindrune
             }
             catch (Exception ex)
             {
-                Plugin.Log.LogDebug($"Bindrune: no default for {bind.Id}: {ex.Message}");
+                Plugin.WarnOnce($"Bindrune: no default for {bind.Id}: {ex.Message}");
                 return KeyCombo.None;
             }
         }

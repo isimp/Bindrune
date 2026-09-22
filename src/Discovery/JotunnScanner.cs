@@ -68,7 +68,7 @@ namespace Bindrune.Discovery
                 }
                 catch (Exception ex)
                 {
-                    Plugin.Log.LogDebug($"JotunnScanner: skipping {dictKey}: {ex.Message}");
+                    Plugin.WarnOnce($"JotunnScanner: skipping {dictKey}: {ex.Message}");
                     continue;
                 }
 

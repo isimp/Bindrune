@@ -53,7 +53,7 @@ namespace Bindrune.Discovery
             try { return config.ToList(); }
             catch (Exception ex)
             {
-                Plugin.Log.LogDebug($"BepInExScanner: could not enumerate a config: {ex.Message}");
+                Plugin.WarnOnce($"BepInExScanner: could not enumerate a config: {ex.Message}");
                 return new List<KeyValuePair<ConfigDefinition, ConfigEntryBase>>();
             }
         }

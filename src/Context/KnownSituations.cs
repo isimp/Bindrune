@@ -169,7 +169,7 @@ namespace Bindrune.Context
             }
             catch (Exception ex)
             {
-                Plugin.Log.LogDebug($"Bindrune: could not read {member} from a mod's tag: {ex.Message}");
+                Plugin.WarnOnce($"Bindrune: could not read {member} from a mod's tag: {ex.Message}");
             }
 
             if (!(value is IEnumerable<string> strings)) return Enumerable.Empty<string>();

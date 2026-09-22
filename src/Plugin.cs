@@ -1,4 +1,6 @@
 using System;
+using System.Collections.Generic;
+using System.Runtime.CompilerServices;
 using BepInEx;
 using BepInEx.Bootstrap;
 using BepInEx.Configuration;
@@ -19,6 +21,21 @@ namespace Bindrune
         public const string Guid = "isimp.Bindrune";
 
         public static ManualLogSource Log;
+
+        private static readonly HashSet<string> Warned = new HashSet<string>();
+
+        /// <summary>
+        /// Reports a failure that was caught and carried on from. The first one warns, which the
+        /// disk log keeps by default, and the rest go to debug level, so a failure in code that
+        /// runs every frame or once per bind cannot bury the log. The call's own file and line
+        /// tell one site from another, so there is no key to pass or keep in step.
+        /// </summary>
+        public static void WarnOnce(string message,
+            [CallerFilePath] string file = null, [CallerLineNumber] int line = 0)
+        {
+            if (Warned.Add(file + ":" + line)) Log.LogWarning(message);
+            else Log.LogDebug(message);
+        }
 
         private static ConfigEntry<float> _scrollSpeed;
         public static float ScrollSpeed => _scrollSpeed?.Value ?? 300f;
@@ -224,7 +241,9 @@ namespace Bindrune
             }
             catch (Exception ex)
             {
-                Log.LogDebug($"Bindrune input check failed: {ex.Message}");
+                // The whole exception, not just its message: this catch sits over every per-frame
+                // path, so which one threw is only readable from the stack.
+                WarnOnce($"Bindrune input check failed: {ex}");
             }
         }
 
