@@ -94,6 +94,18 @@ namespace Bindrune.UI
 
         private static GameObject _root;
         private static InputField _search;
+
+        /// <summary>
+        /// Where the list was left. The filters, the grouping and the collapsed sections are
+        /// static and outlive the window on their own, but the search field and the scroll view
+        /// are new objects every time it is built, so these two have to be carried over by hand.
+        /// Kept for the session only, since a search you have forgotten setting is no way to open
+        /// the panel days later.
+        /// </summary>
+        private static string _searchText = "";
+
+        /// <summary>1 is the top of the list, which is where a first open starts.</summary>
+        private static float _scrollAt = 1f;
         private static RectTransform _content;
         private static RectTransform _detail;
         private static Text _summary;
@@ -190,6 +202,7 @@ namespace Bindrune.UI
 
             Rescan();
             Build();
+            RestorePlace();
             GUIManager.BlockInput(true);
 
             // While you are in here, the hints can be dragged into place.
@@ -206,6 +219,7 @@ namespace Bindrune.UI
             KeyCapture.Changed = null;
             KeyCapture.Cancel();
             _pendingFor = null;
+            RememberPlace();
             if (_root != null) UnityEngine.Object.Destroy(_root);
             _root = null;
             _content = null;
@@ -314,21 +328,17 @@ namespace Bindrune.UI
         }
 
         /// <summary>
-        /// Rebuilds at the current size. Only the search text needs carrying over: everything
-        /// else the panel shows lives in static state that outlives the window, while the input
-        /// field itself is a new object that comes back empty.
+        /// Rebuilds at the current size. The search text and the scroll position need carrying
+        /// over: everything else the panel shows lives in static state that outlives the window,
+        /// while those two belong to objects that are replaced with empty ones.
         /// </summary>
         private static void Rebuild()
         {
-            var search = _search != null ? _search.text : "";
+            RememberPlace();
 
             if (_root != null) UnityEngine.Object.Destroy(_root);
             Build();
-
-            if (_search == null || search.Length == 0) return;
-
-            _search.text = search;
-            Populate();
+            RestorePlace();
         }
 
         private static void BuildResizeGrip()
@@ -710,6 +720,40 @@ namespace Bindrune.UI
 
             ScrollTo(bind.Id);
         }
+
+        /// <summary>Takes what the window is about to destroy, so the next one starts where this left off.</summary>
+        private static void RememberPlace()
+        {
+            if (_search != null) _searchText = _search.text;
+
+            var scroll = ListScroll();
+            if (scroll != null) _scrollAt = scroll.verticalNormalizedPosition;
+        }
+
+        /// <summary>Puts the search and the scroll back, once there are rows to scroll through.</summary>
+        private static void RestorePlace()
+        {
+            if (_search != null && _searchText.Length > 0)
+            {
+                _search.text = _searchText;
+
+                // Writing the text asks the field's own listener for a redraw a moment later,
+                // which would rebuild the rows after the scroll below had already been set and
+                // leave the list back at the top. The rows are drawn here instead, in time.
+                _repopulateAt = 0f;
+                Populate();
+            }
+
+            var scroll = ListScroll();
+            if (scroll == null) return;
+
+            // The rows were built this frame, so the layout has to run before the view can move.
+            LayoutRebuilder.ForceRebuildLayoutImmediate(_content);
+            scroll.verticalNormalizedPosition = Mathf.Clamp01(_scrollAt);
+        }
+
+        private static ScrollRect ListScroll() =>
+            _content == null ? null : _content.GetComponentInParent<ScrollRect>();
 
         /// <summary>Puts a row in the middle of the list, or as close to it as the ends allow.</summary>
         private static void ScrollTo(string bindId)
