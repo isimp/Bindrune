@@ -3,6 +3,7 @@ using System.Collections;
 using System.Collections.Generic;
 using HarmonyLib;
 using UnityEngine;
+using UnityEngine.InputSystem;
 
 namespace Bindrune
 {
@@ -23,8 +24,23 @@ namespace Bindrune
             _suffixToKey = new Dictionary<string, KeyCode>(StringComparer.OrdinalIgnoreCase);
             _keyToPath = new Dictionary<KeyCode, string>();
 
-            Absorb("s_keyCodeToKeyMap", null, "<Keyboard>");
-            Absorb("s_keyCodeToMouseButtonMap", "button", "<Mouse>");
+            Absorb("s_keyCodeToKeyMap", null, "<Keyboard>", GameKeyPath());
+            Absorb("s_keyCodeToMouseButtonMap", "button", "<Mouse>", null);
+        }
+
+        /// <summary>
+        /// The game's own path for a key, which is not always the key's name: digits are "1"
+        /// rather than "digit1", and the Windows, Command and Apple keys are all "Meta". A path
+        /// built from the name instead matches no control, and a bind given one stops answering
+        /// to any key at all. Null when the game no longer has the method, which leaves the paths
+        /// built from the names.
+        /// </summary>
+        private static Func<object, string> GameKeyPath()
+        {
+            var method = AccessTools.Method(typeof(ZInput), "KeyToPath", new[] { typeof(Key) });
+            if (method == null) return null;
+
+            return key => method.Invoke(null, new[] { key }) as string;
         }
 
         /// <summary>The input path vanilla expects for a key, or null when it has no equivalent.</summary>
@@ -34,7 +50,7 @@ namespace Bindrune
             return _keyToPath.TryGetValue(key, out var path) ? path : null;
         }
 
-        private static void Absorb(string fieldName, string suffixWord, string device)
+        private static void Absorb(string fieldName, string suffixWord, string device, Func<object, string> gamePath)
         {
             try
             {
@@ -45,8 +61,19 @@ namespace Bindrune
                 {
                     if (!(e.Key is KeyCode kc) || e.Value == null) continue;
 
+                    // Kept even where the game spells it differently, so a path written from the
+                    // name by an earlier version still reads as its key.
                     var name = e.Value.ToString();
                     _suffixToKey[name] = kc;
+
+                    var path = gamePath?.Invoke(e.Value);
+                    if (!string.IsNullOrEmpty(path))
+                    {
+                        var slash = path.LastIndexOf('/');
+                        _suffixToKey[slash >= 0 ? path.Substring(slash + 1) : path] = kc;
+                        if (!_keyToPath.ContainsKey(kc)) _keyToPath[kc] = path;
+                        continue;
+                    }
 
                     var control = name;
                     if (suffixWord != null && !name.EndsWith(suffixWord, StringComparison.OrdinalIgnoreCase))
