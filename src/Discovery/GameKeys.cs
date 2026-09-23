@@ -62,9 +62,10 @@ namespace Bindrune.Discovery
                     Section = "Game",
                     Description = r.What + " The game reads this key in its own code, not through a control.",
                     Source = BindSource.Vanilla,
-                    // The game checks that Ctrl is down and nothing else, so a Ctrl read does not
-                    // fire on F3 alone, while a plain read fires whatever is held with it.
-                    Modifiers = r.Combo.Modifiers.Length > 0 ? ModifierBehavior.Strict : ModifierBehavior.SingleKey,
+                    // The game checks that Ctrl is down and looks at no other key, so a Ctrl read
+                    // does not fire on F3 alone but does with Alt held as well, while a plain read
+                    // fires whatever is held with it.
+                    Modifiers = r.Combo.Modifiers.Length > 0 ? ModifierBehavior.Required : ModifierBehavior.SingleKey,
                     Combo = r.Combo,
                     Editable = false,
                     ReadOnlyReason = "the game reads this key in its own code, so it cannot be rebound anywhere"

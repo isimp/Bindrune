@@ -769,9 +769,7 @@ namespace Bindrune.UI
             string modifiers;
             if (bind.Source == BindSource.Gamepad)
                 modifiers = "A gamepad button, read from whichever controller layout you picked. Modifiers do not enter into it.";
-            // Only the keys the game reads in its own code carry a modifier on the game's side,
-            // and it checks that one is down, not that nothing else is.
-            else if (bind.Source == BindSource.Vanilla && bind.Modifiers == ModifierBehavior.Strict)
+            else if (bind.Modifiers == ModifierBehavior.Required)
                 modifiers = "Fires while this modifier is held, whatever else is held with it.";
             else if (bind.Modifiers == ModifierBehavior.Strict)
                 modifiers = "Needs exactly these modifiers, and will not fire while any other key is held (including movement keys).";

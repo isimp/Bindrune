@@ -68,6 +68,13 @@ namespace Bindrune
             return label;
         }
 
+        /// <summary>A modifier as it is written in front of a key where room is short: Alt, Ctrl or Shift.</summary>
+        public static string Modifier(KeyCode modifier) =>
+            modifier == KeyCode.LeftAlt ? "Alt" :
+            modifier == KeyCode.LeftControl ? "Ctrl" :
+            modifier == KeyCode.LeftShift ? "Shift" :
+            Of(modifier);
+
         /// <summary>The heading for a group of binds on one key.</summary>
         public static string Heading(KeyCombo combo) =>
             combo.Main != KeyCode.None ? Of(combo.Main)

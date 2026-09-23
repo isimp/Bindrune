@@ -34,7 +34,12 @@ namespace Bindrune
         /// <summary>One key, with no modifier field to match against.</summary>
         SingleKey,
         /// <summary>Free text we parsed. How its owner reads it is not visible from here.</summary>
-        Unknown
+        Unknown,
+        /// <summary>
+        /// Needs its modifiers held and ignores any others: a key the game reads in its own code
+        /// with a modifier, and a hotbar key Bindrune gave one.
+        /// </summary>
+        Required
     }
 
 

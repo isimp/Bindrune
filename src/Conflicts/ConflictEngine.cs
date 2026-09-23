@@ -248,6 +248,20 @@ namespace Bindrune.Conflicts
                 };
             }
 
+            // A bind that needs its modifiers but ignores any others fires on every combo that
+            // holds all of them, so a longer combo on the same key does not keep it off.
+            var covered = Covers(a, b) ? a : Covers(b, a) ? b : null;
+            if (covered != null)
+            {
+                var other = ReferenceEquals(covered, a) ? b : a;
+                return new Conflict
+                {
+                    A = a, B = b, Severity = Severity.Soft, KeyLabel = key,
+                    Reason = $"{Name(covered)} needs {Modifiers(covered)} held and ignores any other modifier, so " +
+                             $"pressing {KeyLabels.Of(other.Combo)} for {Name(other)} fires it too."
+                };
+            }
+
             // Different modifiers only separate two binds if both sides can tell them apart.
             var loose = Unprotected(a) ? a : Unprotected(b) ? b : null;
             if (loose != null)
@@ -260,17 +274,28 @@ namespace Bindrune.Conflicts
                 };
             }
 
+            var exactly = a.Modifiers == ModifierBehavior.Strict && b.Modifiers == ModifierBehavior.Strict;
             return new Conflict
             {
                 A = a, B = b, Severity = Severity.Note, KeyLabel = key,
                 // Named like every other sentence here: two of these can sit in one list, and
                 // "same key, different modifiers" alone reads the same on both.
                 Reason = $"{Name(a)} is on {KeyLabels.Of(a.Combo)} and {Name(b)} on {KeyLabels.Of(b.Combo)}: " +
-                         "the same key with different modifiers, and both check modifiers exactly, so they should not interfere."
+                         (exactly
+                             ? "the same key with different modifiers, and both check modifiers exactly, so they should not interfere."
+                             : "the same key with different modifiers, and neither combo holds what the other needs, so they should not interfere.")
             };
         }
 
         private static string Name(BindEntry e) => $"{e.OwnerName}'s \"{e.Label}\"";
+
+        /// <summary>Whether a bind that needs only its own modifiers is fired by the other's combo.</summary>
+        private static bool Covers(BindEntry needs, BindEntry other) =>
+            needs.Modifiers == ModifierBehavior.Required &&
+            needs.Combo.Modifiers.All(m => other.Combo.Modifiers.Contains(m));
+
+        private static string Modifiers(BindEntry e) =>
+            string.Join(" + ", e.Combo.Modifiers.Select(KeyLabels.Modifier).ToArray());
 
         /// <summary>A bind whose own modifiers cannot be relied on to keep another one off it.</summary>
         private static bool Unprotected(BindEntry e) =>

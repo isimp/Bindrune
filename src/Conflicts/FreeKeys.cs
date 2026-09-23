@@ -126,7 +126,7 @@ namespace Bindrune.Conflicts
         {
             var with = combo.Modifiers.Length == 0
                 ? "on its own"
-                : "with " + string.Join(" + ", combo.Modifiers.Select(Short).ToArray());
+                : "with " + string.Join(" + ", combo.Modifiers.Select(KeyLabels.Modifier).ToArray());
 
             if (combo.Main == tried.Main) return "same key, " + with;
             return combo.Modifiers.SequenceEqual(tried.Modifiers) ? "near " + name : $"near {name}, {with}";
@@ -168,11 +168,5 @@ namespace Bindrune.Conflicts
             option.Shared = clashes;
             return true;
         }
-
-        private static string Short(KeyCode modifier) =>
-            modifier == KeyCode.LeftAlt ? "Alt" :
-            modifier == KeyCode.LeftControl ? "Ctrl" :
-            modifier == KeyCode.LeftShift ? "Shift" :
-            KeyLabels.Of(modifier);
     }
 }
