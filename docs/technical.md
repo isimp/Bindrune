@@ -40,13 +40,25 @@ Versions before 0.2.1 kept those two in `BepInEx/config/Bindrune/`. They are mov
 
 ## Files
 
-Settings are in `BepInEx/config/isimp.Bindrune.cfg`. Situations you set and the shared list are in `BepInEx/config/Bindrune/`, so they travel with a profile. Your own keys, muted clashes and pinned hints are in `BepInEx/bindrune.keys`, so they do not. Data derived from the game is cached in `BepInEx/cache/Bindrune/` and rebuilt after a game update. All of these are plain text and safe to edit or delete, also while the game runs: an edited file is read again when the panel opens, and before Bindrune next writes to it.
+Settings are in `BepInEx/config/isimp.Bindrune.cfg`. Situations you set and the shared list are in `BepInEx/config/Bindrune/`, so they travel with a profile. Your own keys, moved hotbar keys, muted clashes and pinned hints are in `BepInEx/bindrune.keys`, so they do not. Data derived from the game is cached in `BepInEx/cache/Bindrune/` and rebuilt after a game update. All of these are plain text and safe to edit or delete, also while the game runs: an edited file is read again when the panel opens, and before Bindrune next writes to it.
 
 ## How it reads the game
 
 Bindrune reads the game's assemblies with Mono.Cecil, finds the code that reads each bind and derives where it is used. For example, `TabRight` is only read during build placement, so it cannot collide with `Use` elsewhere even though both are on E. The result is cached against the assemblies' file stamps and rebuilt after a game update. Mono.Cecil ships with BepInEx.
 
 Jotunn is declared as a soft dependency, so Bindrune loads without it, but the panel and the hints are built with Jotunn's GUI and nothing is shown without it.
+
+Everywhere else Bindrune only reads the game, and it changes it in four places. It holds the start menu's keyboard handling back while you type in the panel, puts the hotbar keys it keeps back after the game loads its controls, hands an alternate hotbar key back to the game before the game's own screen rebinds it, and relabels the hotbar while any slot's key has been moved. Each finds what it changes when the game starts, and a game update that has moved it switches that one off with a warning in the log rather than stopping Bindrune.
+
+## Hotbar keys
+
+The game fixes the hotbar keys to the digits 1 to 8. Its controls screen does not offer them, and it drops any change to them each time it loads its controls, which it does at startup and when you leave that screen. Bindrune can move or clear them anyway. The key you set is kept in `bindrune.keys` and put back after every load, and after the game's own reset of its controls, since that screen does not list the hotbar keys. Default on the bind gives the digit back. Nothing is written to the game's own settings, so without Bindrune the digits are the game's again.
+
+Each slot also answers to its alternate key, the one the controls screen does offer and keeps. Either key can carry one modifier, such as Alt + 1, which the game's own format has no room for: Bindrune builds the combination itself and keeps it in `bindrune.keys` too. An alternate key without a modifier stays the game's to keep, and rebinding an alternate key in the game's controls screen hands it back to the game. A key with a modifier fires while that modifier is held, whatever else is held with it.
+
+A moved slot is labelled on the bar with its new key, and a cleared one with its alternate key, or nothing when neither has a key. While any slot is moved, the whole bar's labels take the layout ExtraSlots gives its bars, so the two read alike side by side. Bars that other mods add are left alone. The prompts that name the hotbar keys, such as cooking or attaching an item to a stand, list the keys when they come to one or two runs, such as Alt + 1-8, and otherwise name the hotbar in the game's own word for it.
+
+A mod that reads the digit keys itself is not affected by moving them. A mod that holds the game's keys back while one of its own is pressed wins a combo the two share; the clash is reported either way.
 
 ## Key names
 

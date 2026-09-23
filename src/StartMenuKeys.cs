@@ -1,3 +1,4 @@
+using System;
 using HarmonyLib;
 
 namespace Bindrune
@@ -17,17 +18,24 @@ namespace Bindrune
     /// </summary>
     internal static class StartMenuKeys
     {
-        public static void Apply(Harmony harmony)
+        public static void Patch(Harmony harmony)
         {
-            var target = AccessTools.Method(typeof(FejdStartup), "UpdateKeyboard");
-            if (target == null)
+            try
             {
-                Plugin.WarnOnce("Bindrune: the start menu's keyboard handling was not found, so Return " +
-                                "may reach the menu while you type in the panel.");
-                return;
-            }
+                var target = AccessTools.Method(typeof(FejdStartup), "UpdateKeyboard");
+                if (target == null)
+                {
+                    Plugin.WarnOnce("Bindrune: the start menu's keyboard handling was not found, so Return " +
+                                    "may reach the menu while you type in the panel.");
+                    return;
+                }
 
-            harmony.Patch(target, new HarmonyMethod(AccessTools.Method(typeof(StartMenuKeys), nameof(Skip))));
+                harmony.Patch(target, new HarmonyMethod(AccessTools.Method(typeof(StartMenuKeys), nameof(Skip))));
+            }
+            catch (Exception ex)
+            {
+                Plugin.WarnOnce($"Bindrune: could not hold the start menu's keys back while you type: {ex.Message}", ex);
+            }
         }
 
         private static bool Skip() => !UI.BindrunePanel.Typing;

@@ -62,12 +62,14 @@ namespace Bindrune.Conflicts
         private static IEnumerable<FreeKey> Ranked(BindEntry bind, KeyCombo tried)
         {
             // A bind that stores one key drops any modifier when written, so it is offered none,
-            // and one held while pressing is not carried over to its neighbours either.
-            var strict = bind.Modifiers == ModifierBehavior.Strict;
-            var held = strict ? tried.Modifiers : new KeyCode[0];
+            // and one held while pressing is not carried over to its neighbours either. A hotbar
+            // key can take one, which Bindrune builds for the game.
+            var canHold = bind.Modifiers == ModifierBehavior.Strict ||
+                          (bind.Handle is ZInput.ButtonDef def && FixedKeys.IsHotbar(def.Name));
+            var held = canHold ? tried.Modifiers : new KeyCode[0];
 
             var choices = new List<ModifierChoice> { new ModifierChoice(held, 0f) };
-            if (strict)
+            if (canHold)
             {
                 if (held.Length > 0) choices.Add(new ModifierChoice(new KeyCode[0], 0f));
 
@@ -159,8 +161,8 @@ namespace Bindrune.Conflicts
             // What it already has is not an alternative.
             if (combo.Equals(bind.Combo)) return false;
 
-            // The game can only be given a key it has an input path for.
-            if (bind.Source == BindSource.Vanilla && KeyPaths.ToPath(combo.Main) == null) return false;
+            // Only what the bind can take at all: the same check a pressed key goes through.
+            if (BindWriter.Refusal(bind, combo) != null) return false;
 
             var clashes = ConflictEngine.Preview(bind, combo, BindRegistry.All);
             if (clashes.Any(c => c.Severity != Severity.Note)) return false;

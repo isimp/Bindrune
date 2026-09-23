@@ -104,27 +104,12 @@ namespace Bindrune.UI
                     Wrapped("Press any key, or press and release a modifier on its own to bind it. A key nothing else " +
                             "uses is set straight away. Esc cancels.",
                         _detail, width, 13, new Color(1f, 0.85f, 0.4f));
+                else if (bind.Handle is ZInput.ButtonDef def && FixedKeys.IsDigit(def.Name))
+                    ShowKept(bind, width);
             }
             else
             {
                 Wrapped("Locked: " + bind.ReadOnlyReason, _detail, width, 13, new Color(1f, 0.8f, 0.4f));
-
-                var alternate = Alternate(bind);
-                if (alternate != null)
-                {
-                    Spacer(4f);
-                    Wrapped($"The game keeps this key and lets you set {alternate.Label} instead. " +
-                            "Both reach the same thing, so it answers to either.",
-                        _detail, width, 13, new Color(1f, 1f, 1f, 0.65f));
-
-                    var row = HorizontalRow(_detail, 30f);
-                    FixedButton("Go to", row, 86f, 26f, () =>
-                    {
-                        Select(alternate);
-                        Reveal(alternate);
-                        ShowDetail();
-                    });
-                }
             }
 
             if (!string.IsNullOrEmpty(_note))
@@ -202,9 +187,34 @@ namespace Bindrune.UI
         }
 
         /// <summary>
-        /// The bind the game offers in place of one it keeps fixed: the same name with Alt on the
-        /// end, which is how the hotbar digits are set. Null unless that bind exists and is one
-        /// the player can actually set, since pointing at a second locked bind helps nobody.
+        /// Why a key the game fixes can be set here, and the other key that reaches the same slot.
+        /// </summary>
+        private static void ShowKept(BindEntry bind, float width)
+        {
+            Spacer(4f);
+            Wrapped("The game fixes this key and drops any change to it when it reloads its controls. " +
+                    "Bindrune keeps the key you set here and puts it back each time.",
+                _detail, width, 13, new Color(1f, 1f, 1f, 0.65f));
+
+            var alternate = Alternate(bind);
+            if (alternate == null) return;
+
+            Spacer(4f);
+            Wrapped($"{alternate.Label} reaches the same slot, so the slot answers to either key.",
+                _detail, width, 13, new Color(1f, 1f, 1f, 0.65f));
+
+            var row = HorizontalRow(_detail, 30f);
+            FixedButton("Go to", row, 86f, 26f, () =>
+            {
+                Select(alternate);
+                Reveal(alternate);
+                ShowDetail();
+            });
+        }
+
+        /// <summary>
+        /// The other bind the game reads for the same thing: the same name with Alt on the end,
+        /// as each hotbar slot has. Null unless that bind exists and is one the player can set.
         /// </summary>
         private static BindEntry Alternate(BindEntry bind)
         {
@@ -246,13 +256,14 @@ namespace Bindrune.UI
             // The entry the capture began with may have been replaced by a rescan since.
             var bind = BindRegistry.All.FirstOrDefault(b => b.Id == id);
 
-            // A key only the Input System sees cannot go on a mod's bind at all, so there is nothing
-            // to preview: say why, and leave the bind as it was.
-            if (bind != null && bind.Source != BindSource.Vanilla && combo.Main == KeyCode.None && combo.IsBound)
+            // A key the bind cannot take at all, such as a modifier on a game bind that holds one
+            // key, has nothing to preview: say why, and leave the bind as it was.
+            var refusal = bind == null ? null : BindWriter.Refusal(bind, combo);
+            if (refusal != null)
             {
                 _pendingFor = null;
                 Refresh(rescan: false);
-                Note("Not set: " + BindWriter.UnseenByMods + ".");
+                Note("Not set: " + refusal + ".");
                 return false;
             }
 

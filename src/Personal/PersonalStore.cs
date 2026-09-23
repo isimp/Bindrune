@@ -24,11 +24,12 @@ namespace Bindrune.Personal
         public const string Keys = "keys";
         public const string Muted = "muted";
         public const string Hints = "hints";
+        public const string Fixed = "fixed";
 
         private const string Version = "# bindrune state v3";
 
         /// <summary>The order sections are written in. Any others found are kept and appended.</summary>
-        private static readonly string[] Known = { Keys, Muted, Hints };
+        private static readonly string[] Known = { Keys, Muted, Hints, Fixed };
 
         private static readonly Dictionary<string, string[]> Notes = new Dictionary<string, string[]>
         {
@@ -45,6 +46,13 @@ namespace Bindrune.Personal
                 {
                     "# Binds Bindrune shows on screen, one id per line.",
                     "# Each is shown only while its situations say it applies."
+                }
+            },
+            {
+                Fixed, new[]
+                {
+                    "# Hotbar keys Bindrune keeps for the game: the game's button name, then the",
+                    "# key it answers to, a modifier first as modifier+key. none means no key."
                 }
             }
         };

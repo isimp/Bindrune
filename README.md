@@ -1,6 +1,6 @@
 # Bindrune
 
-Bindrune shows every keybind in your game in one panel: the game's own controls and the keybinds of every installed mod. When two binds share a key, it tells you whether they will actually get in each other's way, and why. It never blocks a binding. It explains what will happen and leaves the choice to you.
+Bindrune shows every keybind in your game in one panel: the game's own controls and the keybinds of every installed mod. When two binds share a key, it tells you whether they will actually get in each other's way, and why. It never blocks a binding. It explains what will happen and leaves the choice to you. It can also take the hotbar off the number keys, which the game itself does not allow.
 
 ![The Bindrune keybind panel](https://raw.githubusercontent.com/isimp/Bindrune/main/docs/images/screenshot.webp)
 
@@ -15,6 +15,12 @@ Press Insert in game to open the panel. Select a bind to see what it clashes wit
 You can tell Bindrune where a bind is used, for example only in the build menu or only with a pickaxe in hand. Binds that can never be active at the same time are then no longer reported as clashes.
 
 Any bind can also be pinned to a small list of hints on screen, which only shows a bind while it applies. Alt+H shows and hides that list.
+
+## The hotbar keys
+
+The game ties its hotbar to the number keys 1 to 8. Its controls let you add a second key to a slot, but never take the number away. Bindrune can put each slot on any key you like, with a modifier such as Alt if you want one, or on none, which leaves the number keys free for other binds. The hotbar shows the keys you chose, and so do the game's prompts that name them. They stay in place when the game reloads its controls, and they are yours alone, so a synced profile does not change them. Default on the bind gives the number back, and without Bindrune the game has its own keys again.
+
+![The hotbar with its slots on the keys they were moved to](https://raw.githubusercontent.com/isimp/Bindrune/main/docs/images/hotbar.webp)
 
 ## Your own keys
 

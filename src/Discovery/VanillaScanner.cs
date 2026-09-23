@@ -61,6 +61,18 @@ namespace Bindrune.Discovery
                 try { canRebind = rebindable == null || (bool)rebindable.Invoke(def, null); }
                 catch { /* assume rebindable */ }
 
+                // A slot's own key the game fixes but Bindrune moves and keeps itself. See FixedKeys.
+                var editable = canRebind || FixedKeys.IsDigit(def.Name);
+
+                // A hotbar key with a modifier, which Bindrune built for the game; the game's own
+                // binding reads None while it is in use.
+                KeyCombo? composite = null;
+                if (FixedKeys.IsHotbar(def.Name))
+                {
+                    try { composite = FixedKeys.Composite(def); }
+                    catch (Exception ex) { Plugin.WarnOnce($"VanillaScanner: could not read the key Bindrune set for {def.Name}: {ex.Message}"); }
+                }
+
                 result.Add(new BindEntry
                 {
                     Id = BindIds.Vanilla(def.Name),
@@ -69,12 +81,13 @@ namespace Bindrune.Discovery
                     Label = def.Name,
                     Section = "Game",
                     Source = BindSource.Vanilla,
-                    // Vanilla bindings are single input paths with no modifier concept,
-                    // so they fire regardless of which modifiers are held.
-                    Modifiers = ModifierBehavior.SingleKey,
-                    Combo = new KeyCombo(key, null, key == KeyCode.None && !unbound ? path : null),
-                    Editable = canRebind,
-                    ReadOnlyReason = canRebind ? null : "the game marks this bind as fixed",
+                    // Vanilla bindings are single input paths with no modifier concept, so they
+                    // fire regardless of which modifiers are held. A composite needs its modifier
+                    // and ignores any others.
+                    Modifiers = composite != null ? ModifierBehavior.Required : ModifierBehavior.SingleKey,
+                    Combo = composite ?? new KeyCombo(key, null, key == KeyCode.None && !unbound ? path : null),
+                    Editable = editable,
+                    ReadOnlyReason = editable ? null : "the game marks this bind as fixed",
                     Handle = def,
                     // Plumbing, by two facts that agree: the game refuses to let the player
                     // rebind it, and it is not one of the controls we know are player facing.

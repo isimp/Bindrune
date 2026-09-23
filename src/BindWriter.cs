@@ -15,15 +15,41 @@ namespace Bindrune
         public const string UnseenByMods =
             "mods read keys through Unity's older input, which cannot see this key, so only the game's own controls can use it";
 
-        /// <summary>Returns null on success, or a message explaining why nothing was written.</summary>
-        public static string Apply(BindEntry bind, KeyCombo combo, SaveTarget target = SaveTarget.Personal)
+        /// <summary>
+        /// Why a key cannot go on a bind at all, or null when it can. The one place this is
+        /// decided, asked before a key is previewed, suggested or written, so a key that would be
+        /// refused is refused the moment it is pressed rather than after it has been shown.
+        /// </summary>
+        public static string Refusal(BindEntry bind, KeyCombo combo)
         {
             if (!bind.Editable) return bind.ReadOnlyReason ?? "this bind cannot be changed from here";
 
             // A mod's setting holds a KeyCode, and a key known only by its path has none: written
             // anyway it would come out as no key at all, clearing the bind instead of setting it.
-            if (bind.Source != BindSource.Vanilla && combo.Main == KeyCode.None && combo.IsBound)
-                return UnseenByMods;
+            if (bind.Source != BindSource.Vanilla) return combo.Main == KeyCode.None && combo.IsBound ? UnseenByMods : null;
+
+            // The game's own format holds one key. A hotbar key can carry one modifier as well,
+            // which Bindrune builds and keeps itself. See FixedKeys.
+            var hotbar = bind.Handle is ZInput.ButtonDef def && FixedKeys.IsHotbar(def.Name);
+            if (combo.Modifiers.Length > (hotbar ? 1 : 0))
+                return hotbar
+                    ? "a hotbar key can have one modifier at most"
+                    : "the game stores one key per bind and has no modifier support, so pick a single key";
+
+            if (combo.Modifiers.Length == 1 && KeyPaths.ToPath(combo.Modifiers[0]) == null)
+                return $"the game has no input path for {combo.Modifiers[0]}";
+
+            if (string.IsNullOrEmpty(combo.RawPath) && KeyPaths.ToPath(combo.Main) == null)
+                return $"the game has no input path for {combo.Main}";
+
+            return null;
+        }
+
+        /// <summary>Returns null on success, or a message explaining why nothing was written.</summary>
+        public static string Apply(BindEntry bind, KeyCombo combo, SaveTarget target = SaveTarget.Personal)
+        {
+            var refusal = Refusal(bind, combo);
+            if (refusal != null) return refusal;
 
             try
             {
@@ -101,7 +127,8 @@ namespace Bindrune
                 {
                     if (!(bind.Handle is ZInput.ButtonDef def)) return "this game bind is not writable";
 
-                    def.ResetBinding();
+                    (FixedKeys.Live(def.Name) ?? def).ResetBinding();
+                    if (FixedKeys.IsHotbar(def.Name)) FixedKeys.Forget(def.Name);
                     var zinput = ZInput.instance;
                     if (zinput != null) AccessTools.Method(typeof(ZInput), "Save")?.Invoke(zinput, null);
 
@@ -201,25 +228,38 @@ namespace Bindrune
         private static string ApplyVanilla(BindEntry bind, KeyCombo combo)
         {
             if (!(bind.Handle is ZInput.ButtonDef def)) return "this game bind is not writable";
-            if (combo.Modifiers.Length > 0)
-                return "the game stores one key per bind and has no modifier support, so pick a single key";
 
             // A key the older input has no KeyCode for arrives as its path already, in the form the
             // game stores its own rebinds in. Everything else is named by its KeyCode, including
             // the unbound combo, whose path is the None control the game parks cleared binds on.
+            // Refusal has already made sure both paths exist.
             var path = !string.IsNullOrEmpty(combo.RawPath) ? combo.RawPath : KeyPaths.ToPath(combo.Main);
-            if (path == null) return $"the game has no input path for {combo.Main}";
+            var modifier = combo.Modifiers.Length == 1 ? KeyPaths.ToPath(combo.Modifiers[0]) : null;
 
-            def.Rebind(path);
+            // A slot's own key and any key with a modifier would be dropped the next time the game
+            // loads its controls, so Bindrune keeps those and puts them back. A plain key on an Alt
+            // button is the game's to keep, which also takes it back from Bindrune. See FixedKeys.
+            if (FixedKeys.IsDigit(def.Name) || (FixedKeys.IsAlt(def.Name) && modifier != null))
+            {
+                FixedKeys.Set(def.Name, modifier == null ? path : modifier + "+" + path);
+            }
+            else
+            {
+                if (FixedKeys.IsAlt(def.Name)) FixedKeys.Forget(def.Name);
+                (FixedKeys.Live(def.Name) ?? def).Rebind(path);
+            }
 
             var zinput = ZInput.instance;
             if (zinput != null) AccessTools.Method(typeof(ZInput), "Save")?.Invoke(zinput, null);
 
+            // The bar and the game's prompts name the keys that reach each slot.
+            if (FixedKeys.IsHotbar(def.Name)) FixedKeys.Relabel();
+
             // A cleared bind sits on the None control, which is a path like any other and would
             // otherwise read back as a key of that name.
             bind.Combo = !combo.IsBound ? KeyCombo.None
-                : combo.Main != KeyCode.None ? new KeyCombo(combo.Main, null)
-                : new KeyCombo(KeyCode.None, null, path);
+                : combo.Main != KeyCode.None ? new KeyCombo(combo.Main, combo.Modifiers)
+                : new KeyCombo(KeyCode.None, combo.Modifiers, path);
 
             return null;
         }
