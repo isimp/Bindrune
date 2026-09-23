@@ -5,7 +5,7 @@
     <AssemblyName>Bindrune</AssemblyName>
     <RootNamespace>Bindrune</RootNamespace>
     <LangVersion>latest</LangVersion>
-    <Version>0.3.2</Version>
+    <Version>0.4.0</Version>
     <Authors>isimp</Authors>
     <Product>Bindrune</Product>
     <Description>Every keybind from every mod and the game itself in one panel, with the clashes between them explained.</Description>

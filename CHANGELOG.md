@@ -1,5 +1,19 @@
 # Changelog
 
+## 0.4.0
+
+The hotbar keys 1 to 8 can now be moved or cleared, which the game itself does not allow. Bindrune keeps the new key and puts it back whenever the game reloads its controls, and Default gives the digit back.
+
+A hotbar key, or its alternate, can now take a modifier such as Alt + 1.
+
+The hotbar shows the keys on its slots, and prompts such as cooking name them, or say hotbar when there are too many to list.
+
+A key a bind cannot take is now refused as soon as you press it.
+
+Binding a game control to a number key now works. It used to leave the control answering to no key, and clashes between the number keys and the hotbar were never reported.
+
+Keys the game reads with a modifier, such as Ctrl + F3, are now reported when a longer combo fires them too.
+
 ## 0.3.2
 
 The alternate hotbar keys and the alternate dodge are now listed. The game ships them without a key, and binds in that state were being missed.
