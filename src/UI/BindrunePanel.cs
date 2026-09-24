@@ -180,6 +180,14 @@ namespace Bindrune.UI
 
         public static bool IsOpen => _root != null;
 
+        private static int _closedFrame = -1;
+
+        /// <summary>
+        /// Whether the keyboard is the panel's this frame: while it is open, and in the frame it
+        /// closed in, so the key that closed it reaches nothing else.
+        /// </summary>
+        public static bool HoldsKeyboard => IsOpen || Time.frameCount == _closedFrame;
+
         /// <summary>
         /// True while the search box has the keyboard. Our hotkeys are ordinary key checks, so
         /// without this, typing a letter that happens to be one of them would fire it.
@@ -215,6 +223,7 @@ namespace Bindrune.UI
         public static void Close(bool quietly = false)
         {
             if (_root != null && !quietly) Sfx.Play(Sfx.PanelClose);
+            if (_root != null) _closedFrame = Time.frameCount;
 
             KeyCapture.Changed = null;
             KeyCapture.Cancel();
