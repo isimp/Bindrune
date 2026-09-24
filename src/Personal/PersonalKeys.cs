@@ -232,7 +232,10 @@ namespace Bindrune.Personal
                 entry.Active = true;
             }
 
-            Save();
+            // Unsaved, Keepsake's lines are the only record of these keys past this session, so
+            // they stay, and the next launch takes them again.
+            if (!Save()) return;
+
             KeepsakeHandover.Remove(keys);
             Plugin.Log.LogInfo($"Bindrune: took over {keys.Count} keybind(s) kept in Keepsake as yours.");
         }
@@ -261,9 +264,9 @@ namespace Bindrune.Personal
             if (_entries.Count > 0) Plugin.Log.LogInfo($"Bindrune: {Count} personal keys loaded.");
         }
 
-        private static void Save()
+        private static bool Save()
         {
-            PersonalStore.Replace(PersonalStore.Keys,
+            return PersonalStore.Replace(PersonalStore.Keys,
                 Entries.OrderBy(e => e.Key).Select(e => KeyLines.Format(e.Key, e.Value)));
         }
     }

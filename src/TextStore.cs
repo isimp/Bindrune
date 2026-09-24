@@ -82,8 +82,9 @@ namespace Bindrune
         /// <summary>
         /// Writes header comments followed by the body. When atomic, the file is written aside
         /// and swapped in, so a crash mid-write cannot leave a half-file where user data was.
+        /// Returns whether the file was written. A failure is logged here.
         /// </summary>
-        public static void Write(string path, IEnumerable<string> header, IEnumerable<string> body, bool atomic = false)
+        public static bool Write(string path, IEnumerable<string> header, IEnumerable<string> body, bool atomic = false)
         {
             try
             {
@@ -97,18 +98,21 @@ namespace Bindrune
                 if (!atomic)
                 {
                     File.WriteAllLines(path, lines.ToArray());
-                    return;
+                    return true;
                 }
 
                 var temp = path + ".tmp";
                 File.WriteAllLines(temp, lines.ToArray());
 
-                if (File.Exists(path)) File.Delete(path);
-                File.Move(temp, path);
+                // Replace swaps the two in one step, so there is no moment without the file.
+                if (File.Exists(path)) File.Replace(temp, path, null);
+                else File.Move(temp, path);
+                return true;
             }
             catch (Exception ex)
             {
                 Plugin.Log.LogError($"Bindrune: could not save {Path.GetFileName(path)}: {ex.Message}");
+                return false;
             }
         }
     }

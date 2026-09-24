@@ -1,8 +1,14 @@
 # Changelog
 
+## 0.4.2
+
+When `bindrune.keys` cannot be written, keybinds taken over from Keepsake now stay in Keepsake's file, to be taken over at the next launch, rather than being lost from both.
+
 ## 0.4.1
 
 Keybinds kept in Keepsake become your own keys in Bindrune, which looks after keybinds while both are installed.
+
+Return in the search box at the start menu no longer reaches the menu behind it, where it could still log a character in. The menu now ignores the keyboard while the panel is open.
 
 ## 0.4.0
 

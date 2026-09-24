@@ -88,8 +88,11 @@ namespace Bindrune.Personal
             return new List<string>(Body(section));
         }
 
-        /// <summary>Puts a section back and writes the file, leaving every other section as it is.</summary>
-        public static void Replace(string section, IEnumerable<string> lines)
+        /// <summary>
+        /// Puts a section back and writes the file, leaving every other section as it is. Returns
+        /// whether the file was written.
+        /// </summary>
+        public static bool Replace(string section, IEnumerable<string> lines)
         {
             Ensure();
 
@@ -97,7 +100,7 @@ namespace Bindrune.Personal
             body.Clear();
             body.AddRange(lines);
 
-            Write();
+            return Write();
         }
 
         /// <summary>
@@ -214,7 +217,8 @@ namespace Bindrune.Personal
 
             // Written even when there was nothing to take over: the sections it puts in the file
             // are the mark that this has been done, and without them every launch would look again.
-            Write();
+            // Unwritten, the old files are all that holds what was taken in, so they stay.
+            if (!Write()) return;
 
             foreach (var path in taken)
             {
@@ -233,7 +237,7 @@ namespace Bindrune.Personal
             }
         }
 
-        private static void Write()
+        private static bool Write()
         {
             var lines = new List<string>();
 
@@ -247,7 +251,7 @@ namespace Bindrune.Personal
 
             // Atomic: these are choices made by hand that cannot be got back from anywhere else,
             // so a crash mid-write must not be able to truncate them.
-            TextStore.Write(FilePath,
+            var written = TextStore.Write(FilePath,
                 new[]
                 {
                     Version,
@@ -257,6 +261,7 @@ namespace Bindrune.Personal
                 lines, atomic: true);
 
             _stamp = TextStore.Stamp(FilePath);
+            return written;
         }
     }
 }
