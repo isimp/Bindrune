@@ -8,21 +8,9 @@ using BepInEx.Bootstrap;
 using BepInEx.Configuration;
 using Bindrune.Discovery;
 using Jotunn.Configs;
-using UnityEngine;
 
 namespace Bindrune.Personal
 {
-    /// <summary>A keybind kept in Keepsake, matched to the bind it belongs to.</summary>
-    internal sealed class KeepsakeKey
-    {
-        public BindEntry Bind;
-        public KeyCombo Yours;
-        public KeyCombo Profile;
-
-        /// <summary>The line as it stands in keepsake.pins, so exactly that line is removed.</summary>
-        public string Line;
-    }
-
     /// <summary>
     /// Keepsake keeps single config values through profile syncs. While both are installed,
     /// keybinds are Bindrune's: Keepsake stops writing them, and each keybind it kept becomes
@@ -30,11 +18,10 @@ namespace Bindrune.Personal
     /// Keepsake's file, so a key only ever has one keeper, and what it ends up as never depends on
     /// which of the two wrote last.
     ///
-    /// Keepsake's file is BepInEx/keepsake.pins, one kept setting per line, tab separated: the cfg
-    /// file relative to BepInEx/config, the section, the setting, the kept value and, optionally,
-    /// the profile's value, both in the form the cfg file holds them. Lines are only ever taken
-    /// out, never rewritten, and only while Keepsake is loaded, so the file of a mod that is not
-    /// installed is left alone.
+    /// Only while Keepsake is loaded, so the file of a mod that is not installed is left alone,
+    /// and only for a file in the version KeepsakeContract reads. Lines are only ever taken out,
+    /// never rewritten. The reading itself is in KeepsakeContract; this is the part that touches
+    /// the game and the file.
     /// </summary>
     internal static class KeepsakeHandover
     {
@@ -42,11 +29,13 @@ namespace Bindrune.Personal
 
         private static string PinsFile => Path.Combine(Paths.BepInExRootPath, "keepsake.pins");
 
+        /// <summary>Whether there may be keybinds to take over, cheap enough to ask at every startup.</summary>
+        public static bool MayHaveKeys => Chainloader.PluginInfos.ContainsKey(KeepsakeGuid) && File.Exists(PinsFile);
+
         /// <summary>The keybinds kept in Keepsake that belong to binds Bindrune can keep as yours.</summary>
-        public static List<KeepsakeKey> Find()
+        public static List<KeepsakeMatch<BindEntry>> Find()
         {
-            var found = new List<KeepsakeKey>();
-            if (!Chainloader.PluginInfos.ContainsKey(KeepsakeGuid) || !File.Exists(PinsFile)) return found;
+            if (!MayHaveKeys) return new List<KeepsakeMatch<BindEntry>>();
 
             string[] lines;
             try
@@ -56,10 +45,18 @@ namespace Bindrune.Personal
             catch (Exception ex)
             {
                 Plugin.WarnOnce($"Bindrune: could not read keepsake.pins: {ex.Message}", ex);
-                return found;
+                return new List<KeepsakeMatch<BindEntry>>();
             }
 
-            var binds = new Dictionary<string, (BindEntry Bind, ConfigEntryBase Entry)>();
+            var kept = KeepsakeContract.Parse(lines);
+            if (kept == null)
+            {
+                Plugin.WarnOnce("Bindrune: keepsake.pins is not in a version this Bindrune knows " +
+                                $"({KeepsakeContract.PinsVersion}), so no keybinds are taken over from it. Updating Bindrune fixes this.");
+                return new List<KeepsakeMatch<BindEntry>>();
+            }
+
+            var binds = new Dictionary<string, (BindEntry Bind, Type SettingType)>();
             foreach (var bind in BindRegistry.All)
             {
                 if (!PersonalKeys.Eligible(bind)) continue;
@@ -68,38 +65,21 @@ namespace Bindrune.Personal
                 var file = Relative(entry?.ConfigFile?.ConfigFilePath);
                 if (file == null) continue;
 
-                binds[Name(file, entry.Definition.Section, entry.Definition.Key)] = (bind, entry);
+                binds[KeepsakeContract.Name(file, entry.Definition.Section, entry.Definition.Key)] = (bind, entry.SettingType);
             }
 
-            foreach (var line in lines)
-            {
-                if (line.Length == 0 || line.StartsWith("#")) continue;
-
-                var parts = line.Split('\t');
-                if (parts.Length < 4) continue;
-                if (!binds.TryGetValue(Name(parts[0], parts[1].Trim(), parts[2].Trim()), out var match)) continue;
-                if (!TryCombo(parts[3], match.Entry, out var yours)) continue;
-
-                var profile = parts.Length > 4 && TryCombo(parts[4], match.Entry, out var recorded)
-                    ? recorded
-                    : match.Bind.Combo;
-
-                found.Add(new KeepsakeKey { Bind = match.Bind, Yours = yours, Profile = profile, Line = line });
-            }
-
-            return found;
+            return KeepsakeContract.Match(kept, binds);
         }
 
         /// <summary>
         /// Takes the given lines out of keepsake.pins, read again first so nothing written since is
         /// lost, and swapped in whole so a crash cannot leave half a file.
         /// </summary>
-        public static void Remove(IEnumerable<KeepsakeKey> keys)
+        public static void Remove(IEnumerable<KeepsakeMatch<BindEntry>> keys)
         {
             try
             {
-                var taken = new HashSet<string>(keys.Select(k => k.Line));
-                var kept = File.ReadAllLines(PinsFile).Where(l => !taken.Contains(l)).ToArray();
+                var kept = KeepsakeContract.Without(File.ReadAllLines(PinsFile), keys.Select(k => k.Line));
 
                 var temp = PinsFile + ".bindrune.tmp";
                 File.WriteAllLines(temp, kept, new UTF8Encoding(false));
@@ -118,10 +98,6 @@ namespace Bindrune.Personal
             return null;
         }
 
-        /// <summary>A cfg file, section and setting as one name, the way Keepsake tells settings apart.</summary>
-        private static string Name(string file, string section, string key) =>
-            file.Trim().Replace('\\', '/').ToLowerInvariant() + "\t" + section + "\t" + key;
-
         private static string Relative(string path)
         {
             if (string.IsNullOrEmpty(path)) return null;
@@ -136,33 +112,6 @@ namespace Bindrune.Personal
             {
                 return null;
             }
-        }
-
-        /// <summary>A value in the form the cfg file holds it, as a combo, read the way the setting reads it.</summary>
-        private static bool TryCombo(string text, ConfigEntryBase entry, out KeyCombo combo)
-        {
-            combo = KeyCombo.None;
-            try
-            {
-                var value = TomlTypeConverter.ConvertToValue(text.Trim(), entry.SettingType);
-                if (value is KeyboardShortcut shortcut)
-                {
-                    combo = shortcut.MainKey == KeyCode.None ? KeyCombo.None : new KeyCombo(shortcut.MainKey, shortcut.Modifiers);
-                    return true;
-                }
-
-                if (value is KeyCode key)
-                {
-                    combo = key == KeyCode.None ? KeyCombo.None : new KeyCombo(key, null);
-                    return true;
-                }
-            }
-            catch (Exception)
-            {
-                // Not a value this setting can hold, so not one to take over.
-            }
-
-            return false;
         }
     }
 }

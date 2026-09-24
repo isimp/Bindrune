@@ -26,7 +26,7 @@ namespace Bindrune.Personal
         public const string Hints = "hints";
         public const string Fixed = "fixed";
 
-        private const string Version = "# bindrune state v3";
+        private const string Version = KeyLines.StateVersion;
 
         /// <summary>The order sections are written in. Any others found are kept and appended.</summary>
         private static readonly string[] Known = { Keys, Muted, Hints, Fixed };

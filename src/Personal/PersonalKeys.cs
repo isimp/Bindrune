@@ -22,19 +22,6 @@ namespace Bindrune.Personal
     }
 
     /// <summary>
-    /// A bind can hold two keys at once: the one you chose, and the one the shared profile says.
-    /// Both are remembered so switching between them restores the other rather than overwriting it.
-    /// </summary>
-    public class PersonalEntry
-    {
-        public KeyCombo Personal;
-        public KeyCombo Profile;
-
-        /// <summary>True while your key is the one actually written to the mod's config.</summary>
-        public bool Active;
-    }
-
-    /// <summary>
     /// Keys you set that must survive a profile sync.
     ///
     /// Gale rewrites and deletes files under BepInEx/config on every pull, which is where mod
@@ -225,7 +212,9 @@ namespace Bindrune.Personal
             {
                 var entry = Entry(key.Bind.Id);
                 entry.Personal = key.Yours;
-                entry.Profile = key.Profile;
+                // Without a profile's key from Keepsake, the key in place is the profile's: Keepsake
+                // no longer writes keybinds once Bindrune is installed.
+                entry.Profile = key.Profile ?? key.Bind.Combo;
                 entry.Active = true;
             }
 
@@ -252,44 +241,16 @@ namespace Bindrune.Personal
 
             foreach (var line in PersonalStore.Lines(PersonalStore.Keys))
             {
-                var parts = line.Split('\t');
-                if (parts.Length < 2) continue;
-
-                _entries[parts[0]] = new PersonalEntry
-                {
-                    Personal = Parse(parts[1]),
-                    Profile = parts.Length > 2 ? Parse(parts[2]) : KeyCombo.None,
-                    // A line without the flag, for example one written by hand, counts as active.
-                    Active = parts.Length < 4 || parts[3] == "1"
-                };
+                if (KeyLines.TryParse(line, out var id, out var entry)) _entries[id] = entry;
             }
 
             if (_entries.Count > 0) Plugin.Log.LogInfo($"Bindrune: {Count} personal keys loaded.");
         }
 
-        private static KeyCombo Parse(string text)
-        {
-            if (string.IsNullOrEmpty(text) || text == "none") return KeyCombo.None;
-
-            try
-            {
-                var shortcut = KeyboardShortcut.Deserialize(text);
-                return new KeyCombo(shortcut.MainKey, shortcut.Modifiers);
-            }
-            catch
-            {
-                return KeyCombo.None;
-            }
-        }
-
-        private static string Serialize(KeyCombo combo) =>
-            combo.IsBound ? new KeyboardShortcut(combo.Main, combo.Modifiers).Serialize() : "none";
-
         private static void Save()
         {
             PersonalStore.Replace(PersonalStore.Keys,
-                Entries.OrderBy(e => e.Key).Select(e =>
-                    $"{e.Key}\t{Serialize(e.Value.Personal)}\t{Serialize(e.Value.Profile)}\t{(e.Value.Active ? "1" : "0")}"));
+                Entries.OrderBy(e => e.Key).Select(e => KeyLines.Format(e.Key, e.Value)));
         }
     }
 }

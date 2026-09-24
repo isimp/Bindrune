@@ -297,8 +297,9 @@ namespace Bindrune
             if (_restoreAt == 0f) _restoreAt = Time.realtimeSinceStartup + 3f;
             if (Time.realtimeSinceStartup < _restoreAt) return;
 
-            // Nothing of yours to put back and nothing to show on screen, so do not pay for a scan.
-            if (PersonalKeys.Count == 0 && HintChoice.Count == 0)
+            // Nothing of yours to put back, nothing to show on screen and nothing to take over from
+            // Keepsake, so do not pay for a scan.
+            if (PersonalKeys.Count == 0 && HintChoice.Count == 0 && !KeepsakeHandover.MayHaveKeys)
             {
                 _restored = true;
                 return;

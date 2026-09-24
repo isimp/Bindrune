@@ -36,7 +36,9 @@ It lives in `config` on purpose, so it travels with a modpack and everyone follo
 
 Keys marked as your own are stored in `BepInEx/bindrune.keys`, outside `config` and with an extension no profile sync picks up, and reapplied once the game is running. Each bind can be switched between your own key and the profile's key, and both are remembered. Muted clashes and pinned hints sit in the same file, for the same reason: a sync would hand you the profile owner's and delete yours.
 
-Keepsake, which keeps single config values through profile syncs, leaves keybinds to Bindrune while both are installed. A keybind kept in Keepsake becomes your own key here the next time Bindrune puts your keys back, with the key Keepsake recorded as the profile's, and its line is removed from `BepInEx/keepsake.pins`. So a key only ever has one keeper. Nothing is taken while Keepsake is not loaded.
+Keepsake, which keeps single config values through profile syncs, leaves keybinds to Bindrune while both are installed. A keybind kept in Keepsake becomes your own key here the next time Bindrune puts your keys back, with the key Keepsake recorded as the profile's, and its line is removed from `BepInEx/keepsake.pins`. So a key only ever has one keeper. Nothing is taken while Keepsake is not loaded. Without Bindrune, Keepsake offers to take over the keys that are yours here, reading the keys section of `bindrune.keys`.
+
+The two files are read across the mods, so their formats have to stay in step: `keepsake.pins` (first line `# keepsake pins v1`, then cfg file, section, setting, value and optionally the profile's value, tab separated) and the keys section of `bindrune.keys` (first line `# bindrune state v3`). Each mod reads the other's file only in the version it knows, and otherwise leaves it alone and says so once in the log. Both repositories keep identical samples in `tests/contract`, which the build workflow compares with Keepsake's on every push and the tests check against. The same list is in Keepsake's technical notes.
 
 Versions before 0.2.1 kept those two in `BepInEx/config/Bindrune/`. They are moved into `bindrune.keys` on the first launch after the update and the old files are removed. A copy a sync puts back afterwards is ignored, and the log says so.
 
@@ -71,6 +73,16 @@ Searching by key uses the shown names, and a single typed character is read as a
 ## Limits
 
 A mod that writes its key directly into its code instead of a setting has nothing to read and does not appear. Keybind settings stored as free text are shown but cannot be changed from Bindrune. Gamepad buttons are listed while a controller is connected but are not editable and are left out of clashes. A bind with no description is compared with everything.
+
+## Tests
+
+`tests/Bindrune.Tests` covers what needs no game: the keys section of `bindrune.keys` and taking keybinds over from Keepsake, checked against the samples in `tests/contract`. The tests run on .NET 8 against the real `BepInEx.dll` of a local profile, which is not part of the repository, so they run locally rather than on the build server:
+
+```
+dotnet test tests/Bindrune.Tests
+```
+
+`.githooks/pre-push` runs them before every push and stops the push when one fails; without a local `BepInEx.dll` it lets the push through with a warning. Git uses it once told to, per clone: `git config core.hooksPath .githooks`.
 
 ## Building
 

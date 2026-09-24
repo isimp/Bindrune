@@ -1,0 +1,39 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <!-- Tests for the parts of Bindrune that need no game: the keys section of bindrune.keys and
+       the take over from Keepsake (see tests/contract). They run on .NET 8 against the real
+       BepInEx.dll from the local profile, which is not committed, together with the
+       metadata-only Unity assemblies in lib/: the tests only use enums from those, which the
+       stubs keep whole.
+       Run with: dotnet test tests/Bindrune.Tests -->
+  <PropertyGroup>
+    <TargetFramework>net8.0</TargetFramework>
+    <IsPackable>false</IsPackable>
+    <IsTestProject>true</IsTestProject>
+    <RootNamespace>Bindrune.Tests</RootNamespace>
+    <ProfileDir Condition="'$(ProfileDir)' == ''">$(AppData)\com.kesomannen.gale\valheim\profiles\Default</ProfileDir>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <Compile Include="../../src/KeyCombo.cs" />
+    <Compile Include="../../src/Personal/KeyLines.cs" />
+    <Compile Include="../../src/Personal/KeepsakeContract.cs" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.11.1" />
+    <PackageReference Include="xunit" Version="2.9.2" />
+    <PackageReference Include="xunit.runner.visualstudio" Version="2.8.2" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Reference Include="BepInEx"><HintPath>$(ProfileDir)/BepInEx/core/BepInEx.dll</HintPath></Reference>
+    <Reference Include="UnityEngine"><HintPath>$(MSBuildThisFileDirectory)../../lib/UnityEngine.dll</HintPath></Reference>
+    <Reference Include="UnityEngine.CoreModule"><HintPath>$(MSBuildThisFileDirectory)../../lib/UnityEngine.CoreModule.dll</HintPath></Reference>
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Include="../contract/*" LinkBase="contract" CopyToOutputDirectory="PreserveNewest" />
+  </ItemGroup>
+
+</Project>
