@@ -164,6 +164,7 @@ namespace Bindrune.Personal
         public static int Reconcile()
         {
             PersonalStore.Sync();
+            AdoptFromKeepsake();
 
             if (Entries.Count == 0) return 0;
 
@@ -208,6 +209,29 @@ namespace Bindrune.Personal
                 Plugin.Log.LogInfo($"Bindrune: personal keys - {Count} active, {reapplied} reapplied, {missing} for binds not loaded.");
 
             return missing;
+        }
+
+        /// <summary>
+        /// Keybinds kept in Keepsake become yours here, and the reconcile that follows puts them
+        /// in. See KeepsakeHandover. They are recorded before their lines leave Keepsake's file, so
+        /// an interruption between the two leaves a key in both, to be taken again, never in neither.
+        /// </summary>
+        private static void AdoptFromKeepsake()
+        {
+            var keys = KeepsakeHandover.Find();
+            if (keys.Count == 0) return;
+
+            foreach (var key in keys)
+            {
+                var entry = Entry(key.Bind.Id);
+                entry.Personal = key.Yours;
+                entry.Profile = key.Profile;
+                entry.Active = true;
+            }
+
+            Save();
+            KeepsakeHandover.Remove(keys);
+            Plugin.Log.LogInfo($"Bindrune: took over {keys.Count} keybind(s) kept in Keepsake as yours.");
         }
 
         /// <summary>Recorded binds that no mod currently provides: uninstalled, disabled, or renamed.</summary>

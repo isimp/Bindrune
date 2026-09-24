@@ -36,6 +36,8 @@ It lives in `config` on purpose, so it travels with a modpack and everyone follo
 
 Keys marked as your own are stored in `BepInEx/bindrune.keys`, outside `config` and with an extension no profile sync picks up, and reapplied once the game is running. Each bind can be switched between your own key and the profile's key, and both are remembered. Muted clashes and pinned hints sit in the same file, for the same reason: a sync would hand you the profile owner's and delete yours.
 
+Keepsake, which keeps single config values through profile syncs, leaves keybinds to Bindrune while both are installed. A keybind kept in Keepsake becomes your own key here the next time Bindrune puts your keys back, with the key Keepsake recorded as the profile's, and its line is removed from `BepInEx/keepsake.pins`. So a key only ever has one keeper. Nothing is taken while Keepsake is not loaded.
+
 Versions before 0.2.1 kept those two in `BepInEx/config/Bindrune/`. They are moved into `bindrune.keys` on the first launch after the update and the old files are removed. A copy a sync puts back afterwards is ignored, and the log says so.
 
 ## Files

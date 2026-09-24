@@ -1,5 +1,9 @@
 # Changelog
 
+## 0.4.1
+
+Keybinds kept in Keepsake become your own keys in Bindrune, which looks after keybinds while both are installed.
+
 ## 0.4.0
 
 The hotbar keys 1 to 8 can now be moved or cleared, which the game itself does not allow. Bindrune keeps the new key and puts it back whenever the game reloads its controls, and Default gives the digit back.
