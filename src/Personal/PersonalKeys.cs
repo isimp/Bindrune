@@ -205,6 +205,20 @@ namespace Bindrune.Personal
         /// </summary>
         private static void AdoptFromKeepsake()
         {
+            // Whatever goes wrong here must not cost you your own keys, which the reconcile puts
+            // back right after, or the panel, which opens through it.
+            try
+            {
+                Adopt();
+            }
+            catch (Exception ex)
+            {
+                Plugin.WarnOnce($"Bindrune: taking keybinds over from Keepsake failed: {ex.Message}", ex);
+            }
+        }
+
+        private static void Adopt()
+        {
             var keys = KeepsakeHandover.Find();
             if (keys.Count == 0) return;
 
