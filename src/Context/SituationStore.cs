@@ -25,10 +25,15 @@ namespace Bindrune.Context
             {
                 if (_situations != null) return _situations;
 
-                _situations = new Dictionary<string, HashSet<string>>();
-                _stamp = TextStore.Stamp(FilePath);
+                // Held open by another program: nothing to go on, and nothing kept in memory, so
+                // the next look reads the file again and no change is written over it meanwhile.
+                var stamp = TextStore.Stamp(FilePath);
+                if (!TextStore.TryRead(FilePath, out var lines)) return new Dictionary<string, HashSet<string>>();
 
-                foreach (var line in TextStore.Read(FilePath))
+                _situations = new Dictionary<string, HashSet<string>>();
+                _stamp = stamp;
+
+                foreach (var line in lines)
                 {
                     if (TextStore.IsNoise(line)) continue;
 
@@ -41,6 +46,13 @@ namespace Bindrune.Context
 
                 return _situations;
             }
+        }
+
+        /// <summary>Forgets what was read, as a new game starts. For the tests, which run many in one process.</summary>
+        internal static void Reset()
+        {
+            _situations = null;
+            _stamp = null;
         }
 
         /// <summary>Forgets what was read if the file has changed since, so the next look reads it again.</summary>
@@ -56,6 +68,12 @@ namespace Bindrune.Context
         {
             // The change goes onto what the file says now, not onto what it said when first read.
             Sync();
+            var situations = Situations;
+            if (_situations == null)
+            {
+                Plugin.Log.LogWarning("Bindrune: situations.txt could not be read, so this change is not saved to it until it can.");
+                return;
+            }
 
             if (!Situations.TryGetValue(bindId, out var set))
                 Situations[bindId] = set = new HashSet<string>();

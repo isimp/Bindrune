@@ -26,6 +26,9 @@ namespace Bindrune.Personal
         public const string Hints = "hints";
         public const string Fixed = "fixed";
 
+        /// <summary>The name of the file in BepInEx, for the spare copy and the log.</summary>
+        public const string FileName = "bindrune.keys";
+
         private const string Version = KeyLines.StateVersion;
 
         /// <summary>The order sections are written in. Any others found are kept and appended.</summary>
@@ -72,6 +75,13 @@ namespace Bindrune.Personal
         private static string _stamp;
 
         /// <summary>
+        /// Set while the file could not be read, held open by another program: what is in memory
+        /// is then nothing rather than the file, so nothing is written over it, and every look
+        /// reads it again until it can be.
+        /// </summary>
+        private static bool _unreadable;
+
+        /// <summary>
         /// Raised when the file turned out to have changed since it was read, so that everything
         /// holding a parsed copy of a section drops it and reads the section again.
         /// </summary>
@@ -96,6 +106,12 @@ namespace Bindrune.Personal
         {
             Ensure();
 
+            if (_unreadable)
+            {
+                Plugin.Log.LogWarning($"Bindrune: {Path.GetFileName(FilePath)} could not be read, so this change is not saved to it until it can.");
+                return false;
+            }
+
             var body = Body(section);
             body.Clear();
             body.AddRange(lines);
@@ -111,7 +127,19 @@ namespace Bindrune.Personal
         /// </summary>
         public static void Sync()
         {
-            if (_sections == null || !TextStore.ChangedSince(FilePath, _stamp)) return;
+            if (_sections == null) return;
+
+            // A file that could not be read last time counts as changed: whatever holds a section
+            // read then holds nothing, and must not write that over the file now it can be read.
+            if (_unreadable)
+            {
+                _sections = null;
+                _unreadable = false;
+                Reloaded?.Invoke();
+                return;
+            }
+
+            if (!TextStore.ChangedSince(FilePath, _stamp)) return;
 
             _sections = null;
             Plugin.Log.LogInfo($"Bindrune: {Path.GetFileName(FilePath)} was changed outside the game; reading it again.");
@@ -120,7 +148,7 @@ namespace Bindrune.Personal
 
         private static void Ensure()
         {
-            if (_sections == null) Load();
+            if (_sections == null || _unreadable) Load();
         }
 
         private static List<string> Body(string section)
@@ -140,13 +168,16 @@ namespace Bindrune.Personal
             _order = new List<string>();
             _stamp = TextStore.Stamp(FilePath);
 
+            _unreadable = !TextStore.TryRead(FilePath, out var file);
+            if (_unreadable) return;
+
             // A file from an earlier version is all keys and carries no section line, so that is
             // where its lines belong. A section line found anywhere is also the one thing that
             // says this file has already been through the step below.
             var section = Keys;
             var sectioned = false;
 
-            foreach (var raw in TextStore.Read(FilePath))
+            foreach (var raw in file)
             {
                 var line = raw.Trim();
                 if (TextStore.IsNoise(line)) continue;
@@ -261,7 +292,18 @@ namespace Bindrune.Personal
                 lines, atomic: true);
 
             _stamp = TextStore.Stamp(FilePath);
+            if (written) SpareCopy.Follow();
             return written;
+        }
+
+        /// <summary>Forgets what was read, as a new game starts, and so does everything holding a section. For the tests, which run many in one process.</summary>
+        internal static void Reset()
+        {
+            _sections = null;
+            _order = null;
+            _stamp = null;
+            _unreadable = false;
+            Reloaded?.Invoke();
         }
     }
 }

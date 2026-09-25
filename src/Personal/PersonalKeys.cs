@@ -70,7 +70,12 @@ namespace Bindrune.Personal
             (bind.Source == BindSource.ModTyped || bind.Source == BindSource.Jotunn);
 
         /// <summary>Records a rebind against whichever side is live, leaving the other side untouched.</summary>
-        public static void RecordRebind(string bindId, KeyCombo combo, bool personal)
+        /// <param name="before">
+        /// The key the bind had before the write. While the profile's side was live it was the
+        /// profile's key, so a key of yours replacing it remembers it as such, the way Mine does:
+        /// that is the key Whole profile gives back.
+        /// </param>
+        public static void RecordRebind(string bindId, KeyCombo combo, bool personal, KeyCombo before)
         {
             PersonalStore.Sync();
 
@@ -78,6 +83,7 @@ namespace Bindrune.Personal
 
             if (personal)
             {
+                if (!entry.Active) entry.Profile = before;
                 entry.Personal = combo;
                 entry.Active = true;
             }
@@ -128,7 +134,11 @@ namespace Bindrune.Personal
             if (entry == null) return;
 
             if (entry.Active && entry.Personal.IsBound) entry.Personal = bind.Combo;
-            if (entry.Profile.IsBound) BindWriter.Apply(bind, entry.Profile, SaveTarget.Unrecorded);
+
+            // No key is the profile's key as much as any other: the one your key replaced, or the
+            // one a sync put where yours had been. Left in place, yours would pass for the
+            // profile's from here on.
+            BindWriter.Apply(bind, entry.Profile, SaveTarget.Unrecorded);
 
             entry.Active = false;
             Save();

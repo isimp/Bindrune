@@ -34,10 +34,10 @@ Keepsake does the same for any other setting: you keep your own value for it, an
 |---|---|
 | Gale profile sync, or a Gale import into the same profile | Yes |
 | Installing or updating a modpack, in any mod manager | Yes |
-| Thunderstore Mod Manager or r2modman, Update existing profile | No |
+| Thunderstore Mod Manager or r2modman, Update existing profile | Yes, with a spare copy |
 | Importing as a new profile, in any mod manager | Carried over by hand |
 
-Your moved hotbar keys, the clashes you have waved through and the hints you have pinned are kept with them and go the same way. Update existing profile in Thunderstore Mod Manager and r2modman replaces the whole profile folder, so they are gone with it. A profile imported as new starts without them; to bring them along, copy bindrune.keys from the old profile's BepInEx folder into the new one's.
+Your moved hotbar keys, the clashes you have waved through and the hints you have pinned are kept with them and go the same way. Update existing profile in Thunderstore Mod Manager and r2modman replaces the whole profile folder. For their profiles Bindrune offers to keep a spare copy of bindrune.keys next to the profiles folder, in Bindrune and the profile's name, and brings it back the next time the game starts. It asks before writing anything there, and the Spare copy button in the panel changes the answer. A profile imported as new starts without them; to bring them along, copy bindrune.keys from the old profile's BepInEx folder into the new one's.
 
 ## Requirements
 

@@ -1,7 +1,8 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
-  <!-- Tests for the parts of Bindrune that need no game: the keys section of bindrune.keys and
-       the take over from Keepsake (see tests/contract). They run on .NET 8 against the real
+  <!-- Tests for the parts of Bindrune that need no game: bindrune.keys and what it holds, your key
+       and the profile's on a mod's setting, the take over from Keepsake (see tests/contract), the spare
+       copy, muted clashes, hints and situations. They run on .NET 8 against the real
        BepInEx.dll from the local profile, which is not committed, together with the
        metadata-only Unity assemblies in lib/: the tests only use enums from those, which the
        stubs keep whole.
@@ -14,10 +15,10 @@
     <ProfileDir Condition="'$(ProfileDir)' == ''">$(AppData)\com.kesomannen.gale\valheim\profiles\Default</ProfileDir>
   </PropertyGroup>
 
+  <!-- All of Bindrune but the plugin class, which PluginShim.cs stands in for, against the metadata-only game stubs in
+       lib/: the tests run the parts that need no running game, and the rest only has to load. -->
   <ItemGroup>
-    <Compile Include="../../src/KeyCombo.cs" />
-    <Compile Include="../../src/Personal/KeyLines.cs" />
-    <Compile Include="../../src/Personal/KeepsakeContract.cs" />
+    <Compile Include="../../src/**/*.cs" Exclude="../../src/Plugin.cs;../../src/UI/**;../../src/Hints/HintOverlay.cs;../../src/Hints/HintDrag.cs;../../src/StartMenuKeys.cs" />
   </ItemGroup>
 
   <ItemGroup>
@@ -29,7 +30,19 @@
   <ItemGroup>
     <Reference Include="BepInEx"><HintPath>$(ProfileDir)/BepInEx/core/BepInEx.dll</HintPath></Reference>
     <Reference Include="UnityEngine"><HintPath>$(MSBuildThisFileDirectory)../../lib/UnityEngine.dll</HintPath></Reference>
-    <Reference Include="UnityEngine.CoreModule"><HintPath>$(MSBuildThisFileDirectory)../../lib/UnityEngine.CoreModule.dll</HintPath></Reference>
+    <Reference Include="UnityEngine.CoreModule"><HintPath>$(MSBuildThisFileDirectory)../../lib/UnityEngine.CoreModule.dll</HintPath></Reference>    <Reference Include="Mono.Cecil"><HintPath>$(MSBuildThisFileDirectory)../../lib/Mono.Cecil.dll</HintPath></Reference>
+    <Reference Include="0Harmony"><HintPath>$(MSBuildThisFileDirectory)../../lib/0Harmony.dll</HintPath></Reference>
+     <Reference Include="assembly_valheim"><HintPath>$(MSBuildThisFileDirectory)../../lib/assembly_valheim.dll</HintPath></Reference>
+     <Reference Include="assembly_utils"><HintPath>$(MSBuildThisFileDirectory)../../lib/assembly_utils.dll</HintPath></Reference>
+     <Reference Include="assembly_guiutils"><HintPath>$(MSBuildThisFileDirectory)../../lib/assembly_guiutils.dll</HintPath></Reference>
+     <Reference Include="Jotunn"><HintPath>$(MSBuildThisFileDirectory)../../lib/Jotunn.dll</HintPath></Reference>
+     <Reference Include="Unity.InputSystem"><HintPath>$(MSBuildThisFileDirectory)../../lib/Unity.InputSystem.dll</HintPath></Reference>
+     <Reference Include="Unity.TextMeshPro"><HintPath>$(MSBuildThisFileDirectory)../../lib/Unity.TextMeshPro.dll</HintPath></Reference>
+     <Reference Include="UnityEngine.IMGUIModule"><HintPath>$(MSBuildThisFileDirectory)../../lib/UnityEngine.IMGUIModule.dll</HintPath></Reference>
+     <Reference Include="UnityEngine.InputLegacyModule"><HintPath>$(MSBuildThisFileDirectory)../../lib/UnityEngine.InputLegacyModule.dll</HintPath></Reference>
+     <Reference Include="UnityEngine.TextRenderingModule"><HintPath>$(MSBuildThisFileDirectory)../../lib/UnityEngine.TextRenderingModule.dll</HintPath></Reference>
+     <Reference Include="UnityEngine.UI"><HintPath>$(MSBuildThisFileDirectory)../../lib/UnityEngine.UI.dll</HintPath></Reference>
+     <Reference Include="UnityEngine.UIModule"><HintPath>$(MSBuildThisFileDirectory)../../lib/UnityEngine.UIModule.dll</HintPath></Reference>
   </ItemGroup>
 
   <ItemGroup>

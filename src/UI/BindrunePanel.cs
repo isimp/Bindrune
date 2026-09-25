@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using Bindrune.Conflicts;
@@ -236,6 +236,8 @@ namespace Bindrune.UI
             _root = null;
             _content = null;
             _detail = null;
+            _modal = null;
+            _spareButton = null;
             GUIManager.BlockInput(false);
             Hints.HintOverlay.Movable = false;
         }
@@ -243,6 +245,13 @@ namespace Bindrune.UI
         public static void Tick()
         {
             KeyCapture.Tick();
+
+            // Setting the first key of your own in a profile a mod manager may replace is when to ask.
+            if (_askSpare)
+            {
+                _askSpare = false;
+                AskAboutSpareCopyIfDue();
+            }
 
             if (_repopulateAt > 0f && Time.realtimeSinceStartup >= _repopulateAt)
             {
@@ -312,6 +321,9 @@ namespace Bindrune.UI
                 new Vector2(0.5f, 0.5f), new Vector2(0.5f, 0.5f), Vector2.zero,
                 PanelWidth, PanelHeight, true);
             _root.name = "BindrunePanel";
+            _modal = null;
+            SpareCopy.Followed -= OnSpareFollowed;
+            SpareCopy.Followed += OnSpareFollowed;
             ((RectTransform)_root.transform).anchoredPosition = Vector2.zero;
 
             // A fresh panel has no rows, so the previous signature must not suppress the first draw.
@@ -337,6 +349,7 @@ namespace Bindrune.UI
             BuildResizeGrip();
 
             Refresh(rescan: false);
+            AskAboutSpareCopyIfDue();
         }
 
         /// <summary>
@@ -404,6 +417,8 @@ namespace Bindrune.UI
             var hints = Button("Hints", _root.transform, 100f, 32f, () => Show(DetailPage.Hints));
             AnchorRight(hints, -Margin - 294f, titleRow);
             _hintsButtonLabel = hints.GetComponentInChildren<Text>();
+
+            BuildSpareButton(-Margin - 404f, titleRow);
 
             var searchObject = GUIManager.Instance.CreateInputField(_root.transform,
                 new Vector2(0f, 1f), new Vector2(0f, 1f), Vector2.zero,

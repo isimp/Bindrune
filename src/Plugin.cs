@@ -144,6 +144,10 @@ namespace Bindrune
         {
             Log = Logger;
 
+            // A profile folder replaced whole by its mod manager gets your keys back before
+            // anything reads them. See SpareCopy.
+            SpareCopy.AtLaunch();
+
             _openKey = Config.Bind("General", "OpenKey", new KeyboardShortcut(KeyCode.Insert),
                 "Opens the Bindrune panel.");
             _panelWidth = Config.Bind("Panel", "Width", 1280f,
@@ -221,6 +225,7 @@ namespace Bindrune
             {
                 FixedKeys.EnsureRestored();
                 RestoreOnce();
+                NoticeSpareCopyOnce();
 
                 // Capture finishes inside Tick, so asking afterwards whether it is still running
                 // would let the very key that completed it fall through and toggle the panel too.
@@ -316,6 +321,25 @@ namespace Bindrune
 
             _restoreInWorld = true;
             _restoreAt = 0f;
+        }
+
+        private bool _spareNoticeShown;
+        private float _spareNoticeAt;
+
+        /// <summary>
+        /// Says on screen, once your character appears, that this start brought your keys back
+        /// from their spare copy after an update replaced the profile folder.
+        /// </summary>
+        private void NoticeSpareCopyOnce()
+        {
+            if (_spareNoticeShown || !SpareCopy.RestoredThisLaunch || Player.m_localPlayer == null || MessageHud.instance == null) return;
+
+            if (_spareNoticeAt == 0f) _spareNoticeAt = Time.realtimeSinceStartup + 5f;
+            if (Time.realtimeSinceStartup < _spareNoticeAt) return;
+            _spareNoticeShown = true;
+
+            MessageHud.instance.ShowMessage(MessageHud.MessageType.TopLeft,
+                "Bindrune: the profile was replaced by an update, so your own keys came back from their spare copy.");
         }
 
         public static string ResolveModName(string guid)

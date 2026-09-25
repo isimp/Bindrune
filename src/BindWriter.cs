@@ -51,6 +51,9 @@ namespace Bindrune
             var refusal = Refusal(bind, combo);
             if (refusal != null) return refusal;
 
+            // The key in place until now, which a first key of yours replaces as the profile's.
+            var before = bind.Combo;
+
             try
             {
                 string problem;
@@ -68,7 +71,7 @@ namespace Bindrune
 
                 // Record what the bind actually became, which is not the same as "no problem":
                 // a dropped modifier still wrote a key, and an unsupported setting wrote nothing.
-                if (wrote) Remember(bind, target);
+                if (wrote) Remember(bind, target, before);
                 return problem;
             }
             catch (Exception ex)
@@ -152,11 +155,12 @@ namespace Bindrune
         /// Records the bind as yours, or hands it back to the profile. The reconciler writes with
         /// SaveTarget.Unrecorded, so re-applying a key never rewrites the file it came from.
         /// </summary>
-        private static void Remember(BindEntry bind, SaveTarget target)
+        /// <param name="before">The key the bind had before this write.</param>
+        private static void Remember(BindEntry bind, SaveTarget target, KeyCombo before)
         {
             if (target == SaveTarget.Unrecorded || !PersonalKeys.Eligible(bind)) return;
 
-            PersonalKeys.RecordRebind(bind.Id, bind.Combo, target == SaveTarget.Personal);
+            PersonalKeys.RecordRebind(bind.Id, bind.Combo, target == SaveTarget.Personal, before);
         }
 
         private static string ApplyConfig(BindEntry bind, KeyCombo combo, out bool wrote)
