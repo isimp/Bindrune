@@ -1,4 +1,4 @@
-﻿using System.Collections.Generic;
+using System.Collections.Generic;
 using System.Linq;
 using Bindrune.Conflicts;
 using Bindrune.Context;
@@ -620,8 +620,9 @@ namespace Bindrune.UI
                     if (fromMod) return;
 
                     Adopt(bind, situations, source);
-                    SituationStore.Toggle(bind.Id, tag);
+                    var problem = SituationStore.Toggle(bind.Id, tag);
                     Refresh();
+                    if (problem != null) Note(problem);
                 });
 
                 var clickable = button.GetComponent<Button>();
@@ -699,8 +700,9 @@ namespace Bindrune.UI
                 FixedButton("Remove", row, 96f, 26f, () =>
                 {
                     Adopt(bind, situations, source);
-                    SituationStore.Toggle(bind.Id, tag);
+                    var problem = SituationStore.Toggle(bind.Id, tag);
                     Refresh();
+                    if (problem != null) Note(problem);
                 });
             }
 
@@ -749,8 +751,9 @@ namespace Bindrune.UI
                 }
 
                 Adopt(bind, situations, source);
-                SituationStore.Toggle(bind.Id, chosen);
+                var problem = SituationStore.Toggle(bind.Id, chosen);
                 Refresh();
+                if (problem != null) Note(problem);
             });
 
             Spacer(10f);

@@ -26,8 +26,6 @@ namespace Bindrune.Personal
         public const string Hints = "hints";
         public const string Fixed = "fixed";
 
-        /// <summary>The name of the file in BepInEx, for the spare copy and the log.</summary>
-        public const string FileName = "bindrune.keys";
 
         private const string Version = KeyLines.StateVersion;
 

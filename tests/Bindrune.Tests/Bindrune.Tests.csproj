@@ -3,9 +3,9 @@
   <!-- Tests for the parts of Bindrune that need no game: bindrune.keys and what it holds, your key
        and the profile's on a mod's setting, the take over from Keepsake (see tests/contract), the spare
        copy, muted clashes, hints and situations. They run on .NET 8 against the real
-       BepInEx.dll from the local profile, which is not committed, together with the
-       metadata-only Unity assemblies in lib/: the tests only use enums from those, which the
-       stubs keep whole.
+       BepInEx.dll from the local profile, which is not committed, and compile against the
+       metadata-only game assemblies in lib/: at run time they touch only Unity's enums from those,
+       which the stubs keep whole, and code that needs the running game is left out below.
        Run with: dotnet test tests/Bindrune.Tests -->
   <PropertyGroup>
     <TargetFramework>net8.0</TargetFramework>

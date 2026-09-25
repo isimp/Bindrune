@@ -64,15 +64,18 @@ namespace Bindrune.Context
         public static HashSet<string> For(string bindId) =>
             Situations.TryGetValue(bindId, out var set) ? set : new HashSet<string>();
 
-        public static void Toggle(string bindId, string tag)
+        /// <summary>Marks a bind as applying to a situation, or takes the mark off again. Returns why it could not be saved, or null.</summary>
+        public static string Toggle(string bindId, string tag)
         {
             // The change goes onto what the file says now, not onto what it said when first read.
+            // Reading it is what the next line is for: a file that cannot be read leaves nothing
+            // held, and nothing may then be written over it.
             Sync();
-            var situations = Situations;
+            _ = Situations;
             if (_situations == null)
             {
                 Plugin.Log.LogWarning("Bindrune: situations.txt could not be read, so this change is not saved to it until it can.");
-                return;
+                return "situations.txt could not be read, so this was not saved; see the log";
             }
 
             if (!Situations.TryGetValue(bindId, out var set))
@@ -82,16 +85,17 @@ namespace Bindrune.Context
             if (!set.Add(tag)) set.Remove(tag);
             if (set.Count == 0) Situations.Remove(bindId);
 
-            Save();
+            return Save() ? null : "situations.txt could not be saved, see the log";
         }
 
-        private static void Save()
+        private static bool Save()
         {
-            TextStore.Write(FilePath,
+            var written = TextStore.Write(FilePath,
                 new[] { "# Situations you marked each bind as applying to." },
                 _situations.OrderBy(kv => kv.Key).Select(kv => kv.Key + "=" + string.Join("|", kv.Value.ToArray())));
 
             _stamp = TextStore.Stamp(FilePath);
+            return written;
         }
     }
 }

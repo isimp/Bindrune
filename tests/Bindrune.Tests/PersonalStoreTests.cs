@@ -271,6 +271,20 @@ namespace Bindrune.Tests
         }
 
         [Fact]
+        public void AMarkThatCannotBeSavedSaysSoAndOneThatCanDoesNot()
+        {
+            using var profile = new TestProfile();
+            Assert.Null(SituationStore.Toggle("vanilla:Jump", "World"));
+            TestProfile.NewGame();
+
+            using (TestProfile.Lock(profile.SituationsFile))
+                Assert.NotNull(SituationStore.Toggle("vanilla:Use", "Boat"));
+
+            Assert.Null(SituationStore.Toggle("vanilla:Use", "Boat"));
+            Assert.Contains("Boat", SituationStore.For("vanilla:Use"));
+        }
+
+        [Fact]
         public void ASituationsFileThatCannotBeReadIsNeverWrittenOver()
         {
             using var profile = new TestProfile();
