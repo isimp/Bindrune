@@ -24,7 +24,7 @@ The game ties its hotbar to the number keys 1 to 8. Its controls let you add a s
 
 ## Your own keys
 
-When a shared modpack profile is synced, it overwrites your config files and your rebinds with them. Bindrune can keep the keys you mark as your own outside the synced config and puts them back after every sync. The clashes you have waved through and the hints you have pinned are kept there too. Update existing profile in Thunderstore Mod Manager and r2modman replaces the whole profile folder, which takes your own keys with it, and a profile imported as new starts without them; to bring them along, copy bindrune.keys from the old profile's BepInEx folder into the new one's.
+When a shared modpack profile is synced, it overwrites your config files and your rebinds with them. Bindrune can keep the keys you mark as your own outside the synced config and puts them back after every sync. The clashes you have waved through and the hints you have pinned are kept there too.
 
 Keepsake does the same for any other setting: you keep your own value for it, and a sync no longer takes it away. With both installed, keybinds are Bindrune's, and a keybind you kept in Keepsake becomes one of your own keys here. Keepsake is on Thunderstore at https://thunderstore.io/c/valheim/p/isimp/Keepsake/ and on Hexium at https://valheim.hexium.gg/mods/isimp/Keepsake
 
