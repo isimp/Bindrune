@@ -2,11 +2,11 @@
 
 ## 0.5.0
 
-Your own keys now survive Update existing profile in Thunderstore Mod Manager and r2modman. For their profiles Bindrune offers to keep a spare copy of bindrune.keys next to the profiles folder, asking once before it writes anything there, and brings it back the next time the game starts after an update, saying so in the corner. The Spare copy button in the panel changes the answer.
+Your own keys now survive *Update existing profile* in Thunderstore Mod Manager and r2modman. For their profiles Bindrune offers to keep a spare copy of `bindrune.keys` next to the profiles folder, asking once before it writes anything there, and brings it back the next time the game starts after an update, saying so in the corner. The *Spare copy* button in the panel changes the answer.
 
-A bindrune.keys or situations.txt held open by another program as Bindrune first read it is no longer written over by the next change, which lost everything it held, and your keys in it are put back once it can be read rather than only the next time the game starts.
+A `bindrune.keys` or `situations.txt` held open by another program as Bindrune first read it is no longer written over by the next change, which lost everything it held, and your keys in it are put back once it can be read rather than only the next time the game starts.
 
-Setting a key of your own now remembers the key it replaced as the profile's, so Whole profile gives that key back straight away rather than only after the next sync. When the profile has no key there, Whole profile now leaves the bind without one instead of keeping yours, which Mine then also took for the profile's.
+Setting a key of your own now remembers the key it replaced as the profile's, so *Whole profile* gives that key back straight away rather than only after the next sync. When the profile has no key there, *Whole profile* now leaves the bind without one instead of keeping yours, which *Just for you* then also took for the profile's.
 
 ## 0.4.2
 
@@ -20,7 +20,7 @@ Return in the search box at the start menu no longer reaches the menu behind it,
 
 ## 0.4.0
 
-The hotbar keys 1 to 8 can now be moved or cleared, which the game itself does not allow. Bindrune keeps the new key and puts it back whenever the game reloads its controls, and Default gives the digit back.
+The hotbar keys 1 to 8 can now be moved or cleared, which the game itself does not allow. Bindrune keeps the new key and puts it back whenever the game reloads its controls, and *Default* gives the digit back.
 
 A hotbar key, or its alternate, can now take a modifier such as Alt + 1.
 
@@ -78,11 +78,11 @@ A mute now covers the clash you looked at rather than the pair for good. It is r
 
 A note about two binds sharing a key now names both of them.
 
-Cancel now cancels a rebind instead of binding the left mouse button, and the Press key search does the same when clicked again. Left click is still bindable anywhere else.
+*Cancel* now cancels a rebind instead of binding the left mouse button, and the *Press key* search does the same when clicked again. Left click is still bindable anywhere else.
 
 ## 0.2.0
 
-Every clash a bind has now carries a Go to button that switches to the other bind in the pair, and scrolls its row into view.
+Every clash a bind has now carries a *Go to* button that switches to the other bind in the pair, and scrolls its row into view.
 
 ## 0.1.0
 

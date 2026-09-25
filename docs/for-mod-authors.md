@@ -1,6 +1,6 @@
 # Describing your binds to Bindrune
 
-Bindrune reports keybind clashes between mods. It can only rule a clash out when it knows *when* each bind is live — and you are the only one who really knows that about your own mod.
+Bindrune reports keybind clashes between mods. It can only rule a clash out when it knows *when* each bind is live, and you are the only one who really knows that about your own mod.
 
 You can tell it, in a few lines, with **no reference to Bindrune, no dependency, and no behaviour change when it is not installed**.
 
@@ -38,14 +38,14 @@ This is the same trick the `ConfigurationManagerAttributes` ecosystem uses, so i
 
 ### Rules
 
-- The class must be **named** `BindruneAttributes`. Any namespace, any accessibility — it is matched on `GetType().Name`.
+- The class must be **named** `BindruneAttributes`. Any namespace and any accessibility will do, since it is matched on `GetType().Name`.
 - `Situations` and `HeldItems` may be **fields or properties**, as long as they are public instance members of type `string[]` (anything enumerable as strings works).
 - Either may be omitted. An empty declaration is ignored.
 - **Your declaration is final.** It beats the user's own tagging, the shared list and everything else, and the panel greys those controls out rather than letting a user argue with your code. Declare what is true, not what you would prefer.
 
 ### `Situations`
 
-Use these names exactly. Anything else is ignored — there is no free text, because two binds can only be compared when both use the same vocabulary.
+Use these names exactly. Anything else is ignored. There is no free text, because two binds can only be compared when both use the same vocabulary.
 
 | | |
 |---|---|
@@ -62,7 +62,7 @@ Use these names exactly. Anything else is ignored — there is no free text, bec
 
 List every situation the bind is live in. More is safer than fewer: a missing situation can silence a real clash, an extra one only makes a clash more likely to be reported.
 
-`Custom` is a deliberate escape hatch. It means "a state only this mod knows about" — two binds both marked `Custom` count as sharing a situation, and the on-screen hints never treat it as a place that can fail to match.
+`Custom` is a deliberate escape hatch. It means "a state only this mod knows about": two binds both marked `Custom` count as sharing a situation, and the on-screen hints never treat it as a place that can fail to match.
 
 ### `HeldItems`
 
@@ -74,11 +74,11 @@ For binds that only mean something with something in hand. Three forms:
 | `type:<ItemType>` | `type:Shield` | every item of that type |
 | `item:<prefab>` | `item:ood_remote` | one specific item, by prefab name |
 
-Skill and type names are Valheim's own enum names (`Skills.SkillType`, `ItemDrop.ItemData.ItemType`). Prefab names are the GameObject names in `ObjectDB` — your own items work exactly like the game's.
+Skill and type names are Valheim's own enum names (`Skills.SkillType`, `ItemDrop.ItemData.ItemType`). Prefab names are the GameObject names in `ObjectDB`, so your own items work exactly like the game's.
 
 Groups and single items compare correctly against each other: a bind needing `skill:Pickaxes` and one needing `item:PickaxeIron` are understood to overlap, because Bindrune expands both to the actual set of prefabs.
 
-Note the axes are independent. `Situations` says *where*, `HeldItems` says *what you are carrying*, and a bind can declare either, both or neither. Declaring only `HeldItems` is normal and correct for an item-driven bind — it does not mean "nowhere".
+Note the axes are independent. `Situations` says *where*, `HeldItems` says *what you are carrying*, and a bind can declare either, both or neither. Declaring only `HeldItems` is normal and correct for an item-driven bind; it does not mean "nowhere".
 
 ## What Bindrune does with it
 
@@ -88,7 +88,7 @@ Note the axes are independent. `Situations` says *where*, `HeldItems` says *what
 
 ## If you cannot change your mod
 
-Anyone — you, a modpack author, a user — can describe binds from the outside in `BepInEx/config/Bindrune/known.txt`, without touching the mod. One line per bind:
+Anyone, whether you, a modpack author or a user, can describe binds from the outside in `BepInEx/config/Bindrune/known.txt`, without touching the mod. One line per bind:
 
 ```
 <bind id><TAB><situations, comma separated><TAB><held items, comma separated>
@@ -97,10 +97,10 @@ cfg:com.example.mod:General:DigKey	World	skill:Pickaxes
 
 The bind id is the one Bindrune shows in its panel. For a BepInEx setting it is `cfg:<plugin GUID>:<section>:<key>`. Treat it as opaque and copy it from the panel rather than building it by hand.
 
-That file lives in `config`, so it travels with a modpack — which is the point: a pack author can describe the whole pack once for everyone who subscribes. A user's own tagging still wins over it, and a mod's own declaration wins over both.
+That file lives in `config`, so it travels with a modpack. That is the point: a pack author can describe the whole pack once for everyone who subscribes. A user's own tagging still wins over it, and a mod's own declaration wins over both.
 
 ## Things worth knowing
 
-- **A hardcoded key is invisible.** If your mod reads `Input.GetKeyDown(KeyCode.G)` with no setting behind it, there is nothing for Bindrune — or any other tool, or the user — to find. Put it in a config entry.
+- **A hardcoded key is invisible.** If your mod reads `Input.GetKeyDown(KeyCode.G)` with no setting behind it, there is nothing for Bindrune, any other tool or the user to find. Put it in a config entry.
 - **`KeyboardShortcut` or `KeyCode`: pick by how the key is used.** BepInEx only reports a `KeyboardShortcut` as pressed when the held keys match exactly, so a modifier genuinely protects the bind. The same rule means it does not fire while any other key is held, including movement keys. For a key meant to work while moving, a plain `KeyCode` is the better choice; it fires under any modifier, and Bindrune reports it that way.
 - **A keybind stored as a string is read-only in Bindrune.** It will be listed and parsed, but not rewritten, because writing a format we guessed at is not safe. A typed setting is editable.
