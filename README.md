@@ -28,6 +28,17 @@ When a shared modpack profile is synced, it overwrites your config files and you
 
 Keepsake does the same for any other setting: you keep your own value for it, and a sync no longer takes it away. With both installed, keybinds are Bindrune's, and a keybind you kept in Keepsake becomes one of your own keys here. Keepsake is on Thunderstore at https://thunderstore.io/c/valheim/p/isimp/Keepsake/ and on Hexium at https://valheim.hexium.gg/mods/isimp/Keepsake
 
+## Profile updates
+
+| Update | Your own keys |
+|---|---|
+| Gale profile sync, or a Gale import into the same profile | Yes |
+| Installing or updating a modpack, in any mod manager | Yes |
+| Thunderstore Mod Manager or r2modman, Update existing profile | No |
+| Importing as a new profile, in any mod manager | Carried over by hand |
+
+Your moved hotbar keys, the clashes you have waved through and the hints you have pinned are kept with them and go the same way. Update existing profile in Thunderstore Mod Manager and r2modman replaces the whole profile folder, so they are gone with it. A profile imported as new starts without them; to bring them along, copy bindrune.keys from the old profile's BepInEx folder into the new one's.
+
 ## Requirements
 
 Bindrune needs BepInEx 5 and Jotunn. Mod managers install Jotunn along with it.

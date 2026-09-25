@@ -42,6 +42,17 @@ The two files are read across the mods, so their formats have to stay in step: `
 
 Versions before 0.2.1 kept those two in `BepInEx/config/Bindrune/`. They are moved into `bindrune.keys` on the first launch after the update and the old files are removed. A copy a sync puts back afterwards is ignored, and the log says so.
 
+## Profile updates
+
+| Update | Your own keys |
+|---|---|
+| Gale profile sync, or a Gale import into the same profile | Yes |
+| Installing or updating a modpack, in any mod manager | Yes |
+| Thunderstore Mod Manager or r2modman, Update existing profile | No |
+| Importing as a new profile, in any mod manager | Carried over by hand |
+
+The same goes for moved hotbar keys, muted clashes and pinned hints, which share `bindrune.keys`. The file lives in the profile outside `config`, so syncs and modpacks, which write config files, leave it alone, and Bindrune puts your keys back from it every time the game runs, whatever the config files hold. Update existing profile in Thunderstore Mod Manager and r2modman builds the imported profile in a folder of its own, deletes the whole existing profile folder and moves the new one in its place, so the file is gone with it; Bindrune keeps nothing outside the profile. A profile imported as new starts without it. Copying `bindrune.keys` from the old profile's `BepInEx` folder into the new one's carries everything over, since nothing in it depends on where the profile is.
+
 ## Files
 
 Settings are in `BepInEx/config/isimp.Bindrune.cfg`. Situations you set and the shared list are in `BepInEx/config/Bindrune/`, so they travel with a profile. Your own keys, moved hotbar keys, muted clashes and pinned hints are in `BepInEx/bindrune.keys`, so they do not. Data derived from the game is cached in `BepInEx/cache/Bindrune/` and rebuilt after a game update. All of these are plain text and safe to edit or delete, also while the game runs: an edited file is read again when the panel opens, and before Bindrune next writes to it.
