@@ -79,6 +79,9 @@ namespace Bindrune.Personal
         /// </summary>
         private static bool _unreadable;
 
+        /// <summary>Whether the file could not be read the last time it was looked at, so nothing of yours is known right now.</summary>
+        public static bool CouldNotRead => _unreadable;
+
         /// <summary>
         /// Raised when the file turned out to have changed since it was read, so that everything
         /// holding a parsed copy of a section drops it and reads the section again.

@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Runtime.CompilerServices;
 using BepInEx;
@@ -304,7 +304,7 @@ namespace Bindrune
 
             // Nothing of yours to put back, nothing to show on screen and nothing to take over from
             // Keepsake, so do not pay for a scan.
-            if (PersonalKeys.Count == 0 && HintChoice.Count == 0 && !KeepsakeHandover.MayHaveKeys)
+            if (!PersonalKeys.MayHaveKeys && HintChoice.Count == 0 && !KeepsakeHandover.MayHaveKeys)
             {
                 _restored = true;
                 return;

@@ -57,6 +57,12 @@ namespace Bindrune.Personal
         /// <summary>How many binds are currently using your key rather than the profile's.</summary>
         public static int Count => Entries.Values.Count(e => e.Active);
 
+        /// <summary>
+        /// Whether there may be keys of yours to put back: some are known, or bindrune.keys could
+        /// not be read to tell, as when another program holds it just as the game starts.
+        /// </summary>
+        public static bool MayHaveKeys => Count > 0 || PersonalStore.CouldNotRead;
+
         /// <summary>True when your key is the live one for this bind.</summary>
         public static bool IsPersonal(string bindId) =>
             Entries.TryGetValue(bindId, out var entry) && entry.Active;
@@ -163,7 +169,9 @@ namespace Bindrune.Personal
             PersonalStore.Sync();
             AdoptFromKeepsake();
 
-            if (Entries.Count == 0) return 0;
+            // Unread, nothing of yours is known: counted as one not placed yet, so the start
+            // looks again.
+            if (Entries.Count == 0) return PersonalStore.CouldNotRead ? 1 : 0;
 
             int reapplied = 0, missing = 0;
             var dirty = false;

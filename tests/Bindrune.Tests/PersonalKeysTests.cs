@@ -151,6 +151,35 @@ namespace Bindrune.Tests
         }
 
         [Fact]
+        public void KeysThatCouldNotBeReadAtTheStartAreAskedForAgainAndPutBackOnceTheyCanBe()
+        {
+            using var profile = new TestProfile();
+            var (bind, setting) = ModBind(profile, KeyCode.L);
+            File.WriteAllLines(profile.KeysFile, new[] { KeyLines.StateVersion, "[keys]", $"{bind.Id}\tQ\tL\t1" });
+
+            try
+            {
+                Scanned(bind);
+
+                // A scanner holds the file as the game starts: the start has to look again.
+                using (TestProfile.Lock(profile.KeysFile))
+                {
+                    Assert.True(PersonalKeys.MayHaveKeys);
+                    Assert.True(PersonalKeys.Reconcile() > 0);
+                }
+
+                Assert.Equal(KeyCode.L, setting.Value.MainKey);
+
+                PersonalKeys.Reconcile();
+                Assert.Equal(KeyCode.Q, setting.Value.MainKey);
+            }
+            finally
+            {
+                Scanned();
+            }
+        }
+
+        [Fact]
         public void BothKeysAreThereInTheNextGame()
         {
             using var profile = new TestProfile();
