@@ -14,7 +14,7 @@ using UnityEngine;
 
 namespace Bindrune
 {
-    [BepInPlugin(Guid, "Bindrune", "0.4.2")]
+    [BepInPlugin(Guid, "Bindrune", "0.5.0")]
     [BepInDependency("com.jotunn.jotunn", BepInDependency.DependencyFlags.SoftDependency)]
     [BepInProcess("valheim.exe")]
     public class Plugin : BaseUnityPlugin
