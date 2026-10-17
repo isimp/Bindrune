@@ -210,6 +210,9 @@ namespace Bindrune.SelfTest
             {
                 var b = Bind("NoteB");
                 if (b != null) BindWriter.Apply(b, keyBefore, Personal.SaveTarget.Unrecorded);
+
+                // Judged afresh, as the panel would, so the mute is looked for on the note it was set on.
+                ConflictIndex.Rebuild(BindRegistry.All.Where(x => !x.Internal && x.Compared));
                 var now = Pair("NoteA", "NoteB");
                 if (now != null && MuteStore.IsMuted(now)) MuteStore.Toggle(now);
             }

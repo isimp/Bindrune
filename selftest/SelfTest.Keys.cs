@@ -58,8 +58,10 @@ namespace Bindrune.SelfTest
                 Check(Held(entry).Equals(mine), "after a sync changed the setting, your key is put back", Held(entry).ToString());
                 Check(PersonalKeys.Get(id)?.Profile.Equals(synced) == true, "the key the sync brought is now the profile's", PersonalKeys.Get(id)?.Profile.ToString());
 
-                Check(BindWriter.Reset(Bind("Yours")) == null && Held(entry).Equals(DefaultOf(entry)) && PersonalKeys.Get(id) == null,
-                    "Default gives the mod's own key back and forgets yours", Held(entry).ToString());
+                Check(BindWriter.Reset(Bind("Yours")) == null && Held(entry).Equals(DefaultOf(entry)) && !PersonalKeys.IsPersonal(id),
+                    "Default gives the mod's own key back, on the profile's side", Held(entry).ToString());
+                Check(PersonalKeys.Get(id)?.Personal.Equals(mine) == true, "your key is kept aside, for Just for you to bring back",
+                    PersonalKeys.Get(id)?.Personal.ToString());
             }
             finally
             {
@@ -140,11 +142,18 @@ namespace Bindrune.SelfTest
                 composite = FixedKeys.Composite(FixedKeys.Live(name));
                 Check(composite.HasValue && composite.Value.Equals(withAlt), "the moved key survives the game loading its controls again", composite?.ToString());
 
-                yield return null;
-                yield return null;
-                var bar = HotbarTexts();
-                if (bar == null) Skip("the hotbar on screen", "the hotbar is not on screen");
-                else Check(bar.Contains(label), "the hotbar on screen shows the new key", string.Join(" | ", bar.ToArray()));
+                // The bar relabels as the game updates it, which it does every frame.
+                string shown = null;
+                for (var waited = 0f; waited < 1f; waited += Time.unscaledDeltaTime)
+                {
+                    shown = SlotOnScreen(slot - 1);
+                    if (shown == label) break;
+                    yield return null;
+                }
+
+                if (shown == null) Skip("the hotbar on screen", "the game's hotbar has no slot " + Count(slot) + " to show");
+                else Check(shown == label, "the hotbar on screen shows the new key on the slot",
+                    "slot " + Count(slot) + " reads \"" + shown + "\"; bar moved " + FixedKeys.BarChanged + ", " + Count(BarSlots()) + " slots");
             }
             finally
             {
@@ -160,15 +169,28 @@ namespace Bindrune.SelfTest
         }
 
         /// <summary>Text with the non-breaking spaces the hotbar labels use read as plain ones.</summary>
-        private static string Plain(string text) => text?.Replace(' ', ' ');
+        private static string Plain(string text) => text?.Replace((char)0xA0, ' ');
 
-        /// <summary>What the game's own hotbar shows, every text on it, or null when it is not on screen.</summary>
-        private static List<string> HotbarTexts()
+        /// <summary>The game's own hotbar, as Bindrune labels it, or null when there is none.</summary>
+        private static HotkeyBar Bar()
         {
             var hud = Hud.instance.OrNull();
             var bar = hud == null ? null : hud.m_rootObject.transform.Find("HotKeyBar");
-            if (bar == null) return null;
-            return bar.GetComponentsInChildren<TMP_Text>(true).Select(t => Plain(t.text)).Where(t => !string.IsNullOrEmpty(t)).ToList();
+            return bar == null ? null : bar.GetComponent<HotkeyBar>().OrNull();
+        }
+
+        private static IList Elements() => Bar() == null ? null : AccessTools.Field(typeof(HotkeyBar), "m_elements")?.GetValue(Bar()) as IList;
+
+        private static int BarSlots() => Elements()?.Count ?? 0;
+
+        /// <summary>What a slot of the game's own hotbar reads on screen, or null when it has no such slot.</summary>
+        private static string SlotOnScreen(int index)
+        {
+            var elements = Elements();
+            if (elements == null || index >= elements.Count) return null;
+            var go = AccessTools.Field(elements[index].GetType(), "m_go")?.GetValue(elements[index]) as GameObject;
+            var binding = go == null ? null : go.transform.Find("binding");
+            return binding == null ? null : Plain(binding.GetComponent<TMP_Text>().OrNull()?.text);
         }
     }
 }
