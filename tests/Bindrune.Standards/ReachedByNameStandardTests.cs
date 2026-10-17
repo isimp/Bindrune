@@ -55,6 +55,31 @@ namespace Bindrune.Standards
             Violations.None("reach a member by name that the self-test does not look for", found);
         }
 
+        private static readonly HashSet<string> TypeLookups = new HashSet<string> { "GetMethod", "GetField", "GetProperty" };
+
+        [Fact]
+        public void EveryGameMemberReachedByPlainReflectionIsLookedForInGame()
+        {
+            // typeof(ConfigFile).GetProperty("OrphanedEntries", ...): the same reach by name, without Harmony.
+            var listed = new HashSet<string>(StringLiterals(BindruneSource.SelfTest), StringComparer.Ordinal);
+            var bindrune = BindruneSource.Compilation.Assembly;
+
+            var found = new List<string>();
+            foreach (var (call, model) in BindruneSource.In<InvocationExpressionSyntax>(new[] { BindruneSource.Compilation }))
+            {
+                if (!(model.GetSymbolInfo(call).Symbol is IMethodSymbol method) || method.ContainingType?.ToDisplayString() != "System.Type" || !TypeLookups.Contains(method.Name)) continue;
+                if (!(call.Expression is MemberAccessExpressionSyntax access) || !(access.Expression is TypeOfExpressionSyntax typeOf)) continue;
+                if (SymbolEqualityComparer.Default.Equals(model.GetTypeInfo(typeOf.Type).Type?.ContainingAssembly, bindrune)) continue;
+                var args = call.ArgumentList.Arguments;
+                if (args.Count < 1 || !(model.GetConstantValue(args[0].Expression).Value is string name)) continue;
+
+                var expected = typeOf.Type + "." + name;
+                if (!listed.Contains(expected)) found.Add($"{BindruneSource.Where(call)} {expected}");
+            }
+
+            Violations.None("reach a game member by plain reflection that the self-test does not look for", found);
+        }
+
         private static IEnumerable<string> StringLiterals(CSharpCompilation compilation) =>
             compilation.SyntaxTrees.Where(t => !string.IsNullOrEmpty(t.FilePath))
                 .SelectMany(t => t.GetRoot().DescendantNodes().OfType<LiteralExpressionSyntax>())

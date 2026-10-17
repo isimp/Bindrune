@@ -1,8 +1,8 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Reflection;
 using BepInEx.Configuration;
-using HarmonyLib;
 
 namespace Bindrune
 {
@@ -38,7 +38,9 @@ namespace Bindrune
         {
             if (config == null) return;
 
-            if (!(AccessTools.Property(typeof(ConfigFile), "OrphanedEntries")?.GetValue(config) is IDictionary orphans))
+            // BepInEx keeps them in a private property, read by plain reflection: nothing here needs Harmony.
+            var property = typeof(ConfigFile).GetProperty("OrphanedEntries", BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic);
+            if (!(property?.GetValue(config, null) is IDictionary orphans))
             {
                 Plugin.Log.LogDebug("Bindrune: orphaned settings are not readable on this BepInEx; leaving them.");
                 return;
