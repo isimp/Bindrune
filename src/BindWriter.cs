@@ -9,7 +9,7 @@ using UnityEngine;
 namespace Bindrune
 {
     /// <summary>Writes a new combo back to whichever system owns the bind.</summary>
-    public static class BindWriter
+    internal static class BindWriter
     {
         /// <summary>Why a key only the Input System sees cannot go on a mod's bind.</summary>
         public const string UnseenByMods =
@@ -155,6 +155,8 @@ namespace Bindrune
         /// Records the bind as yours, or hands it back to the profile. The reconciler writes with
         /// SaveTarget.Unrecorded, so re-applying a key never rewrites the file it came from.
         /// </summary>
+        /// <param name="bind">The bind just written, already holding its new key.</param>
+        /// <param name="target">Whose key the write was: yours, the profile's, or neither.</param>
         /// <param name="before">The key the bind had before this write.</param>
         private static void Remember(BindEntry bind, SaveTarget target, KeyCombo before)
         {

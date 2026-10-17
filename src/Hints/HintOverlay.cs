@@ -8,7 +8,7 @@ using UnityEngine.UI;
 namespace Bindrune.Hints
 {
     /// <summary>Which way the list extends as rows are added, which is to say which edge stays put.</summary>
-    public enum HintGrowth
+    internal enum HintGrowth
     {
         /// <summary>The bottom edge is pinned and the list climbs. For a box near the bottom.</summary>
         Up,
@@ -17,7 +17,7 @@ namespace Bindrune.Hints
     }
 
     /// <summary>Where the text sits inside the box.</summary>
-    public enum HintAlign
+    internal enum HintAlign
     {
         Left,
         Center,
@@ -25,7 +25,7 @@ namespace Bindrune.Hints
     }
 
     /// <summary>Which half of a hint comes first: the key you press, or what it does.</summary>
-    public enum HintOrder
+    internal enum HintOrder
     {
         KeyFirst,
         ActionFirst
@@ -42,7 +42,7 @@ namespace Bindrune.Hints
     /// things anyway. Its place is kept as a fraction of the screen, so it lands where you left
     /// it at any resolution.
     /// </summary>
-    public static class HintOverlay
+    internal static class HintOverlay
     {
         private static GameObject _root;
         private static RectTransform _list;

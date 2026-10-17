@@ -12,7 +12,7 @@ namespace Bindrune.Hints
     /// your screen is as personal as the keys themselves, and a profile sync would replace the
     /// list with the profile owner's.
     /// </summary>
-    public static class HintChoice
+    internal static class HintChoice
     {
         private static HashSet<string> _chosen;
 

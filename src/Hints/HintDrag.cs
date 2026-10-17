@@ -12,7 +12,9 @@ namespace Bindrune.Hints
     /// Only ever active while the Bindrune panel is open. The rest of the time the overlay takes
     /// no input at all, because a box that swallows clicks is not something you want on your HUD.
     /// </summary>
-    public class HintDrag : MonoBehaviour, IBeginDragHandler, IDragHandler, IEndDragHandler
+    [System.Diagnostics.CodeAnalysis.SuppressMessage("Performance", "CA1812",
+        Justification = "Unity makes it, through AddComponent, which the analysis does not count.")]
+    internal sealed class HintDrag : MonoBehaviour, IBeginDragHandler, IDragHandler, IEndDragHandler
     {
         /// <summary>Raised when a drag finishes, so the new place can be written down.</summary>
         public Action<Vector2> Moved;

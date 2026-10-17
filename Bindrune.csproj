@@ -53,6 +53,8 @@
     <PackageReference Include="Microsoft.NETFramework.ReferenceAssemblies" Version="1.0.3" PrivateAssets="all" />
   </ItemGroup>
 
+  <Import Project="BuildChecks.props" />
+
   <!-- The tests are a project of their own, run locally. See tests/Bindrune.Tests. -->
   <ItemGroup>
     <Compile Remove="tests/**" />

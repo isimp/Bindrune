@@ -21,7 +21,7 @@ namespace Bindrune
     {
         public const string Guid = "isimp.Bindrune";
 
-        public static ManualLogSource Log;
+        internal static ManualLogSource Log;
 
         private static readonly HashSet<string> Warned = new HashSet<string>();
 
@@ -31,11 +31,14 @@ namespace Bindrune
         /// runs every frame or once per bind cannot bury the log. The call's own file and line
         /// tell one site from another, so there is no key to pass or keep in step.
         /// </summary>
+        /// <param name="message">What failed, worded for the log.</param>
         /// <param name="detail">
         /// An exception whose stack is worth having. Spelled out only for the one that warns,
         /// since writing a stack costs far more than the message and the rest are repeats.
         /// </param>
-        public static void WarnOnce(string message, Exception detail = null,
+        /// <param name="file">Filled in by the compiler: the calling file.</param>
+        /// <param name="line">Filled in by the compiler: the calling line.</param>
+        internal static void WarnOnce(string message, Exception detail = null,
             [CallerFilePath] string file = null, [CallerLineNumber] int line = 0)
         {
             if (Warned.Add(file + ":" + line)) Log.LogWarning(detail != null ? message + "\n" + detail : message);
@@ -43,12 +46,12 @@ namespace Bindrune
         }
 
         private static ConfigEntry<float> _scrollSpeed;
-        public static float ScrollSpeed => _scrollSpeed?.Value ?? 300f;
+        internal static float ScrollSpeed => _scrollSpeed?.Value ?? 300f;
 
         private static ConfigEntry<bool> _keyboardLabels;
 
         /// <summary>Whether keys are shown as the player's keyboard labels them. See KeyLabels.</summary>
-        public static bool KeyboardLabels => _keyboardLabels == null || _keyboardLabels.Value;
+        internal static bool KeyboardLabels => _keyboardLabels == null || _keyboardLabels.Value;
 
         private static ConfigEntry<float> _panelWidth;
         private static ConfigEntry<float> _panelHeight;
@@ -63,37 +66,37 @@ namespace Bindrune
         private static ConfigEntry<float> _hintY;
 
         /// <summary>Whether the on-screen hints are up. Remembered, so they come back as you left them.</summary>
-        public static bool HintsVisible
+        internal static bool HintsVisible
         {
             get => _hintsVisible != null && _hintsVisible.Value;
             set { if (_hintsVisible != null) _hintsVisible.Value = value; }
         }
 
-        public static int HintFontSize => _hintFontSize?.Value ?? 15;
+        internal static int HintFontSize => _hintFontSize?.Value ?? 15;
 
         /// <summary>Where the text sits inside the hint box.</summary>
-        public static HintAlign HintAlign
+        internal static HintAlign HintAlign
         {
             get => _hintAlign?.Value ?? Hints.HintAlign.Left;
             set { if (_hintAlign != null) _hintAlign.Value = value; }
         }
 
         /// <summary>Whether each hint names the mod it belongs to as well as the action.</summary>
-        public static bool HintModNames
+        internal static bool HintModNames
         {
             get => _hintModNames != null && _hintModNames.Value;
             set { if (_hintModNames != null) _hintModNames.Value = value; }
         }
 
         /// <summary>Whether a hint leads with the key or with what it does.</summary>
-        public static HintOrder HintOrder
+        internal static HintOrder HintOrder
         {
             get => _hintOrder?.Value ?? HintOrder.KeyFirst;
             set { if (_hintOrder != null) _hintOrder.Value = value; }
         }
 
         /// <summary>Which way the hint list extends as rows are added.</summary>
-        public static HintGrowth HintGrowth
+        internal static HintGrowth HintGrowth
         {
             get => _hintGrowth?.Value ?? HintGrowth.Up;
             set { if (_hintGrowth != null) _hintGrowth.Value = value; }
@@ -104,7 +107,7 @@ namespace Bindrune
         /// a fraction rather than in pixels so a change of resolution leaves them where they look
         /// like they were, instead of off the edge.
         /// </summary>
-        public static Vector2 HintPosition
+        internal static Vector2 HintPosition
         {
             get => new Vector2(_hintX?.Value ?? 0.02f, _hintY?.Value ?? 0.06f);
             set
@@ -116,7 +119,7 @@ namespace Bindrune
         }
 
         /// <summary>Panel size, remembered across sessions once you drag the corner.</summary>
-        public static Vector2 PanelSize
+        internal static Vector2 PanelSize
         {
             get => new Vector2(_panelWidth?.Value ?? 1280f, _panelHeight?.Value ?? 820f);
             set
@@ -131,7 +134,7 @@ namespace Bindrune
         private static ConfigEntry<KeyboardShortcut> _hintsKey;
 
         /// <summary>The hint toggle as text, so the panel can name it rather than guess.</summary>
-        public static string HintsKeyText => _hintsKey != null
+        internal static string HintsKeyText => _hintsKey != null
             ? KeyLabels.Of(new KeyCombo(_hintsKey.Value.MainKey, _hintsKey.Value.Modifiers))
             : "the hints key";
         private bool _restored;
@@ -140,6 +143,8 @@ namespace Bindrune
         /// <summary>Set when the menu pass left keys whose mod had not bound its settings yet.</summary>
         private bool _restoreInWorld;
 
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Reliability", "CA2000",
+            Justification = "The patches are meant to last as long as the game runs, so nothing disposes the Harmony instance that applies them.")]
         private void Awake()
         {
             Log = Logger;
@@ -342,7 +347,7 @@ namespace Bindrune
                 "Bindrune: the profile was replaced by an update, so your own keys came back from their spare copy.");
         }
 
-        public static string ResolveModName(string guid)
+        internal static string ResolveModName(string guid)
         {
             if (string.IsNullOrEmpty(guid)) return "unknown";
             return Chainloader.PluginInfos.TryGetValue(guid, out var info) && info?.Metadata != null

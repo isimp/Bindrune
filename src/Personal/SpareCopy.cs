@@ -28,7 +28,7 @@ namespace Bindrune.Personal
     /// file, so one that lost it never writes over the copy. Bindrune removes a spare copy only
     /// when you turn it off; a profile deleted in the manager leaves its spare copy behind.
     /// </summary>
-    public static class SpareCopy
+    internal static class SpareCopy
     {
         private const string KeysName = "bindrune.keys";
         private const string AnswerName = "bindrune.spare";
@@ -87,20 +87,20 @@ namespace Bindrune.Personal
         {
             try
             {
-                if (!File.Exists(AnswerPath)) return new string[0];
+                if (!File.Exists(AnswerPath)) return Array.Empty<string>();
                 var lines = File.ReadAllLines(AnswerPath);
-                return lines.Length > 0 && lines[0].Trim() == AnswerVersion ? lines.Skip(1).Where(l => !l.StartsWith("#")).ToArray() : new string[0];
+                return lines.Length > 0 && lines[0].Trim() == AnswerVersion ? lines.Skip(1).Where(l => !l.StartsWith("#", StringComparison.Ordinal)).ToArray() : Array.Empty<string>();
             }
             catch (Exception ex)
             {
                 Plugin.Log.LogWarning($"Bindrune: could not read {AnswerName}: {ex.Message}");
-                return new string[0];
+                return Array.Empty<string>();
             }
         }
 
         /// <summary>Whether bindrune.keys holds anything of yours: a key, a muted clash, a hint or a hotbar key.</summary>
         private static bool KeepsSomething() =>
-            TextStore.Read(KeysPath).Select(l => l.Trim()).Any(l => !TextStore.IsNoise(l) && !(l.StartsWith("[") && l.EndsWith("]")));
+            TextStore.Read(KeysPath).Select(l => l.Trim()).Any(l => !TextStore.IsNoise(l) && !(l.StartsWith("[", StringComparison.Ordinal) && l.EndsWith("]", StringComparison.Ordinal)));
 
         /// <summary>
         /// Records your answer. Yes makes the spare copy at once; no removes one made before, and

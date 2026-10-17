@@ -19,7 +19,7 @@ namespace Bindrune.Discovery
     /// the ones belonging to the active layout, and it clears and refills it whenever the layout
     /// changes - so what is in it is always what the pad does right now.
     /// </summary>
-    public static class GamepadButtons
+    internal static class GamepadButtons
     {
         public static List<BindEntry> Scan()
         {

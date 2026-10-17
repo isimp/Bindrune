@@ -6,7 +6,7 @@ using UnityEngine;
 namespace Bindrune
 {
     /// <summary>A main key plus its modifier keys, comparable across every bind source.</summary>
-    public readonly struct KeyCombo : IEquatable<KeyCombo>
+    internal readonly struct KeyCombo : IEquatable<KeyCombo>
     {
         public static readonly KeyCombo None = new KeyCombo(KeyCode.None, null, null);
 
@@ -67,6 +67,7 @@ namespace Bindrune
         /// The one place a combo is spelled out, so the raw form and the labelled form can never
         /// disagree about order or separators, only about what each key is called.
         /// </summary>
+        /// <param name="name">What to call each key, the main one and every modifier.</param>
         /// <param name="path">What to call a main key known only by its path; the path itself when null.</param>
         internal string Format(Func<KeyCode, string> name, Func<string, string> path = null)
         {

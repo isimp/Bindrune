@@ -16,7 +16,7 @@ namespace Bindrune.Hints
     /// Sampled on a cadence rather than per frame: this runs while you play, and reading it sixty
     /// times a second to redraw a list that changes when you open a menu would be waste.
     /// </summary>
-    public static class SituationNow
+    internal static class SituationNow
     {
         private const float Interval = 0.2f;
 

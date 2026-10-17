@@ -12,7 +12,7 @@ namespace Bindrune.Context
     /// Whose answer a bind's situations are, in the order they win. Distinct from BindSource,
     /// which is where the bind itself was found: a vanilla bind can still be described by you.
     /// </summary>
-    public enum SituationSource
+    internal enum SituationSource
     {
         None,
         /// <summary>The mod declared them to Bindrune, which makes them final.</summary>
@@ -45,7 +45,7 @@ namespace Bindrune.Context
     ///         new ConfigDescription("Dig", null,
     ///             new BindruneAttributes { HeldItems = new[] { "skill:Pickaxes" } }));
     /// </summary>
-    public static class KnownSituations
+    internal static class KnownSituations
     {
         private const string AttributeTypeName = "BindruneAttributes";
 
@@ -222,25 +222,25 @@ namespace Bindrune.Context
 
         private static void WriteTemplate()
         {
-            TextStore.Write(PackPath,
-                new[]
-                {
-                    "# Situations for mods that do not describe their own binds.",
-                    "# One per line:   <bind id><TAB><situations><TAB><held items>",
-                    "#",
-                    "# The bind id is the one Bindrune shows in its panel, for example:",
-                    "#   cfg:com.example.mod:General:DigKey",
-                    "#",
-                    "# Situations are the names from the panel, comma separated:",
-                    "#   World, Build placement, Build menu, Inventory, Container, Crafting, Map, Chat, Vehicle, Custom",
-                    "#",
-                    "# Held items are skill:<Skill>, type:<ItemType> or item:<prefab>, comma separated:",
-                    "#   skill:Pickaxes, item:ood_remote",
-                    "#",
-                    "# Anything you set yourself in the panel wins over this list.",
-                    "# A mod that declares its own situations wins over both."
-                },
-                new string[0]);
+            TextStore.Write(PackPath, PackTemplate, Array.Empty<string>());
         }
+
+        private static readonly string[] PackTemplate =
+        {
+            "# Situations for mods that do not describe their own binds.",
+            "# One per line:   <bind id><TAB><situations><TAB><held items>",
+            "#",
+            "# The bind id is the one Bindrune shows in its panel, for example:",
+            "#   cfg:com.example.mod:General:DigKey",
+            "#",
+            "# Situations are the names from the panel, comma separated:",
+            "#   World, Build placement, Build menu, Inventory, Container, Crafting, Map, Chat, Vehicle, Custom",
+            "#",
+            "# Held items are skill:<Skill>, type:<ItemType> or item:<prefab>, comma separated:",
+            "#   skill:Pickaxes, item:ood_remote",
+            "#",
+            "# Anything you set yourself in the panel wins over this list.",
+            "# A mod that declares its own situations wins over both."
+        };
     }
 }

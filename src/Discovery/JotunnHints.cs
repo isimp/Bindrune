@@ -17,7 +17,7 @@ namespace Bindrune.Discovery
     /// is the same fact we ask for in "only when holding", written for another purpose, so there
     /// is nothing for the author to adopt.
     /// </summary>
-    public static class JotunnHints
+    internal static class JotunnHints
     {
         public static void Read(List<BindEntry> binds)
         {

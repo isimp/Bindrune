@@ -14,9 +14,9 @@ namespace Bindrune.Discovery
     /// frame by the HUD or the camera, whatever screen is open, which is why VanillaDefaults
     /// tags them as live everywhere.
     /// </summary>
-    public static class GameKeys
+    internal static class GameKeys
     {
-        private class Read
+        private sealed class Read
         {
             public readonly string Name;
             public readonly KeyCombo Combo;

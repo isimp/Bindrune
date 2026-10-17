@@ -7,7 +7,7 @@ using UnityEngine.InputSystem;
 namespace Bindrune.UI
 {
     /// <summary>What a capture is for, so only the control that started it shows as waiting.</summary>
-    public enum CapturePurpose
+    internal enum CapturePurpose
     {
         None,
         Rebind,
@@ -18,7 +18,7 @@ namespace Bindrune.UI
     /// Listens for the next key press. Reads through BepInEx's input abstraction rather than
     /// UnityEngine.Input directly, so it works whichever input backend the game was built against.
     /// </summary>
-    public static class KeyCapture
+    internal static class KeyCapture
     {
         private static Action<KeyCombo> _onCaptured;
         private static KeyCode[] _candidates;

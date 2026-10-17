@@ -19,10 +19,10 @@ namespace Bindrune.Conflicts
     /// else's and delete yours. Held as pairs of bind ids, so a mute survives either bind moving
     /// to another key.
     /// </summary>
-    public static class MuteStore
+    internal static class MuteStore
     {
         /// <summary>What was waved through, so a worse version of it can be told apart.</summary>
-        private class Mute
+        private sealed class Mute
         {
             /// <summary>Null in a line from before mutes recorded this, which mutes the pair outright.</summary>
             public Severity? Severity;

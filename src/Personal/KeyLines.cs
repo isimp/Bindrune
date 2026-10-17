@@ -6,7 +6,7 @@ namespace Bindrune.Personal
     /// A bind can hold two keys at once: the one you chose, and the one the shared profile says.
     /// Both are remembered so switching between them restores the other rather than overwriting it.
     /// </summary>
-    public class PersonalEntry
+    internal sealed class PersonalEntry
     {
         public KeyCombo Personal;
         public KeyCombo Profile;
@@ -22,7 +22,7 @@ namespace Bindrune.Personal
     /// installed, so a change to it means a new StateVersion and a matching Keepsake. See
     /// tests/contract.
     /// </summary>
-    public static class KeyLines
+    internal static class KeyLines
     {
         /// <summary>The first line of bindrune.keys.</summary>
         public const string StateVersion = "# bindrune state v3";

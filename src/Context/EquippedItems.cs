@@ -7,7 +7,7 @@ using UnityEngine;
 
 namespace Bindrune.Context
 {
-    public class HeldItem
+    internal sealed class HeldItem
     {
         /// <summary>Every prefab that is this item. Mods clone gear for their own spawns, and a
         /// clone is still the same weapon as far as "what am I holding" is concerned.</summary>
@@ -25,7 +25,7 @@ namespace Bindrune.Context
     }
 
     /// <summary>One line the panel can offer: a group such as "any pickaxe", or a single item.</summary>
-    public class ItemChoice
+    internal sealed class ItemChoice
     {
         /// <summary>The situation tag this line adds. Groups are always obtainable.</summary>
         public string Tag;
@@ -41,9 +41,11 @@ namespace Bindrune.Context
     /// The databases are only populated in a world, so the list is cached to disk the first time
     /// it is seen and reused everywhere after that.
     /// </summary>
-    public static class EquippedItems
+    internal static class EquippedItems
     {
         public const string Prefix = "Equipped: ";
+
+        private static readonly string[] CacheHeader = { "# Holdable items, rebuilt from the game whenever you load a world." };
 
         // Item types that occupy a hand. Armour, materials and trophies cannot be "held".
         private static readonly HashSet<string> Holdable = new HashSet<string>
@@ -247,7 +249,7 @@ namespace Bindrune.Context
 
                     // Valheim returns "[token]" when a translation is missing, which is not a
                     // name anyone would recognise in a list.
-                    if (!string.IsNullOrEmpty(text) && !(text.StartsWith("[") && text.EndsWith("]")))
+                    if (!string.IsNullOrEmpty(text) && !(text.StartsWith("[", StringComparison.Ordinal) && text.EndsWith("]", StringComparison.Ordinal)))
                         return text;
                 }
             }
@@ -292,8 +294,8 @@ namespace Bindrune.Context
             var value = Value(tag);
             if (value == null) return tag;
 
-            if (value.StartsWith("skill:")) return SkillLabel(value.Substring(6));
-            if (value.StartsWith("type:")) return "Any " + Spaced(value.Substring(5));
+            if (value.StartsWith("skill:", StringComparison.Ordinal)) return SkillLabel(value.Substring(6));
+            if (value.StartsWith("type:", StringComparison.Ordinal)) return "Any " + Spaced(value.Substring(5));
 
             var prefab = value.Substring(5);
             var item = Items.FirstOrDefault(i => i.Prefabs.Contains(prefab));
@@ -309,13 +311,13 @@ namespace Bindrune.Context
             var value = Value(tag);
             if (value == null) return null;
 
-            if (value.StartsWith("skill:"))
+            if (value.StartsWith("skill:", StringComparison.Ordinal))
             {
                 var skill = value.Substring(6);
                 return new HashSet<string>(Items.Where(i => i.Skill == skill).SelectMany(i => i.Prefabs));
             }
 
-            if (value.StartsWith("type:"))
+            if (value.StartsWith("type:", StringComparison.Ordinal))
             {
                 var type = value.Substring(5);
                 return new HashSet<string>(Items.Where(i => i.Type == type).SelectMany(i => i.Prefabs));
@@ -389,7 +391,7 @@ namespace Bindrune.Context
 
         private static void Save() =>
             TextStore.Write(CachePath,
-                new[] { "# Holdable items, rebuilt from the game whenever you load a world." },
+                CacheHeader,
                 _items.Select(i =>
                     $"{string.Join(",", i.Prefabs.ToArray())}|{i.Display}|{i.Type}|{i.Skill}|{(i.Obtainable ? "1" : "0")}"));
     }

@@ -7,7 +7,7 @@ namespace Bindrune
     /// from most to least the owner told us: a ZInput button and a Jotunn button announce
     /// themselves, a typed config entry is unmistakable, and free text is our reading of it.
     /// </summary>
-    public enum BindSource
+    internal enum BindSource
     {
         /// <summary>Vanilla game button registered in ZInput.</summary>
         Vanilla,
@@ -27,7 +27,7 @@ namespace Bindrune
     /// cannot express a modifier cannot require one, but nothing stops its owner from checking
     /// Alt separately, and nothing here can see that.
     /// </summary>
-    public enum ModifierBehavior
+    internal enum ModifierBehavior
     {
         /// <summary>A KeyboardShortcut: its owner only reports it pressed on an exact match.</summary>
         Strict,
@@ -43,7 +43,7 @@ namespace Bindrune
     }
 
 
-    public class BindEntry
+    internal sealed class BindEntry
     {
         /// <summary>Stable identity across restarts and rescans. Built by BindIds; never parsed.</summary>
         public string Id;

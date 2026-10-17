@@ -6,7 +6,7 @@ using UnityEngine;
 
 namespace Bindrune.Conflicts
 {
-    public static class ConflictEngine
+    internal static class ConflictEngine
     {
         public static List<Conflict> Find(IEnumerable<BindEntry> binds)
         {

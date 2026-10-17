@@ -26,7 +26,7 @@ namespace Bindrune.Discovery
     /// The game assemblies are scanned once and cached against their own file stamp, so a game
     /// update re-derives the map instead of leaving a stale hand-written table behind.
     /// </summary>
-    public static class ContextIndex
+    internal static class ContextIndex
     {
         private static Dictionary<string, HashSet<string>> _contexts;
 

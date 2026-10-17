@@ -2,7 +2,7 @@ using System;
 
 namespace Bindrune.Conflicts
 {
-    public enum Severity
+    internal enum Severity
     {
         /// <summary>Same key, same modifiers. Both mods will act on the same press.</summary>
         Hard,
@@ -12,7 +12,7 @@ namespace Bindrune.Conflicts
         Note
     }
 
-    public class Conflict
+    internal sealed class Conflict
     {
         public BindEntry A;
         public BindEntry B;

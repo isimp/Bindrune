@@ -13,7 +13,7 @@ namespace Bindrune
     /// both worlds can be compared. Built from ZInput's own lookup tables to stay correct
     /// across game updates instead of hardcoding a table that will rot.
     /// </summary>
-    public static class KeyPaths
+    internal static class KeyPaths
     {
         private static Dictionary<string, KeyCode> _suffixToKey;
         private static Dictionary<KeyCode, string> _keyToPath;

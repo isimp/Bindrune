@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using BepInEx;
@@ -12,8 +13,10 @@ namespace Bindrune.Context
     /// the panel opens: the file is written whole, so without that an edit made by hand while
     /// the game runs would be undone by the next click.
     /// </summary>
-    public static class SituationStore
+    internal static class SituationStore
     {
+        private static readonly string[] Header = { "# Situations you marked each bind as applying to." };
+
         private static Dictionary<string, HashSet<string>> _situations;
         private static string _stamp;
 
@@ -90,9 +93,8 @@ namespace Bindrune.Context
 
         private static bool Save()
         {
-            var written = TextStore.Write(FilePath,
-                new[] { "# Situations you marked each bind as applying to." },
-                _situations.OrderBy(kv => kv.Key).Select(kv => kv.Key + "=" + string.Join("|", kv.Value.ToArray())));
+            var written = TextStore.Write(FilePath, Header,
+                _situations.OrderBy(kv => kv.Key, StringComparer.Ordinal).Select(kv => kv.Key + "=" + string.Join("|", kv.Value.ToArray())));
 
             _stamp = TextStore.Stamp(FilePath);
             return written;

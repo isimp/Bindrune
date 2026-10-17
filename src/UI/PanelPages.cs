@@ -13,7 +13,7 @@ namespace Bindrune.UI
     /// behind "?", which explains the marks and what Bindrune keeps for you, and the on-screen
     /// hints page behind "Hints", which is that whole feature's settings and its list.
     /// </summary>
-    public static partial class BindrunePanel
+    internal static partial class BindrunePanel
     {
         /// <summary>
         /// What was put back since you started, under a heading of its own so it reads as part of

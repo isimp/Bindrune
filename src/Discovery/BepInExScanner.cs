@@ -9,7 +9,7 @@ using UnityEngine;
 namespace Bindrune.Discovery
 {
     /// <summary>Reads keybinds out of every loaded plugin's BepInEx configuration.</summary>
-    public static class BepInExScanner
+    internal static class BepInExScanner
     {
         private static readonly string[] NameHints = { "key", "hotkey", "shortcut", "bind", "button", "modifier" };
 
@@ -115,8 +115,8 @@ namespace Bindrune.Discovery
         {
             combo = KeyCombo.None;
 
-            var haystack = (def.Key + " " + def.Section).ToLowerInvariant();
-            if (!NameHints.Any(h => haystack.Contains(h))) return false;
+            var haystack = def.Key + " " + def.Section;
+            if (!NameHints.Any(h => haystack.IndexOf(h, StringComparison.OrdinalIgnoreCase) >= 0)) return false;
 
             return TryParseCombo(entry.BoxedValue as string, out combo);
         }

@@ -11,7 +11,7 @@ namespace Bindrune.Hints
     /// component (m_buildHints, m_combatHints, m_inventoryHints and so on), with no list of which
     /// binds they name. The vanilla half is therefore a hand-checked guess, and is worded as one.
     /// </summary>
-    public static class SelfHinting
+    internal static class SelfHinting
     {
         private enum Kind
         {

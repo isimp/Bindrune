@@ -14,7 +14,7 @@ namespace Bindrune
     /// your key for the old one becomes an orphan the panel offers to forget. That is the right
     /// trade: the alternative silently applies your key to whatever setting inherits the name.
     /// </summary>
-    public static class BindIds
+    internal static class BindIds
     {
         public static string Config(string guid, string section, string key) => $"cfg:{guid}:{section}:{key}";
 

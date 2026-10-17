@@ -14,7 +14,7 @@ namespace Bindrune.Discovery
     /// raw config entry (they carry a display hint and know their own backing config), so when a
     /// bind shows up here we prefer this view and skip the plain config entry behind it.
     /// </summary>
-    public static class JotunnScanner
+    internal static class JotunnScanner
     {
         public static List<BindEntry> Scan(HashSet<ConfigEntryBase> backingEntries, HashSet<string> claimedButtonNames)
         {

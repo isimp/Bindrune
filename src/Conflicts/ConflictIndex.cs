@@ -10,7 +10,7 @@ namespace Bindrune.Conflicts
     /// the binds; the panel only decides how to draw it. Muting is applied on the way out rather
     /// than baked in, so unmuting one is a redraw and not a rescan.
     /// </summary>
-    public static class ConflictIndex
+    internal static class ConflictIndex
     {
         private static readonly List<Conflict> None = new List<Conflict>();
 

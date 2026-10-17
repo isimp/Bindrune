@@ -14,7 +14,7 @@ namespace Bindrune.Context
     /// aliases are deliberately absent: a wrong default is worse than none, because it would
     /// silence real conflicts.
     /// </summary>
-    public static class VanillaDefaults
+    internal static class VanillaDefaults
     {
         private static readonly string[] World = { "World" };
         private static readonly string[] Build = { "Build placement" };

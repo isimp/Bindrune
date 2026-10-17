@@ -12,7 +12,7 @@ namespace Bindrune.UI
     /// the profile folder. It is a box of its own over the panel, asked once the profile keeps
     /// something, and again from the Spare copy button at the top. See SpareCopy.
     /// </summary>
-    public static partial class BindrunePanel
+    internal static partial class BindrunePanel
     {
         private const float ModalWidth = 640f;
         private const float ModalInner = ModalWidth - 56f;

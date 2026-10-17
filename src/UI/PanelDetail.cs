@@ -15,7 +15,7 @@ namespace Bindrune.UI
     /// The right-hand column when a bind is selected: everything known about it, and every
     /// control that changes it. The pages shown instead of a bind live in PanelPages.
     /// </summary>
-    public static partial class BindrunePanel
+    internal static partial class BindrunePanel
     {
         private static void ShowDetail()
         {

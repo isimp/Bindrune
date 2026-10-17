@@ -14,7 +14,7 @@ namespace Bindrune
     /// the directory a profile sync copies to everyone, so leaving them there means shipping
     /// other people our history.
     /// </summary>
-    public static class Upkeep
+    internal static class Upkeep
     {
         public static void Run(ConfigFile config)
         {

@@ -19,7 +19,7 @@ namespace Bindrune.Personal
     /// are keys, which is exactly what a file written by an earlier version is, so it reads as it
     /// stands and needs no conversion of its own.
     /// </summary>
-    public static class PersonalStore
+    internal static class PersonalStore
     {
         public const string Keys = "keys";
         public const string Muted = "muted";

@@ -12,7 +12,7 @@ namespace Bindrune
     /// Lines starting with # are comments, and a failure is logged and swallowed: a corrupt or
     /// unreadable side file must never stop the panel from opening.
     /// </summary>
-    public static class TextStore
+    internal static class TextStore
     {
         /// <summary>
         /// A file of ours inside a BepInEx directory. Everything Bindrune keeps goes in a folder
@@ -35,7 +35,7 @@ namespace Bindrune
         /// </summary>
         public static bool TryRead(string path, out IEnumerable<string> lines)
         {
-            lines = new string[0];
+            lines = Array.Empty<string>();
 
             try
             {
@@ -77,7 +77,7 @@ namespace Bindrune
         }
 
         /// <summary>True for blank lines and comments, which every caller skips the same way.</summary>
-        public static bool IsNoise(string line) => line.Length == 0 || line.StartsWith("#");
+        public static bool IsNoise(string line) => line.Length == 0 || line.StartsWith("#", StringComparison.Ordinal);
 
         /// <summary>
         /// Writes header comments followed by the body. When atomic, the file is written aside

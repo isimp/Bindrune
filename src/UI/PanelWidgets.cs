@@ -9,7 +9,7 @@ namespace Bindrune.UI
     /// The panel's drawing primitives: Jotunn widgets wrapped so the rest of the panel can say
     /// what it wants rather than how to build it. Nothing here knows about binds or conflicts.
     /// </summary>
-    public static partial class BindrunePanel
+    internal static partial class BindrunePanel
     {
         private static GameObject Label(string text, Transform parent, float width, float height, int fontSize, Color color, bool bold = false)
         {

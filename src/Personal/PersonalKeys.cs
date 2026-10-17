@@ -7,7 +7,7 @@ using Bindrune.Discovery;
 namespace Bindrune.Personal
 {
     /// <summary>Which of a bind's two keys a write belongs to.</summary>
-    public enum SaveTarget
+    internal enum SaveTarget
     {
         /// <summary>Yours: kept when the profile syncs.</summary>
         Personal,
@@ -29,7 +29,7 @@ namespace Bindrune.Personal
     /// keys section of PersonalStore, which sits outside config and is named so that no sync
     /// picks it up either.
     /// </summary>
-    public static class PersonalKeys
+    internal static class PersonalKeys
     {
         private static Dictionary<string, PersonalEntry> _entries;
 
@@ -76,10 +76,13 @@ namespace Bindrune.Personal
             (bind.Source == BindSource.ModTyped || bind.Source == BindSource.Jotunn);
 
         /// <summary>Records a rebind against whichever side is live, leaving the other side untouched.</summary>
+        /// <param name="bindId">The bind written.</param>
+        /// <param name="combo">The key it now has.</param>
+        /// <param name="personal">Whether the key is yours rather than the profile's.</param>
         /// <param name="before">
         /// The key the bind had before the write. While the profile's side was live it was the
-        /// profile's key, so a key of yours replacing it remembers it as such, the way Mine does:
-        /// that is the key Whole profile gives back.
+        /// profile's key, so a key of yours replacing it remembers it as such, the way Just for you
+        /// does: that is the key Whole profile gives back.
         /// </param>
         public static void RecordRebind(string bindId, KeyCombo combo, bool personal, KeyCombo before)
         {

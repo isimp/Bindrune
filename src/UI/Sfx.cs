@@ -15,7 +15,7 @@ namespace Bindrune.UI
     /// A sound whose bundle is not loaded yet is simply not played and looked for again next
     /// time: a missing sound is never worth more than silence.
     /// </summary>
-    public static class Sfx
+    internal static class Sfx
     {
         public const string PanelOpen = "sfx_gui_inventory_open";
         public const string PanelClose = "sfx_gui_inventory_close";

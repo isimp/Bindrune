@@ -23,7 +23,7 @@ namespace Bindrune
     /// A key with no KeyCode is the exception, in OfPath: it has no Unity name to fall back to,
     /// only its input path, so a label of any length is accepted there.
     /// </summary>
-    public static class KeyLabels
+    internal static class KeyLabels
     {
         private static readonly Dictionary<KeyCode, string> Cache = new Dictionary<KeyCode, string>();
 
@@ -103,9 +103,15 @@ namespace Bindrune
             return query.Length > 1 && string.Equals(path, query, StringComparison.OrdinalIgnoreCase);
         }
 
+        /// <param name="name">The key's own name, shown whenever the keyboard gives no better label.</param>
+        /// <param name="displayName">Asks the keyboard in use what it calls the key.</param>
         /// <param name="anyLength">
         /// Whether a label longer than one character is accepted, which it is only for a key whose
         /// fallback is an input path.
+        /// </param>
+        /// <param name="settled">
+        /// Whether the answer can be kept: false only while there is no keyboard to ask yet, so the
+        /// key is asked about again later.
         /// </param>
         private static string Resolve(string name, Func<string> displayName, bool anyLength, out bool settled)
         {

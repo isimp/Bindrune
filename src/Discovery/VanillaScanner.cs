@@ -7,7 +7,7 @@ using UnityEngine;
 namespace Bindrune.Discovery
 {
     /// <summary>Reads the game's own keybinds out of ZInput.</summary>
-    public static class VanillaScanner
+    internal static class VanillaScanner
     {
         public static List<BindEntry> Scan(HashSet<string> claimedButtonNames)
         {

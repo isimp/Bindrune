@@ -7,7 +7,7 @@ using UnityEngine;
 namespace Bindrune.Personal
 {
     /// <summary>One kept setting in keepsake.pins.</summary>
-    public sealed class KeepsakeLine
+    internal sealed class KeepsakeLine
     {
         public string File;
         public string Section;
@@ -24,7 +24,7 @@ namespace Bindrune.Personal
     }
 
     /// <summary>A keybind kept in Keepsake, matched to a bind, as the keys to take over.</summary>
-    public sealed class KeepsakeMatch<T>
+    internal sealed class KeepsakeMatch<T>
     {
         public T Bind;
         public KeyCombo Yours;
@@ -42,7 +42,7 @@ namespace Bindrune.Personal
     /// value, both in the form the cfg file holds them. Kept apart from the game so it can be
     /// tested on its own. A file of any other version is not touched. See tests/contract.
     /// </summary>
-    public static class KeepsakeContract
+    internal static class KeepsakeContract
     {
         public const string PinsVersion = "# keepsake pins v1";
 
@@ -62,7 +62,7 @@ namespace Bindrune.Personal
                     continue;
                 }
 
-                if (line.Length == 0 || line.StartsWith("#")) continue;
+                if (line.Length == 0 || line.StartsWith("#", StringComparison.Ordinal)) continue;
 
                 var parts = line.Split('\t');
                 if (parts.Length < 4) continue;

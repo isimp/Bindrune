@@ -15,7 +15,7 @@ namespace Bindrune.Context
     /// A fixed vocabulary is what makes two binds comparable at all: "build menu" and
     /// "buildmenu" would never match as free text.
     /// </summary>
-    public static class SituationTags
+    internal static class SituationTags
     {
         /// <summary>Every "where" tag, in the order the panel offers them.</summary>
         public static readonly string[] All =

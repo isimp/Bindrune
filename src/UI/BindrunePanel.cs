@@ -15,7 +15,7 @@ namespace Bindrune.UI
     /// The in-game window. Left column lists every bind from every source; right column explains
     /// the selected one in full, so nothing is hidden behind a truncation or an external file.
     /// </summary>
-    public static partial class BindrunePanel
+    internal static partial class BindrunePanel
     {
         private const float RowHeight = 26f;
         private const float TopChrome = 124f;
@@ -694,7 +694,7 @@ namespace Bindrune.UI
             if (IsKeyName(query)) return UsesKey(bind, query);
 
             // Against what the row shows, so typing "ö" finds the rows reading Ö.
-            return (bind.OwnerName + " " + bind.Label + " " + KeyLabels.Of(bind.Combo)).ToLowerInvariant().Contains(query);
+            return (bind.OwnerName + " " + bind.Label + " " + KeyLabels.Of(bind.Combo)).IndexOf(query, StringComparison.OrdinalIgnoreCase) >= 0;
         }
 
         /// <summary>

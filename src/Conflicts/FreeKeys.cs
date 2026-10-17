@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using Bindrune.Discovery;
@@ -6,7 +7,7 @@ using UnityEngine;
 namespace Bindrune.Conflicts
 {
     /// <summary>A key worth trying instead, why it was picked, and what it would still share.</summary>
-    public class FreeKey
+    internal sealed class FreeKey
     {
         public KeyCombo Combo;
         public string Why;
@@ -26,7 +27,7 @@ namespace Bindrune.Conflicts
     /// Only as far as Bindrune can see: a mod that reads a key in its own code, with no setting
     /// behind it, cannot be checked.
     /// </summary>
-    public static class FreeKeys
+    internal static class FreeKeys
     {
         /// <summary>
         /// A candidate this costly is no longer near what was pressed, and suggesting it is no
@@ -66,12 +67,12 @@ namespace Bindrune.Conflicts
             // key can take one, which Bindrune builds for the game.
             var canHold = bind.Modifiers == ModifierBehavior.Strict ||
                           (bind.Handle is ZInput.ButtonDef def && FixedKeys.IsHotbar(def.Name));
-            var held = canHold ? tried.Modifiers : new KeyCode[0];
+            var held = canHold ? tried.Modifiers : Array.Empty<KeyCode>();
 
             var choices = new List<ModifierChoice> { new ModifierChoice(held, 0f) };
             if (canHold)
             {
-                if (held.Length > 0) choices.Add(new ModifierChoice(new KeyCode[0], 0f));
+                if (held.Length > 0) choices.Add(new ModifierChoice(Array.Empty<KeyCode>(), 0f));
 
                 var rank = 1;
                 foreach (var modifier in Preferred().Where(m => !held.Contains(m)))
@@ -109,7 +110,7 @@ namespace Bindrune.Conflicts
                 foreach (var modifier in bind.Combo.Modifiers)
                 {
                     var left = Left(modifier);
-                    if (uses.ContainsKey(left)) uses[left]++;
+                    if (uses.TryGetValue(left, out var count)) uses[left] = count + 1;
                 }
             }
 
@@ -134,7 +135,7 @@ namespace Bindrune.Conflicts
             return combo.Modifiers.SequenceEqual(tried.Modifiers) ? "near " + name : $"near {name}, {with}";
         }
 
-        private class ModifierChoice
+        private sealed class ModifierChoice
         {
             public readonly KeyCode[] Modifiers;
             public readonly float Cost;

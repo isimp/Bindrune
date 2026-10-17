@@ -13,7 +13,7 @@ namespace Bindrune
     /// that surround it there too. Covers the main block, the function row, the navigation keys
     /// and the arrows. The numpad and mouse buttons have no place, and so no neighbours.
     /// </summary>
-    public static class KeyGrid
+    internal static class KeyGrid
     {
         private struct Spot
         {

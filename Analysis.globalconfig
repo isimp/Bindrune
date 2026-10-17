@@ -1,0 +1,27 @@
+is_global = true
+
+# The .NET code analysis rules Bindrune turns off, each for what it misreads here. Every other rule
+# runs and fails the build (BuildChecks.props).
+
+# Unity's objects compare equal to null once destroyed, which flow analysis does not know: a
+# null check on one that looks set is how a destroyed one is skipped, not dead code.
+dotnet_diagnostic.CA1508.severity = none
+
+# Unity calls its messages (Awake, Update, OnDestroy) on the instance, by name; they cannot be static.
+dotnet_diagnostic.CA1822.severity = none
+
+# A BepInEx plugin's id is a dotted name ("isimp.Bindrune"), not a GUID, whatever its parameter is
+# called, and BepInEx names it GUID.
+dotnet_diagnostic.CA2243.severity = none
+dotnet_diagnostic.CA1720.severity = none
+
+# A failure in Bindrune must never take the game or another mod down with it: a caught failure
+# is told in the log (Plugin.WarnOnce or Plugin.Log), or, where it only means a value cannot be
+# read, says so in a comment. FailureStandardTests holds every catch to that.
+dotnet_diagnostic.CA1031.severity = none
+
+# Bindrune lowers text in the invariant culture for words it shows ("hard (4)", "two handed")
+# and for names its files have always been written with (a mute's tier, Keepsake's setting
+# names); raising them instead would change both. Text it compares, it compares ordinally
+# (StringStandardTests), never through the PC's language.
+dotnet_diagnostic.CA1308.severity = none

@@ -5,7 +5,7 @@ using BepInEx.Configuration;
 
 namespace Bindrune.Discovery
 {
-    public static class BindRegistry
+    internal static class BindRegistry
     {
         public static List<BindEntry> All { get; private set; } = new List<BindEntry>();
 

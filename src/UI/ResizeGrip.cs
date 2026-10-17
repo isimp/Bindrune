@@ -8,7 +8,9 @@ namespace Bindrune.UI
     /// Corner handle that resizes a centre-pivoted panel while keeping its top-left corner still,
     /// so the window grows towards the corner you are dragging rather than in both directions.
     /// </summary>
-    public class ResizeGrip : MonoBehaviour, IDragHandler, IEndDragHandler
+    [System.Diagnostics.CodeAnalysis.SuppressMessage("Performance", "CA1812",
+        Justification = "Unity makes it, through AddComponent, which the analysis does not count.")]
+    internal sealed class ResizeGrip : MonoBehaviour, IDragHandler, IEndDragHandler
     {
         public RectTransform Target;
         public Vector2 MinSize = new Vector2(900f, 520f);
