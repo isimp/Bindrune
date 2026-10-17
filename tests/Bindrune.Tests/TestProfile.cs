@@ -16,6 +16,8 @@ namespace Bindrune.Tests
         public string ConfigDir => Path.Combine(Root, "config");
         public string KeysFile => Path.Combine(Root, "bindrune.keys");
         public string SituationsFile => Path.Combine(ConfigDir, "Bindrune", "situations.txt");
+        public string SharedListFile => Path.Combine(ConfigDir, "Bindrune", "known.txt");
+        public string CacheDir => Path.Combine(Root, "cache");
 
         public TestProfile()
         {
@@ -23,7 +25,16 @@ namespace Bindrune.Tests
             Directory.CreateDirectory(ConfigDir);
             SetPath(nameof(Paths.BepInExRootPath), Root);
             SetPath(nameof(Paths.ConfigPath), ConfigDir);
+            SetPath(nameof(Paths.CachePath), CacheDir);
             NewGame();
+        }
+
+        /// <summary>The items a hand can hold, as the game's item list gave them when a world last loaded.</summary>
+        public void HoldableItems(params string[] lines)
+        {
+            Directory.CreateDirectory(Path.Combine(CacheDir, "Bindrune"));
+            File.WriteAllLines(Path.Combine(CacheDir, "Bindrune", "items.txt"), lines);
+            EquippedItems.Reset();
         }
 
         /// <summary>BepInEx sets its paths once as it starts, with no public way in.</summary>
@@ -35,6 +46,8 @@ namespace Bindrune.Tests
         {
             PersonalStore.Reset();
             SituationStore.Reset();
+            KnownSituations.Reset();
+            EquippedItems.Reset();
         }
 
         /// <summary>Holds a file open so nothing else can read or write it, as a scanner or an editor may, until disposed.</summary>

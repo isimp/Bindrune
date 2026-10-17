@@ -50,6 +50,23 @@ namespace Bindrune.Tests
         }
 
         [Fact]
+        public void DefaultPutsTheModsKeyOnTheProfilesSideAndKeepsYoursAsideForJustForYou()
+        {
+            using var profile = new TestProfile();
+            var (bind, setting) = ModBind(profile, KeyCode.L);
+            Assert.Null(BindWriter.Apply(bind, new KeyCombo(KeyCode.Q, null), SaveTarget.Personal));
+
+            Assert.Null(BindWriter.Reset(bind));
+
+            Assert.Equal(KeyCode.H, setting.Value.MainKey);
+            Assert.False(PersonalKeys.IsPersonal(bind.Id));
+            Assert.Equal(new KeyCombo(KeyCode.Q, null), PersonalKeys.Get(bind.Id)?.Personal);
+
+            PersonalKeys.UsePersonal(bind);
+            Assert.Equal(KeyCode.Q, setting.Value.MainKey);
+        }
+
+        [Fact]
         public void WholeProfileGivesTheBindBackToTheProfilesKeyAndMineReturnsToYours()
         {
             using var profile = new TestProfile();

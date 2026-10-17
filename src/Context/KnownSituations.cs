@@ -55,6 +55,13 @@ namespace Bindrune.Context
 
         private static string PackPath => TextStore.Ours(Paths.ConfigPath, "known.txt");
 
+        /// <summary>Forgets every situation read, the shared list's too, as a new game starts. For the tests, which run many in one process.</summary>
+        internal static void Reset()
+        {
+            BeginScan();
+            _fromPack = null;
+        }
+
         /// <summary>Wiped at the start of every scan: a mod that stopped declaring should stop counting.</summary>
         public static void BeginScan()
         {

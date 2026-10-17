@@ -146,7 +146,8 @@ namespace Bindrune
                 return "resetting the key failed, see the log";
             }
 
-            // Back to the mod's own key means there is nothing personal left to keep.
+            // The mod's own key goes in on the profile's side. A key of yours is kept aside, as
+            // Whole profile keeps it, so Just for you brings it back.
             var fallback = DefaultOf(bind);
             return Apply(bind, fallback, SaveTarget.Profile);
         }

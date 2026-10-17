@@ -71,6 +71,13 @@ namespace Bindrune.Context
 
         private static int _scannedFor;
 
+        /// <summary>Forgets the items read, as a new game starts. For the tests, which run many in one process.</summary>
+        internal static void Reset()
+        {
+            _items = null;
+            _scannedFor = 0;
+        }
+
         /// <summary>
         /// Scans the item database if it is available, once per loaded world.
         ///
