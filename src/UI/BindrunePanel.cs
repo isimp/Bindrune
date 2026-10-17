@@ -194,6 +194,21 @@ namespace Bindrune.UI
         /// </summary>
         public static bool Typing => _search != null && _search.isFocused;
 
+        private static List<string> _shownIds = new List<string>();
+
+        /// <summary>The binds the list shows, by id, in its order: what the search and the filters leave.</summary>
+        internal static IReadOnlyList<string> ShownIds => _shownIds;
+
+        /// <summary>The search box's text. Setting it searches as typing it does, once the list catches up.</summary>
+        internal static string SearchText
+        {
+            get => _search != null ? _search.text : null;
+            set
+            {
+                if (_search != null) _search.text = value ?? "";
+            }
+        }
+
         public static void Toggle()
         {
             if (IsOpen) Close();
@@ -583,6 +598,8 @@ namespace Bindrune.UI
                     .ThenBy(b => b.Combo.MainToken, StringComparer.Ordinal)
                     .ThenBy(b => b.OwnerName, StringComparer.OrdinalIgnoreCase)
                     .ToList();
+
+            _shownIds = shown.Select(b => b.Id).ToList();
 
             // Rebuilding every row to produce the same picture is the expensive part, and
             // narrowing a search often does not change what is on screen at all.

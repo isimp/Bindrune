@@ -19,6 +19,7 @@
        lib/: the tests run the parts that need no running game, and the rest only has to load. -->
   <ItemGroup>
     <Compile Include="../../src/**/*.cs" Exclude="../../src/Plugin.cs;../../src/UI/**;../../src/Hints/HintOverlay.cs;../../src/Hints/HintDrag.cs;../../src/StartMenuKeys.cs" />
+    <Compile Include="../../selftest/Report.cs" />
   </ItemGroup>
 
   <ItemGroup>

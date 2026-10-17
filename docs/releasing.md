@@ -17,7 +17,7 @@ Each store needs a token stored as a repository secret. The workflow checks for 
 
 1. Set the new version in `Bindrune.csproj` (`<Version>`), `src/Plugin.cs` (the `BepInPlugin` attribute) and `packaging/manifest.json` (`version_number`). The workflow checks that all three agree.
 2. Add a CHANGELOG entry. It ships in the package and appears on the mod pages.
-3. Push, and wait for the Build workflow to pass.
+3. Run the self-test in game with a development build (see [technical.md](technical.md), Self-test) and read its log. Push, and wait for the Build workflow to pass. The self-test is built there too, and never packaged.
 4. Run the Release workflow from the Actions tab. It asks for the version (without `v`), optional release notes, the draft flag, which stores to publish to (both, Hexium only or Thunderstore only), the team, and each store's categories.
 
 The workflow then runs these steps in order:

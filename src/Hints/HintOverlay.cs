@@ -78,6 +78,9 @@ namespace Bindrune.Hints
             _drawn = null;
         }
 
+        /// <summary>The rows on screen, one a line, or null while the hints are not showing.</summary>
+        internal static string Shown => _root != null && _root.activeSelf ? _drawn : null;
+
         public static void Toggle()
         {
             Plugin.HintsVisible = !Plugin.HintsVisible;

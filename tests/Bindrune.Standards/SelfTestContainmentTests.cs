@@ -37,9 +37,22 @@ namespace Bindrune.Standards
         }
 
         [Fact]
+        public void TheSelfTestPluginBringsItsCommand()
+        {
+            var types = Declared(BindruneSource.SelfTest).Select(t => t.Name).ToList();
+            Assert.Contains("SelfTestPlugin", types);
+            Assert.Contains(Literals(BindruneSource.SelfTest), l => l.Text.Equals("selftest", StringComparison.OrdinalIgnoreCase));
+        }
+
+        [Fact]
         public void AReleaseTakesBindruneDllAlone()
         {
+            // The plugin's own project leaves the self-test's folder out, and the release packs
+            // the one DLL the plugin's build makes.
             var root = BindruneSource.Root();
+            var project = File.ReadAllText(Path.Combine(root, "Bindrune.csproj"));
+            Assert.Contains("<Compile Remove=\"selftest/**\" />", project, StringComparison.Ordinal);
+
             var release = File.ReadAllText(Path.Combine(root, ".github", "workflows", "release.yml"));
             Assert.Contains("cp bin/Release/Bindrune.dll dist/package/", release, StringComparison.Ordinal);
             Assert.DoesNotContain("SelfTest", release, StringComparison.Ordinal);
