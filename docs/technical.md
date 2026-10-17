@@ -103,7 +103,7 @@ The build itself runs every .NET code analysis rule and fails on any finding (`B
 dotnet test tests/Bindrune.Standards
 ```
 
-`.githooks/pre-push` runs both sets before every push and stops the push when one fails; without a local `BepInEx.dll` it leaves out the unit tests with a warning. Git uses it once told to, per clone: `git config core.hooksPath .githooks`.
+`.githooks/pre-push` runs both sets before every push and stops the push when one fails; without a local `BepInEx.dll` it leaves out the unit tests with a warning. It also runs `tools/check-shared.sh`, which compares the files listed in `tools/shared-files.txt` with Keepsake's copies beside this repository (the same but for the mod's name) and stops the push where one changed without the other; without a Keepsake checkout it says so and compares nothing. Git uses it once told to, per clone: `git config core.hooksPath .githooks`.
 
 ## Self-test
 

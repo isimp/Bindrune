@@ -1,12 +1,12 @@
 <Project>
 
-  <!-- What the build itself checks, for Bindrune and the self-test alike; the standards tests in
-       tests/Bindrune.Standards check what the compiler cannot.
+  <!-- What the build itself checks, for what a release ships and the self-test alike; the
+       standards tests in tests/Bindrune.Standards check what the compiler cannot.
 
        Doc comments are compiled: a link to something renamed or gone, a link that could mean
        several overloads, badly formed XML, or parameter tags that miss or name no parameter
        fail the build. A member with no comment is fine. The XML file stays in bin; a release
-       takes Bindrune.dll alone.
+       takes the DLLs alone.
 
        Every .NET code analysis rule runs, and any finding fails the build, but those
        Analysis.globalconfig turns off, each with its reason. -->

@@ -1,0 +1,25 @@
+# Files Bindrune shares with Keepsake, the same in both but for the mod's name.
+# tools/check-shared.sh compares each with Keepsake's copy, and the pre-push hook runs it.
+# A file that differs by design (key names, key capture, sounds, panel widgets, the standards
+# tests that name each mod's own rules) is not listed. Columns are separated by a tab.
+names	Bindrune	Keepsake
+src/UnityNull.cs	src/Keepsake/UnityNull.cs
+src/UI/ResizeGrip.cs	src/Keepsake/UI/ResizeGrip.cs
+selftest/Report.cs	selftest/Report.cs
+tests/Bindrune.Tests/SelfTestReportTests.cs	tests/Keepsake.Tests/SelfTestReportTests.cs
+tests/Bindrune.Standards/CommentStandardTests.cs	tests/Keepsake.Standards/CommentStandardTests.cs
+tests/Bindrune.Standards/FileAndDocStandardTests.cs	tests/Keepsake.Standards/FileAndDocStandardTests.cs
+tests/Bindrune.Standards/LanguageTextStandardTests.cs	tests/Keepsake.Standards/LanguageTextStandardTests.cs
+tests/Bindrune.Standards/ResetStandardTests.cs	tests/Keepsake.Standards/ResetStandardTests.cs
+tests/Bindrune.Standards/StringStandardTests.cs	tests/Keepsake.Standards/StringStandardTests.cs
+tests/Bindrune.Standards/UnitTestReachStandardTests.cs	tests/Keepsake.Standards/UnitTestReachStandardTests.cs
+tests/Bindrune.Standards/UnityNullStandardTests.cs	tests/Keepsake.Standards/UnityNullStandardTests.cs
+tests/Bindrune.Standards/VersionStandardTests.cs	tests/Keepsake.Standards/VersionStandardTests.cs
+tests/Bindrune.Standards/Violations.cs	tests/Keepsake.Standards/Violations.cs
+BuildChecks.props	BuildChecks.props
+global.json	global.json
+.gitattributes	.gitattributes
+.githooks/commit-msg	.githooks/commit-msg
+.githooks/pre-push	.githooks/pre-push
+tools/publish.py	tools/publish.py
+tools/check-shared.sh	tools/check-shared.sh

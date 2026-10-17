@@ -16,7 +16,7 @@ namespace Bindrune.Standards
     public class FileStandardTests
     {
         private static readonly string[] Folders = { "src", "selftest", "tests", "docs", "tools", "packaging", ".github", ".githooks" };
-        private static readonly string[] Kinds = { ".cs", ".md", ".json", ".csproj", ".props", ".globalconfig", ".py", ".ps1", ".yml", ".txt", ".keys", ".pins", "" };
+        private static readonly string[] Kinds = { ".cs", ".md", ".json", ".csproj", ".props", ".globalconfig", ".py", ".ps1", ".yml", ".txt", ".keys", ".pins", ".sln", "" };
 
         /// <summary>Written by its number, so this file does not hold it.</summary>
         private const char LostCharacter = (char)0xFFFD;

@@ -58,6 +58,7 @@ namespace Bindrune.Standards
 
         [Theory]
         [InlineData("Ctrl+F1 frees the mouse")]
+        [InlineData("Home opens the panel")]
         [InlineData("version 0.5.1, a 4:3 screen")]
         public void WhatIsNoDateOrTimeIsLeft(string comment) => Assert.DoesNotMatch(DateOrTime, comment);
 
@@ -69,7 +70,7 @@ namespace Bindrune.Standards
             return File.ReadAllLines(list).Select(l => l.Trim()).Where(l => l.Length > 0 && !l.StartsWith("#", StringComparison.Ordinal)).ToList();
         }
 
-        /// <summary>Every comment of Bindrune's source, the self-test's and the tests', with where it is.</summary>
+        /// <summary>Every comment the standards read, the released code's, the self-test's and the tests', with where it is.</summary>
         private static IEnumerable<(string Where, string Text)> Comments()
         {
             foreach (var tree in BindruneSource.WrittenTrees())
