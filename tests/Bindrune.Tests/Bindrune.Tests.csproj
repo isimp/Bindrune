@@ -16,7 +16,8 @@
   </PropertyGroup>
 
   <!-- All of Bindrune but the plugin class, which PluginShim.cs stands in for, against the metadata-only game stubs in
-       lib/: the tests run the parts that need no running game, and the rest only has to load. -->
+       lib/: the tests run the parts that need no running game, and the rest only has to load. The files left out are
+       named with why in tests/Bindrune.Standards/GameOnlyFiles.cs, which a standards test holds this list to. -->
   <ItemGroup>
     <Compile Include="../../src/**/*.cs" Exclude="../../src/Plugin.cs;../../src/UI/**;../../src/Hints/HintOverlay.cs;../../src/Hints/HintDrag.cs;../../src/StartMenuKeys.cs" />
     <Compile Include="../../selftest/Report.cs" />
