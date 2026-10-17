@@ -60,8 +60,10 @@ namespace Bindrune.SelfTest
             yield return ("Hotbar keys", HotbarKeys);
             yield return ("Panel search", PanelSearch);
             yield return ("Hints", HintsOnScreen);
+            yield return ("Hints by where you are", HintsBySituation);
             yield return ("Key names", KeyNames);
             yield return ("Game code", GameCode);
+            yield return ("Jotunn buttons", JotunnBinds);
         }
 
         public IEnumerator Run(string why)

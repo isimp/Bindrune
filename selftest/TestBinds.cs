@@ -64,6 +64,8 @@ namespace Bindrune.SelfTest
             // A pair you describe in the panel.
             new Spec { Key = "YouA", Default = Shortcut(KeyCode.F13, KeyCode.RightAlt) },
             new Spec { Key = "YouB", Default = Shortcut(KeyCode.F13, KeyCode.RightAlt) },
+            // A bind live in the inventory, for the hints that follow where you are.
+            new Spec { Key = "InInventory", Default = Shortcut(KeyCode.F14, KeyCode.LeftShift), Tag = Where("Inventory") },
             // The bind your own key and the profile's are tried on.
             new Spec { Key = "Yours", Default = Shortcut(KeyCode.F13, KeyCode.RightControl) },
             // The bind pinned to the hints.
