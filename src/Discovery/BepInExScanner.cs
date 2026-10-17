@@ -27,8 +27,12 @@ namespace Bindrune.Discovery
                 if (guid == null) continue;
 
                 ConfigFile config;
-                try { config = info.Instance?.Config; }
-                catch { continue; }
+                try { config = info.Instance.OrNull()?.Config; }
+                catch
+                {
+                    // A plugin whose settings cannot be reached has none Bindrune could list.
+                    continue;
+                }
                 if (config == null) continue;
 
                 foreach (var entry in Snapshot(config))

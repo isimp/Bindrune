@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using Bindrune.Context;
@@ -32,7 +33,7 @@ namespace Bindrune.Conflicts
             return result
                 .OrderBy(c => c.Severity)
                 .ThenByDescending(c => c.Confirmed)
-                .ThenBy(c => c.KeyLabel)
+                .ThenBy(c => c.KeyLabel, StringComparer.OrdinalIgnoreCase)
                 .ToList();
         }
 
@@ -211,7 +212,7 @@ namespace Bindrune.Conflicts
         /// <summary>When a bind is live, from whichever source describes it. See KnownSituations.For.</summary>
         private static HashSet<string> Situations(BindEntry bind) => KnownSituations.For(bind, out SituationSource _);
 
-        private static string Join(IEnumerable<string> values) => string.Join(" / ", values.OrderBy(v => v).ToArray());
+        private static string Join(IEnumerable<string> values) => string.Join(" / ", values.OrderBy(v => v, StringComparer.OrdinalIgnoreCase).ToArray());
 
         private static Conflict Classify(BindEntry a, BindEntry b, string key)
         {

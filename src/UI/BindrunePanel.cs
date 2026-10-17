@@ -534,7 +534,7 @@ namespace Bindrune.UI
             Anchor(scroll, new Vector2(0f, 1f), position);
 
             // Jotunn hands back a container; the ScrollRect itself sits on a child of it.
-            var scrollRect = scroll.GetComponent<ScrollRect>() ?? scroll.GetComponentInChildren<ScrollRect>(true);
+            var scrollRect = scroll.GetComponent<ScrollRect>().OrNull() ?? scroll.GetComponentInChildren<ScrollRect>(true);
             if (scrollRect == null)
             {
                 Plugin.Log.LogError("Bindrune: scroll view has no ScrollRect.");
@@ -544,14 +544,14 @@ namespace Bindrune.UI
             scrollRect.scrollSensitivity = Plugin.ScrollSpeed;
             content = scrollRect.content;
 
-            var layout = content.GetComponent<VerticalLayoutGroup>() ?? content.gameObject.AddComponent<VerticalLayoutGroup>();
+            var layout = content.GetComponent<VerticalLayoutGroup>().OrNull() ?? content.gameObject.AddComponent<VerticalLayoutGroup>();
             layout.childControlHeight = true;
             layout.childControlWidth = true;
             layout.childForceExpandHeight = false;
             layout.padding = new RectOffset(padding, padding, padding, padding);
             layout.spacing = 2f;
 
-            var fitter = content.GetComponent<ContentSizeFitter>() ?? content.gameObject.AddComponent<ContentSizeFitter>();
+            var fitter = content.GetComponent<ContentSizeFitter>().OrNull() ?? content.gameObject.AddComponent<ContentSizeFitter>();
             fitter.verticalFit = ContentSizeFitter.FitMode.PreferredSize;
 
             return scroll;
@@ -580,8 +580,8 @@ namespace Bindrune.UI
             if (_groupByKey)
                 shown = shown
                     .OrderBy(b => b.Combo.IsBound ? 0 : 1)
-                    .ThenBy(b => b.Combo.MainToken)
-                    .ThenBy(b => b.OwnerName)
+                    .ThenBy(b => b.Combo.MainToken, StringComparer.Ordinal)
+                    .ThenBy(b => b.OwnerName, StringComparer.OrdinalIgnoreCase)
                     .ToList();
 
             // Rebuilding every row to produce the same picture is the expensive part, and

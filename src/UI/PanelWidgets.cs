@@ -40,11 +40,11 @@ namespace Bindrune.UI
 
             // No preferred height on the LayoutElement: the fitter derives it from the wrapped
             // text, which is what lets long explanations show in full.
-            var element = go.GetComponent<LayoutElement>() ?? go.AddComponent<LayoutElement>();
+            var element = go.GetComponent<LayoutElement>().OrNull() ?? go.AddComponent<LayoutElement>();
             element.preferredWidth = width;
             element.minWidth = width;
 
-            var fitter = go.GetComponent<ContentSizeFitter>() ?? go.AddComponent<ContentSizeFitter>();
+            var fitter = go.GetComponent<ContentSizeFitter>().OrNull() ?? go.AddComponent<ContentSizeFitter>();
             fitter.verticalFit = ContentSizeFitter.FitMode.PreferredSize;
             return go;
         }
@@ -111,7 +111,7 @@ namespace Bindrune.UI
 
         private static void Fix(GameObject go, float width, float height)
         {
-            var element = go.GetComponent<LayoutElement>() ?? go.AddComponent<LayoutElement>();
+            var element = go.GetComponent<LayoutElement>().OrNull() ?? go.AddComponent<LayoutElement>();
             element.preferredWidth = width;
             element.minWidth = width;
             element.preferredHeight = height;

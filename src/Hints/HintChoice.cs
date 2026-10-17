@@ -57,7 +57,7 @@ namespace Bindrune.Hints
 
         private static void Save()
         {
-            PersonalStore.Replace(PersonalStore.Hints, Chosen.OrderBy(id => id));
+            PersonalStore.Replace(PersonalStore.Hints, Chosen.OrderBy(id => id, StringComparer.Ordinal));
             Changed?.Invoke();
         }
     }

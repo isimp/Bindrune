@@ -26,9 +26,9 @@ namespace Bindrune.Discovery
             var game = Guarded("game keys", () => GameKeys.Scan(jotunn.Concat(configs)));
 
             All = vanilla.Concat(game).Concat(gamepad).Concat(jotunn).Concat(configs)
-                .OrderBy(b => b.OwnerName)
-                .ThenBy(b => b.Section)
-                .ThenBy(b => b.Label)
+                .OrderBy(b => b.OwnerName, StringComparer.OrdinalIgnoreCase)
+                .ThenBy(b => b.Section, StringComparer.OrdinalIgnoreCase)
+                .ThenBy(b => b.Label, StringComparer.OrdinalIgnoreCase)
                 .ToList();
 
             JotunnHints.Read(All);
@@ -39,7 +39,7 @@ namespace Bindrune.Discovery
             Personal.PersonalKeys.Reconcile();
 
             var breakdown = string.Join(", ", All.GroupBy(b => b.Source)
-                .OrderBy(g => g.Key.ToString())
+                .OrderBy(g => g.Key.ToString(), StringComparer.Ordinal)
                 .Select(g => $"{g.Key} {g.Count()}")
                 .ToArray());
             Plugin.Log.LogDebug($"Bindrune: {All.Count} binds ({breakdown}), {All.Count(b => b.Internal)} internal.");

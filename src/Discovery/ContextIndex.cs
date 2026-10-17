@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.IO;
 using System.Linq;
 using BepInEx;
@@ -113,7 +114,7 @@ namespace Bindrune.Discovery
             return true;
         }
 
-        private static string Join(IEnumerable<string> values) => string.Join(" / ", values.OrderBy(v => v).ToArray());
+        private static string Join(IEnumerable<string> values) => string.Join(" / ", values.OrderBy(v => v, StringComparer.OrdinalIgnoreCase).ToArray());
 
         private static string CachePath => TextStore.Ours(Paths.CachePath, "vanilla-contexts.txt");
 
@@ -180,7 +181,7 @@ namespace Bindrune.Discovery
                 }
             }
 
-            Plugin.Log.LogDebug($"Bindrune: derived contexts for {map.Count} vanilla binds in {(DateTime.UtcNow - started).TotalMilliseconds:F0} ms.");
+            Plugin.Log.LogDebug($"Bindrune: derived contexts for {map.Count} vanilla binds in {(DateTime.UtcNow - started).TotalMilliseconds.ToString("F0", CultureInfo.InvariantCulture)} ms.");
 
             // An empty result means the assemblies were missing or unreadable, not that the game
             // has no binds. Caching that would keep the wrong answer under a stamp that never
@@ -243,10 +244,8 @@ namespace Bindrune.Discovery
         {
             try
             {
-                Directory.CreateDirectory(Path.GetDirectoryName(CachePath));
-                var lines = new List<string> { Stamp() };
-                lines.AddRange(map.Select(kv => kv.Key + "=" + string.Join(",", kv.Value.ToArray())));
-                File.WriteAllLines(CachePath, lines.ToArray());
+                // The first line stamps the game's assemblies the contexts were read from.
+                TextStore.Write(CachePath, new[] { Stamp() }, map.Select(kv => kv.Key + "=" + string.Join(",", kv.Value.ToArray())));
             }
             catch (Exception ex)
             {

@@ -23,6 +23,11 @@ jobs:
       - name: Build
         run: dotnet build -c Release -p:LibsDir=lib --nologo
 
+      # The standards tests compile the source against lib/ and read it with the compiler, so
+      # they need no BepInEx.dll and run here. The unit tests need one and run locally.
+      - name: Standards
+        run: dotnet test tests/Bindrune.Standards --nologo
+
       # Bindrune and Keepsake read a file of each other's, and both repositories hold identical
       # samples of the two formats in tests/contract. A difference means one side changed a
       # format without the other. The tests that check each side against the samples run

@@ -60,6 +60,7 @@ namespace Bindrune.Personal
             }
             catch
             {
+                // Text BepInEx cannot read as a shortcut, as a hand edit can leave, holds no key.
                 return KeyCombo.None;
             }
         }

@@ -97,7 +97,13 @@ A mod that writes its key directly into its code instead of a setting has nothin
 dotnet test tests/Bindrune.Tests
 ```
 
-`.githooks/pre-push` runs them before every push and stops the push when one fails; without a local `BepInEx.dll` it lets the push through with a warning. Git uses it once told to, per clone: `git config core.hooksPath .githooks`.
+The build itself runs every .NET code analysis rule and fails on any finding (`BuildChecks.props`), but for the few that misread a Unity plugin, which `Analysis.globalconfig` turns off with the reason for each. It also compiles the doc comments, so a link to something renamed fails it. `tests/Bindrune.Standards` holds what the compiler cannot. It compiles Bindrune's source as the build does, against the stubs in `lib/`, and reads it with the compiler's own types. Text is compared and sorted ordinally, never in the PC's language, and a fraction or a time becomes text the same way on every PC. A Unity object is checked for none by Unity's own test. A failure caught is told in the log, or the catch says what the failure means. Files are written only by `TextStore.Write` and the few writers named with what they hold, and bind ids are spelled only by `BindIds`. Patches are applied one at a time, so a game update can switch one off without the rest. Nothing opens a program or a website, timers keep real time, every type but the plugin is internal, and comments carry no dates. These tests need no `BepInEx.dll`, so the build workflow runs them on every push:
+
+```
+dotnet test tests/Bindrune.Standards
+```
+
+`.githooks/pre-push` runs both sets before every push and stops the push when one fails; without a local `BepInEx.dll` it leaves out the unit tests with a warning. Git uses it once told to, per clone: `git config core.hooksPath .githooks`.
 
 ## Building
 

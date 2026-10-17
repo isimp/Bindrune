@@ -110,6 +110,8 @@ namespace Bindrune.Personal
             }
             catch (Exception)
             {
+                // A path that cannot be made whole, such as one holding characters no path may,
+                // is no setting's file, as one outside BepInEx/config is not.
                 return null;
             }
         }

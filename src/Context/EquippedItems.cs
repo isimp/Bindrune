@@ -107,7 +107,7 @@ namespace Bindrune.Context
                 if (prefab == null) continue;
 
                 var drop = prefab.GetComponent<ItemDrop>();
-                var shared = drop?.m_itemData?.m_shared;
+                var shared = drop.OrNull()?.m_itemData?.m_shared;
                 if (shared == null) continue;
 
                 var type = shared.m_itemType.ToString();
@@ -160,7 +160,7 @@ namespace Bindrune.Context
                     Skill = g.First().Skill,
                     Obtainable = g.Any(c => c.Obtainable)
                 })
-                .OrderBy(i => i.Display)
+                .OrderBy(i => i.Display, StringComparer.OrdinalIgnoreCase)
                 .ToList();
 
             Plugin.Log.LogDebug(
@@ -183,31 +183,31 @@ namespace Bindrune.Context
             {
                 if (db.m_recipes != null)
                     foreach (var recipe in db.m_recipes)
-                        if (recipe?.m_item != null) reachable.Add(recipe.m_item.gameObject.name);
+                        if (recipe.OrNull()?.m_item != null) reachable.Add(recipe.m_item.gameObject.name);
 
                 var scene = ZNetScene.instance;
-                if (scene?.m_prefabs == null) return reachable;
+                if (scene.OrNull()?.m_prefabs == null) return reachable;
 
                 foreach (var prefab in scene.m_prefabs)
                 {
                     if (prefab == null) continue;
 
                     var characterDrop = prefab.GetComponent<CharacterDrop>();
-                    if (characterDrop?.m_drops != null)
+                    if (characterDrop.OrNull()?.m_drops != null)
                         foreach (var drop in characterDrop.m_drops)
                             if (drop?.m_prefab != null) reachable.Add(drop.m_prefab.name);
 
                     var destroyed = prefab.GetComponent<DropOnDestroyed>();
-                    AddTable(reachable, destroyed?.m_dropWhenDestroyed);
+                    AddTable(reachable, destroyed.OrNull()?.m_dropWhenDestroyed);
 
                     var container = prefab.GetComponent<Container>();
-                    AddTable(reachable, container?.m_defaultItems);
+                    AddTable(reachable, container.OrNull()?.m_defaultItems);
 
                     var pickable = prefab.GetComponent<Pickable>();
-                    if (pickable?.m_itemPrefab != null) reachable.Add(pickable.m_itemPrefab.name);
+                    if (pickable.OrNull()?.m_itemPrefab != null) reachable.Add(pickable.m_itemPrefab.name);
 
                     var trader = prefab.GetComponent<Trader>();
-                    if (trader?.m_items != null)
+                    if (trader.OrNull()?.m_items != null)
                         foreach (var sold in trader.m_items)
                             if (sold?.m_prefab != null) reachable.Add(sold.m_prefab.gameObject.name);
                 }
@@ -271,10 +271,10 @@ namespace Bindrune.Context
         {
             var choices = new List<ItemChoice>();
 
-            foreach (var skill in Items.Select(i => i.Skill).Distinct().Where(s => s != "None").OrderBy(s => s))
+            foreach (var skill in Items.Select(i => i.Skill).Distinct().Where(s => s != "None").OrderBy(s => s, StringComparer.OrdinalIgnoreCase))
                 choices.Add(new ItemChoice { Tag = Prefix + "skill:" + skill, Label = SkillLabel(skill) });
 
-            foreach (var type in Items.Select(i => i.Type).Distinct().OrderBy(t => t))
+            foreach (var type in Items.Select(i => i.Type).Distinct().OrderBy(t => t, StringComparer.OrdinalIgnoreCase))
                 choices.Add(new ItemChoice { Tag = Prefix + "type:" + type, Label = "Any " + Spaced(type) });
 
             // OrderByDescending is stable, so each half keeps the alphabetical order Items has.

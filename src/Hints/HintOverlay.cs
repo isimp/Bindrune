@@ -155,8 +155,8 @@ namespace Bindrune.Hints
         private static List<string> Rows() =>
             BindRegistry.All
                 .Where(b => b.Combo.IsBound && HintChoice.Shows(b.Id) && SituationNow.Shows(b))
-                .OrderBy(b => b.OwnerName)
-                .ThenBy(b => b.Label)
+                .OrderBy(b => b.OwnerName, System.StringComparer.OrdinalIgnoreCase)
+                .ThenBy(b => b.Label, System.StringComparer.OrdinalIgnoreCase)
                 .Select(Row)
                 .ToList();
 
@@ -320,7 +320,7 @@ namespace Bindrune.Hints
             component.horizontalOverflow = HorizontalWrapMode.Overflow;
             component.raycastTarget = false;
 
-            var element = label.GetComponent<LayoutElement>() ?? label.AddComponent<LayoutElement>();
+            var element = label.GetComponent<LayoutElement>().OrNull() ?? label.AddComponent<LayoutElement>();
             element.minHeight = Plugin.HintFontSize + 8f;
             element.preferredHeight = Plugin.HintFontSize + 8f;
         }

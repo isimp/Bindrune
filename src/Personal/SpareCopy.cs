@@ -60,6 +60,7 @@ namespace Bindrune.Personal
                 }
                 catch (Exception)
                 {
+                    // A profile folder whose parents cannot be read is not one a manager replaces.
                     return null;
                 }
             }

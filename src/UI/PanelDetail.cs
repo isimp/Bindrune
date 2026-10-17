@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using Bindrune.Conflicts;
@@ -598,7 +599,7 @@ namespace Bindrune.UI
             // below - worth showing in full even where nothing maps onto a situation.
             var contexts = bind.Source == BindSource.Vanilla ? ContextIndex.For(bind.Label) : null;
             if (contexts != null && contexts.Count > 0)
-                Wrapped("Read by the game's own code in: " + string.Join(", ", contexts.OrderBy(d => d).ToArray()),
+                Wrapped("Read by the game's own code in: " + string.Join(", ", contexts.OrderBy(d => d, StringComparer.OrdinalIgnoreCase).ToArray()),
                     _detail, width, 12, new Color(1f, 1f, 1f, 0.55f));
 
             Spacer(4f);
@@ -768,7 +769,7 @@ namespace Bindrune.UI
             var template = dropdown != null ? dropdown.template : null;
             if (template == null) return;
 
-            var scroll = template.GetComponent<ScrollRect>() ?? template.GetComponentInChildren<ScrollRect>(true);
+            var scroll = template.GetComponent<ScrollRect>().OrNull() ?? template.GetComponentInChildren<ScrollRect>(true);
             if (scroll != null) scroll.scrollSensitivity = Plugin.ScrollSpeed;
         }
 

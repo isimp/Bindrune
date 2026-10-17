@@ -153,6 +153,6 @@ namespace Bindrune.Conflicts
                 : $"{pair}\t{mute.Severity.ToString().ToLowerInvariant()}\t{(mute.Confirmed ? "1" : "0")}";
 
         private static void Save() =>
-            PersonalStore.Replace(PersonalStore.Muted, Muted.OrderBy(m => m.Key).Select(m => Line(m.Key, m.Value)));
+            PersonalStore.Replace(PersonalStore.Muted, Muted.OrderBy(m => m.Key, StringComparer.Ordinal).Select(m => Line(m.Key, m.Value)));
     }
 }

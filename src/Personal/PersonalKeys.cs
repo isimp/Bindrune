@@ -288,7 +288,7 @@ namespace Bindrune.Personal
         private static bool Save()
         {
             return PersonalStore.Replace(PersonalStore.Keys,
-                Entries.OrderBy(e => e.Key).Select(e => KeyLines.Format(e.Key, e.Value)));
+                Entries.OrderBy(e => e.Key, StringComparer.Ordinal).Select(e => KeyLines.Format(e.Key, e.Value)));
         }
     }
 }
