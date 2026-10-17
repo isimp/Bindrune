@@ -21,7 +21,13 @@ namespace Bindrune
             [CallerFilePath] string file = null, [CallerLineNumber] int line = 0) => Warnings.Add(message);
 
         public static float ScrollSpeed => 300f;
-        public static bool KeyboardLabels => false;
+        /// <summary>
+        /// Off, though the setting's default is on: names by keyboard layout come from asking the
+        /// game's keyboard, which the stubs in lib/ cannot answer, so the tests read keys by Unity's
+        /// names. What is made of the keyboard's answer is tested through KeyLabels.Label, and the
+        /// self-test's Key names part asks the keyboard in game.
+        /// </summary>
+        public static bool KeyboardLabels { get; set; }
         public static Vector2 PanelSize { get; set; }
         public static bool HintsVisible { get; set; }
         public static int HintFontSize => 15;

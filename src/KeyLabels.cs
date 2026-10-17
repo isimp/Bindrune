@@ -121,19 +121,7 @@ namespace Bindrune
             {
                 if (Keyboard.current == null) return name;
                 settled = true;
-
-                var shown = displayName()?.Trim();
-                if (string.IsNullOrEmpty(shown)) return name;
-
-                foreach (var c in shown)
-                    if (char.IsControl(c)) return name;
-
-                // Upper case, as Unity's own letter names are, so a relabelled key sits among the
-                // unchanged ones without looking like a different kind of thing.
-                if (shown.Length == 1)
-                    return char.IsWhiteSpace(shown[0]) ? name : char.ToUpperInvariant(shown[0]).ToString();
-
-                return anyLength ? shown : name;
+                return Label(name, displayName(), anyLength);
             }
             catch (Exception ex)
             {
@@ -141,6 +129,28 @@ namespace Bindrune
                 settled = true;
                 return name;
             }
+        }
+
+        /// <summary>
+        /// What a key is called given what the keyboard calls it: its one printed character, or,
+        /// for a key known by its path, the keyboard's longer name; its own name otherwise.
+        /// </summary>
+        /// <param name="name">The key's own name, shown whenever the keyboard gives no better label.</param>
+        /// <param name="shown">What the keyboard in use calls the key, or null.</param>
+        /// <param name="anyLength">Whether a label longer than one character is accepted.</param>
+        internal static string Label(string name, string shown, bool anyLength)
+        {
+            shown = shown?.Trim();
+            if (string.IsNullOrEmpty(shown)) return name;
+
+            foreach (var c in shown)
+                if (char.IsControl(c)) return name;
+
+            // Upper case, as Unity's own letter names are, so a relabelled key sits among the
+            // unchanged ones without looking like a different kind of thing.
+            if (shown.Length == 1) return char.ToUpperInvariant(shown[0]).ToString();
+
+            return anyLength ? shown : name;
         }
     }
 }
