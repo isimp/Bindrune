@@ -27,6 +27,15 @@ namespace Bindrune.Standards
         /// <summary>The self-test plugin, selftest/, which reaches Bindrune's insides as its project grants it.</summary>
         public static CSharpCompilation SelfTest => BuiltSelfTest.Value;
 
+        /// <summary>What a release ships: Bindrune alone.</summary>
+        public static IEnumerable<CSharpCompilation> Released
+        {
+            get
+            {
+                yield return Compilation;
+            }
+        }
+
         /// <summary>Both, Bindrune first.</summary>
         public static IEnumerable<CSharpCompilation> Compilations
         {
