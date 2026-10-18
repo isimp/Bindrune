@@ -11,6 +11,19 @@ namespace Bindrune.SelfTest
         private const float SituationSettles = 0.4f;
 
         /// <summary>
+        /// Waits until the game itself says the map and the inventory are open or shut as wanted,
+        /// then long enough for the hints to look again. The map counts as open for a few of its
+        /// own frames after it closes, and opening the inventory can hold the game up for longer
+        /// than a fixed wait, so a wait by the clock alone can end inside those frames.
+        /// </summary>
+        private static IEnumerator Settle(bool mapOpen, bool inventoryOpen)
+        {
+            var clock = System.Diagnostics.Stopwatch.StartNew();
+            while ((Minimap.IsOpen() != mapOpen || InventoryGui.IsVisible() != inventoryOpen) && clock.Elapsed.TotalSeconds < 5) yield return null;
+            yield return Wait(SituationSettles);
+        }
+
+        /// <summary>
         /// The hints follow where you are: with the map open they show the binds live on the map,
         /// with the inventory open those live there, and a bind that says nothing of where shows
         /// everywhere. The map and the inventory are opened as the game opens them, and left
@@ -39,14 +52,14 @@ namespace Bindrune.SelfTest
 
                 if (inventoryWasOpen) InventoryGui.instance.Hide();
                 if (Minimap.IsOpen()) Minimap.instance.SetMapMode(Minimap.MapMode.Small);
-                yield return Wait(SituationSettles);
+                yield return Settle(mapOpen: false, inventoryOpen: false);
                 HintOverlay.Tick(force: true);
                 var world = HintOverlay.Shown ?? "";
                 Check(Has(world, "HintMe") && !Has(world, "OnMap") && !Has(world, "InInventory"),
                     "out in the world, only the bind that says nothing of where shows", Lines(world));
 
                 Minimap.instance.SetMapMode(Minimap.MapMode.Large);
-                yield return Wait(SituationSettles);
+                yield return Settle(mapOpen: true, inventoryOpen: false);
                 HintOverlay.Tick(force: true);
                 var onMap = HintOverlay.Shown ?? "";
                 Check(Minimap.IsOpen() && Has(onMap, "OnMap") && !Has(onMap, "InInventory") && Has(onMap, "HintMe"),
@@ -54,7 +67,7 @@ namespace Bindrune.SelfTest
                 Minimap.instance.SetMapMode(Minimap.MapMode.Small);
 
                 InventoryGui.instance.Show(null);
-                yield return Wait(SituationSettles);
+                yield return Settle(mapOpen: false, inventoryOpen: true);
                 HintOverlay.Tick(force: true);
                 var inInventory = HintOverlay.Shown ?? "";
                 Check(InventoryGui.IsVisible() && Has(inInventory, "InInventory") && !Has(inInventory, "OnMap") && Has(inInventory, "HintMe"),
