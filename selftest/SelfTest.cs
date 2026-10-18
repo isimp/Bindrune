@@ -59,6 +59,7 @@ namespace Bindrune.SelfTest
             yield return ("What a bind takes", Refusals);
             yield return ("Hotbar keys", HotbarKeys);
             yield return ("Panel search", PanelSearch);
+            yield return ("Every bind's detail", EveryDetail);
             yield return ("Hints", HintsOnScreen);
             yield return ("Hints by where you are", HintsBySituation);
             yield return ("Key names", KeyNames);

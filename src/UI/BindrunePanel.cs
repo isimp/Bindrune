@@ -209,6 +209,22 @@ namespace Bindrune.UI
             }
         }
 
+        /// <summary>The bind whose detail is on show, or null.</summary>
+        internal static BindEntry Selected => _selected;
+
+        /// <summary>The detail's sections folded shut, by key. Opening one is taking its key out.</summary>
+        internal static ICollection<string> CollapsedSections => _collapsed;
+
+        /// <summary>Shows a bind's detail as clicking its row does; null shows the help page.</summary>
+        internal static void ShowDetailOf(BindEntry bind)
+        {
+            Select(bind);
+            ShowDetail();
+        }
+
+        /// <summary>Shows the help page or the hints page as their buttons do, where the other page or a bind was on show.</summary>
+        internal static void ShowPage(bool hints) => Show(hints ? DetailPage.Hints : DetailPage.Legend);
+
         public static void Toggle()
         {
             if (IsOpen) Close();
