@@ -92,6 +92,7 @@ namespace Bindrune.Standards
             ["TextStore.cs"] = "the one writer of Bindrune's text files",
             ["KeepsakeHandover.cs"] = "takes your keybinds out of keepsake.pins, aside and swapped in, as Keepsake writes it",
             ["SpareCopy.cs"] = "copies bindrune.keys and bindrune.spare to the spare copy outside the profile and back",
+            ["SpareFolder.cs"] = "removes the spare copy outside the profile, and the emptied folder that held it, when you turn it off",
             ["PersonalStore.cs"] = "removes a file from before 0.2.1 once what it held is in bindrune.keys",
         };
 

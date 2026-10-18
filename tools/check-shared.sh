@@ -26,6 +26,8 @@ fi
 
 ME=$(printf '%s' "$me" | tr '[:lower:]' '[:upper:]')
 SIBLING=$(printf '%s' "$sibling" | tr '[:lower:]' '[:upper:]')
+me_lower=$(printf '%s' "$me" | tr '[:upper:]' '[:lower:]')
+sibling_lower=$(printf '%s' "$sibling" | tr '[:upper:]' '[:lower:]')
 failed=0
 work=$(mktemp -d)
 
@@ -36,7 +38,7 @@ grep -v '^#' "$list" | grep -v '^names	' | grep -v '^$' | while IFS='	' read -r 
         continue
     fi
     tr -d '\r' < "$root/$here" > "$work/here"
-    sed "s/$sibling/$me/g; s/$SIBLING/$ME/g" "$there/$theirs" | tr -d '\r' > "$work/theirs"
+    sed "s/$sibling/$me/g; s/$SIBLING/$ME/g; s/$sibling_lower/$me_lower/g" "$there/$theirs" | tr -d '\r' > "$work/theirs"
     if ! diff -u "$work/theirs" "$work/here" > "$work/diff"; then
         echo "check-shared: $here differs from $sibling's $theirs:" >&2
         sed "s|^--- $work/theirs.*|--- $sibling/$theirs|; s|^+++ $work/here.*|+++ $here|" "$work/diff" >&2

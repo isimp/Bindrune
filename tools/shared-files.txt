@@ -5,6 +5,8 @@
 names	Bindrune	Keepsake
 src/UnityNull.cs	src/Keepsake/UnityNull.cs
 src/UI/ResizeGrip.cs	src/Keepsake/UI/ResizeGrip.cs
+src/SpareFolder.cs	src/Shared/SpareFolder.cs
+tests/Bindrune.Tests/SpareFolderTests.cs	tests/Keepsake.Tests/SpareFolderTests.cs
 selftest/Report.cs	selftest/Report.cs
 tests/Bindrune.Tests/SelfTestReportTests.cs	tests/Keepsake.Tests/SelfTestReportTests.cs
 tests/Bindrune.Standards/CommentStandardTests.cs	tests/Keepsake.Standards/CommentStandardTests.cs

@@ -12,11 +12,7 @@ namespace Bindrune.Personal
     /// to its name. When the plugin starts in a profile without bindrune.keys and a spare copy
     /// under the profile's name is there, the copy comes back before anything reads the file.
     ///
-    /// Only for a profile of those two managers, told by the mods.yml they keep in every profile
-    /// folder, in a folder named profiles. The copy goes one level up, beside the managers' own
-    /// cache and exports folders, in Bindrune/ and the profile's folder name. Not inside profiles,
-    /// where the managers list every folder as a profile. Gale never replaces a profile folder,
-    /// and a profile anywhere else gets no spare copy.
+    /// Which profiles get one, and where it goes, SpareFolder decides, the same way as in Keepsake.
     ///
     /// Nothing is written outside the profile until you agree to it: the panel asks once such a
     /// profile keeps something, and the answer is kept in BepInEx/bindrune.spare, not in the
@@ -32,7 +28,6 @@ namespace Bindrune.Personal
     {
         private const string KeysName = "bindrune.keys";
         private const string AnswerName = "bindrune.spare";
-        private const string AnswerVersion = "# bindrune spare v1";
 
         /// <summary>Whether this session's start brought the spare copy back, for the plugin to say so once your character appears.</summary>
         public static bool RestoredThisLaunch { get; private set; }
@@ -43,28 +38,7 @@ namespace Bindrune.Personal
         private static string KeysPath => Path.Combine(Paths.BepInExRootPath, KeysName);
 
         /// <summary>The spare copy's folder for this profile, or null when the profile is not one of a manager that replaces profile folders.</summary>
-        public static string Folder
-        {
-            get
-            {
-                try
-                {
-                    var profile = Directory.GetParent(Paths.BepInExRootPath);
-                    if (profile == null || !File.Exists(Path.Combine(profile.FullName, "mods.yml"))) return null;
-
-                    var profiles = profile.Parent;
-                    if (profiles == null || !string.Equals(profiles.Name, "profiles", StringComparison.OrdinalIgnoreCase)) return null;
-
-                    var game = profiles.Parent;
-                    return game == null ? null : Path.Combine(Path.Combine(game.FullName, "Bindrune"), profile.Name);
-                }
-                catch (Exception)
-                {
-                    // A profile folder whose parents cannot be read is not one a manager replaces.
-                    return null;
-                }
-            }
-        }
+        public static string Folder => SpareFolder.For(Paths.BepInExRootPath);
 
         /// <summary>Whether a spare copy can be kept for this profile at all: one of a manager that replaces profile folders.</summary>
         public static bool Offered => Folder != null;
@@ -73,24 +47,14 @@ namespace Bindrune.Personal
         public static bool Asks => Offered && KeepsSomething() && Wanted == null;
 
         /// <summary>Whether you want a spare copy: true or false once asked, null before, or when the file cannot be read.</summary>
-        public static bool? Wanted
-        {
-            get
-            {
-                foreach (var parts in AnswerLines().Select(l => l.Split('\t')))
-                    if (parts.Length >= 2 && parts[0].Trim() == "copy")
-                        return parts[1].Trim() == "yes" ? true : parts[1].Trim() == "no" ? (bool?)false : null;
-                return null;
-            }
-        }
+        public static bool? Wanted => SpareFolder.WantedIn(AnswerLines());
 
         private static string[] AnswerLines()
         {
             try
             {
                 if (!File.Exists(AnswerPath)) return Array.Empty<string>();
-                var lines = File.ReadAllLines(AnswerPath);
-                return lines.Length > 0 && lines[0].Trim() == AnswerVersion ? lines.Skip(1).Where(l => !l.StartsWith("#", StringComparison.Ordinal)).ToArray() : Array.Empty<string>();
+                return File.ReadAllLines(AnswerPath);
             }
             catch (Exception ex)
             {
@@ -112,7 +76,7 @@ namespace Bindrune.Personal
             var written = TextStore.Write(AnswerPath,
                 new[]
                 {
-                    AnswerVersion,
+                    SpareFolder.AnswerVersion,
                     "# Whether Bindrune keeps a spare copy of bindrune.keys outside the profile, for",
                     "# Update existing profile in Thunderstore Mod Manager and r2modman.",
                 },
@@ -130,9 +94,7 @@ namespace Bindrune.Personal
                     return null;
                 }
 
-                if (Directory.Exists(spare)) Directory.Delete(spare, true);
-                var root = Path.GetDirectoryName(spare);
-                if (root != null && Directory.Exists(root) && Directory.GetFileSystemEntries(root).Length == 0) Directory.Delete(root);
+                SpareFolder.Remove(spare);
                 return null;
             }
             catch (Exception ex)
