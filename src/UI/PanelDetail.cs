@@ -45,34 +45,33 @@ namespace Bindrune.UI
             var bind = _selected;
             var width = DetailWidth - 40f;
 
-            Wrapped(bind.OwnerName, _detail, width, 15, new Color(1f, 1f, 1f, 0.7f));
-            Wrapped(bind.Label, _detail, width, 21, GUIManager.Instance.ValheimOrange, true);
+            // Only this button waits when this button started the capture; the search box has its own.
+            var view = BindDetail.Of(bind, _pendingFor == bind.Id, KeyCapture.IsCapturingFor(CapturePurpose.Rebind), _storedNamesShown);
+
+            Wrapped(view.Owner, _detail, width, 15, new Color(1f, 1f, 1f, 0.7f));
+            Wrapped(view.Label, _detail, width, 21, GUIManager.Instance.ValheimOrange, true);
             Spacer(6f);
 
-            Wrapped(bind.Combo.IsBound ? KeyLabels.Of(bind.Combo) : "not bound", _detail, width, 24, Color.white, true);
+            Wrapped(view.KeyLine, _detail, width, 24, Color.white, true);
 
             // The config file holds Unity's name, not the label. Only asked for when editing a
             // config by hand, so it waits behind the switch on the help page.
-            var stored = bind.Combo.ToString();
-            if (_storedNamesShown && bind.Combo.IsBound && KeyLabels.Of(bind.Combo) != stored)
-                Wrapped($"stored as {stored}", _detail, width, 12, new Color(1f, 1f, 1f, 0.45f));
+            if (view.StoredAs != null)
+                Wrapped(view.StoredAs, _detail, width, 12, new Color(1f, 1f, 1f, 0.45f));
 
             Spacer(8f);
 
-            if (bind.Editable && _pendingFor == bind.Id)
+            if (view.Mode == BindDetail.Controls.Pending)
             {
                 ShowPendingKey(bind, width);
             }
-            else if (bind.Editable)
+            else if (view.Mode == BindDetail.Controls.Edit)
             {
                 var buttons = HorizontalRow(_detail, 34f);
-                // Only this button waits when this button started the capture; the search box
-                // has its own.
-                var capturing = KeyCapture.IsCapturingFor(CapturePurpose.Rebind);
 
-                FixedButton(capturing ? "press a key..." : "Rebind", buttons, 140f, 32f, () => BeginRebind(bind));
+                FixedButton(view.RebindLabel, buttons, 140f, 32f, () => BeginRebind(bind));
 
-                var cancel = FixedButton(capturing ? "Cancel" : "Clear", buttons, 110f, 32f, () =>
+                var cancel = FixedButton(view.ClearLabel, buttons, 110f, 32f, () =>
                 {
                     if (KeyCapture.Active)
                     {
@@ -88,10 +87,9 @@ namespace Bindrune.UI
 
                 // Told each time it is drawn: this pane is rebuilt when the capture starts, so the
                 // button the capture began with is not the one anyone ends up clicking.
-                if (capturing) KeyCapture.QuitsOver((RectTransform)cancel.transform);
+                if (view.Capturing) KeyCapture.QuitsOver((RectTransform)cancel.transform);
 
-                var fallback = BindWriter.DefaultOf(bind);
-                if (!capturing && fallback.IsBound && !fallback.Equals(bind.Combo))
+                if (view.OffersDefault)
                 {
                     FixedButton("Default", buttons, 110f, 32f, () =>
                     {
@@ -101,7 +99,7 @@ namespace Bindrune.UI
                     });
                 }
 
-                if (capturing)
+                if (view.TellsHowToCapture)
                     Wrapped("Press any key, or press and release a modifier on its own to bind it. A key nothing else " +
                             "uses is set straight away. Esc cancels.",
                         _detail, width, 13, new Color(1f, 0.85f, 0.4f));
@@ -110,7 +108,7 @@ namespace Bindrune.UI
             }
             else
             {
-                Wrapped("Locked: " + bind.ReadOnlyReason, _detail, width, 13, new Color(1f, 0.8f, 0.4f));
+                Wrapped(view.Locked, _detail, width, 13, new Color(1f, 0.8f, 0.4f));
             }
 
             if (!string.IsNullOrEmpty(_note))
@@ -139,9 +137,9 @@ namespace Bindrune.UI
 
             // "No conflicts" has to mean we looked and found none. For a bind nothing compares,
             // the section above has already said why, and a green all-clear would be misleading.
-            if (!bind.Compared) return;
+            var conflicts = view.Conflicts;
+            if (conflicts == null) return;
 
-            var conflicts = ConflictIndex.For(bind.Id).OrderBy(c => c.Severity).ToList();
             if (conflicts.Count == 0)
             {
                 Spacer(18f);
@@ -154,20 +152,19 @@ namespace Bindrune.UI
             Wrapped($"Conflicts ({conflicts.Count})", _detail, width, 17, Color.white, true);
             Spacer(6f);
 
-            foreach (var conflict in conflicts)
+            foreach (var line in conflicts)
             {
                 Spacer(14f);
-                var muted = MuteStore.IsMuted(conflict);
+                var conflict = line.Conflict;
+                var muted = line.Muted;
 
                 var head = HorizontalRow(_detail, 30f);
                 // The tag takes all the slack so the two buttons land on the column's right edge.
                 var tagWidth = width - 96f - 86f - 38f;
-                var severity = conflict.Severity.ToString().ToLowerInvariant() + (conflict.Confirmed ? " - confirmed" : "");
-                FixedLabel(muted ? "muted" : severity, head, tagWidth, 24f, 14,
+                FixedLabel(line.Tag, head, tagWidth, 24f, 14,
                     muted ? new Color(1f, 1f, 1f, 0.4f) : ColorFor(conflict.Severity), true);
 
-                // A clash is a pair, and half of it is always the bind you are not looking at.
-                var other = conflict.A.Id == bind.Id ? conflict.B : conflict.A;
+                var other = line.Other;
                 FixedButton("Go to", head, 86f, 26f, () =>
                 {
                     Select(other);
