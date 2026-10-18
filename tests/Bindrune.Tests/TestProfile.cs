@@ -1,8 +1,12 @@
 using System;
 using System.IO;
+using System.Linq;
 using BepInEx;
+using BepInEx.Configuration;
 using Bindrune.Context;
+using Bindrune.Discovery;
 using Bindrune.Personal;
+using UnityEngine;
 
 namespace Bindrune.Tests
 {
@@ -36,6 +40,31 @@ namespace Bindrune.Tests
             File.WriteAllLines(Path.Combine(CacheDir, "Bindrune", "items.txt"), lines);
             EquippedItems.Reset();
         }
+
+        /// <summary>A mod's keybind setting, bound the way a plugin binds it, on the key the profile gave it, and the bind the panel lists for it.</summary>
+        internal (BindEntry Bind, ConfigEntry<KeyboardShortcut> Entry) ModBind(KeyCode profiles)
+        {
+            var config = new ConfigFile(Path.Combine(ConfigDir, "isimp.Example.cfg"), true);
+            var entry = config.Bind("Keys", "Open", new KeyboardShortcut(KeyCode.H), "Opens it.");
+            entry.Value = new KeyboardShortcut(profiles);
+
+            var bind = new BindEntry
+            {
+                Id = BindIds.Config("isimp.Example", "Keys", "Open"),
+                OwnerName = "Example",
+                Label = "Open",
+                Source = BindSource.ModTyped,
+                Modifiers = ModifierBehavior.Strict,
+                Combo = new KeyCombo(profiles, null),
+                Editable = true,
+                Handle = entry,
+            };
+            return (bind, entry);
+        }
+
+        /// <summary>What a scan found, as BindRegistry.Refresh leaves it.</summary>
+        internal static void Scanned(params BindEntry[] binds) =>
+            typeof(BindRegistry).GetProperty("All")!.GetSetMethod(true)!.Invoke(null, new object[] { binds.ToList() });
 
         /// <summary>BepInEx sets its paths once as it starts, with no public way in.</summary>
         private static void SetPath(string name, string value) =>

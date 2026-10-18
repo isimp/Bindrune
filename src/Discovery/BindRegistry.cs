@@ -9,6 +9,19 @@ namespace Bindrune.Discovery
     {
         public static List<BindEntry> All { get; private set; } = new List<BindEntry>();
 
+        /// <summary>
+        /// The other bind the game reads for the same thing: the same name with Alt on the end,
+        /// as each hotbar slot has. Null unless that bind exists and is one the player can set.
+        /// </summary>
+        public static BindEntry AlternateOf(BindEntry bind)
+        {
+            if (bind.Source != BindSource.Vanilla) return null;
+
+            var id = BindIds.Vanilla(bind.Label + "Alt");
+            var alternate = All.FirstOrDefault(b => b.Id == id);
+            return alternate != null && alternate.Editable ? alternate : null;
+        }
+
         public static void Refresh()
         {
             // Jotunn runs first: it reports which config entries back its buttons, and those

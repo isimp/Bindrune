@@ -29,10 +29,6 @@ namespace Bindrune.Tests
             Source = BindSource.ModTyped, Modifiers = ModifierBehavior.SingleKey, Combo = new KeyCombo(main, null), Editable = true,
         };
 
-        /// <summary>What a scan found, as BindRegistry.Refresh leaves it.</summary>
-        private static void Scanned(params BindEntry[] binds) =>
-            typeof(BindRegistry).GetProperty("All")!.GetSetMethod(true)!.Invoke(null, new object[] { binds.ToList() });
-
         private static Severity? Worst(BindEntry bind, KeyCombo combo)
         {
             var clashes = ConflictEngine.Preview(bind, combo, BindRegistry.All);
@@ -45,7 +41,7 @@ namespace Bindrune.Tests
             using var profile = new TestProfile();
             var mine = Shortcut("Mine", KeyCode.P);
             var taken = Shortcut("Taken", KeyCode.K, KeyCode.LeftAlt);
-            Scanned(mine, taken, Shortcut("Near", KeyCode.J, KeyCode.LeftAlt), SingleKey("Plain", KeyCode.L));
+            TestProfile.Scanned(mine, taken, Shortcut("Near", KeyCode.J, KeyCode.LeftAlt), SingleKey("Plain", KeyCode.L));
 
             var offered = FreeKeys.For(mine, taken.Combo, 3);
 
@@ -60,7 +56,7 @@ namespace Bindrune.Tests
             using var profile = new TestProfile();
             var mine = Shortcut("Mine", KeyCode.P);
             var taken = Shortcut("Taken", KeyCode.K, KeyCode.LeftAlt);
-            Scanned(mine, taken);
+            TestProfile.Scanned(mine, taken);
 
             var first = FreeKeys.For(mine, taken.Combo, 3).First();
 
@@ -74,7 +70,7 @@ namespace Bindrune.Tests
             using var profile = new TestProfile();
             var mine = Shortcut("Mine", KeyCode.P);
             var taken = Shortcut("Taken", KeyCode.K, KeyCode.LeftAlt);
-            Scanned(mine, taken);
+            TestProfile.Scanned(mine, taken);
 
             var others = FreeKeys.For(mine, taken.Combo, 3).Where(k => k.Combo.Main != KeyCode.K).ToList();
 
@@ -89,7 +85,7 @@ namespace Bindrune.Tests
             using var profile = new TestProfile();
             var mine = SingleKey("Mine", KeyCode.P);
             var taken = SingleKey("Taken", KeyCode.K);
-            Scanned(mine, taken);
+            TestProfile.Scanned(mine, taken);
 
             // Every key worth offering, not only the first three, so a modifier ranked low is seen too.
             var offered = FreeKeys.For(mine, taken.Combo, 50);
@@ -104,7 +100,7 @@ namespace Bindrune.Tests
             using var profile = new TestProfile();
             var mine = Shortcut("Mine", KeyCode.P);
             var plain = SingleKey("Plain", KeyCode.K);
-            Scanned(mine, plain);
+            TestProfile.Scanned(mine, plain);
 
             // K with any modifier still fires Plain, so it is no way out.
             Assert.DoesNotContain(FreeKeys.For(mine, new KeyCombo(KeyCode.K, null), 3), key => key.Combo.Main == KeyCode.K);
@@ -116,7 +112,7 @@ namespace Bindrune.Tests
             using var profile = new TestProfile();
             var mine = Shortcut("Mine", KeyCode.P);
             var taken = Shortcut("Taken", KeyCode.K);
-            Scanned(mine, taken, Shortcut("UsesAlt", KeyCode.F5, KeyCode.LeftAlt));
+            TestProfile.Scanned(mine, taken, Shortcut("UsesAlt", KeyCode.F5, KeyCode.LeftAlt));
 
             var offered = FreeKeys.For(mine, taken.Combo, 50);
 
@@ -130,7 +126,7 @@ namespace Bindrune.Tests
             using var profile = new TestProfile();
             var mine = Shortcut("Mine", KeyCode.P);
             var taken = Shortcut("Taken", KeyCode.K);
-            Scanned(mine, taken);
+            TestProfile.Scanned(mine, taken);
 
             var offered = FreeKeys.For(mine, taken.Combo, 50);
 
@@ -145,7 +141,7 @@ namespace Bindrune.Tests
             var locked = Shortcut("Locked", KeyCode.P);
             locked.Editable = false;
             var taken = Shortcut("Taken", KeyCode.K);
-            Scanned(locked, taken);
+            TestProfile.Scanned(locked, taken);
 
             Assert.Empty(FreeKeys.For(locked, taken.Combo, 50));
         }
@@ -159,7 +155,7 @@ namespace Bindrune.Tests
             var apart = Shortcut("Apart", KeyCode.K, KeyCode.LeftAlt);
             Assert.Null(SituationStore.Toggle(mine.Id, "Map"));
             Assert.Null(SituationStore.Toggle(apart.Id, "Inventory"));
-            Scanned(mine, taken, apart);
+            TestProfile.Scanned(mine, taken, apart);
 
             var shared = FreeKeys.For(mine, taken.Combo, 3).FirstOrDefault(k => k.Combo.Equals(apart.Combo));
 
@@ -172,7 +168,7 @@ namespace Bindrune.Tests
         {
             using var profile = new TestProfile();
             var mine = Shortcut("Mine", KeyCode.P);
-            Scanned(mine, Shortcut("UsesAlt", KeyCode.F5, KeyCode.LeftAlt));
+            TestProfile.Scanned(mine, Shortcut("UsesAlt", KeyCode.F5, KeyCode.LeftAlt));
 
             Assert.Empty(FreeKeys.For(mine, new KeyCombo(KeyCode.LeftAlt, null), 50));
             Assert.Empty(FreeKeys.For(mine, new KeyCombo(KeyCode.RightControl, null), 50));
@@ -184,7 +180,7 @@ namespace Bindrune.Tests
         {
             using var profile = new TestProfile();
             var mine = Shortcut("Mine", KeyCode.P);
-            Scanned(mine, Shortcut("UsesAlt", KeyCode.F5, KeyCode.LeftAlt));
+            TestProfile.Scanned(mine, Shortcut("UsesAlt", KeyCode.F5, KeyCode.LeftAlt));
 
             Assert.Empty(FreeKeys.For(mine, new KeyCombo(KeyCode.JoystickButton0, null), 50));
         }
@@ -194,7 +190,7 @@ namespace Bindrune.Tests
         {
             using var profile = new TestProfile();
             var mine = Shortcut("Mine", KeyCode.P);
-            Scanned(mine, Shortcut("Other", KeyCode.K, KeyCode.LeftAlt));
+            TestProfile.Scanned(mine, Shortcut("Other", KeyCode.K, KeyCode.LeftAlt));
 
             Assert.True(FreeKeys.Unused(mine, new KeyCombo(KeyCode.L, null)));
             Assert.False(FreeKeys.Unused(mine, new KeyCombo(KeyCode.K, new[] { KeyCode.LeftControl })));

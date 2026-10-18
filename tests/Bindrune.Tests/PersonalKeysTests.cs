@@ -15,32 +15,11 @@ namespace Bindrune.Tests
     [Collection(ProfileCollection.Name)]
     public class PersonalKeysTests
     {
-        /// <summary>A mod's keybind setting, bound the way a plugin binds it, on the key the profile gave it.</summary>
-        private static (BindEntry Bind, ConfigEntry<KeyboardShortcut> Entry) ModBind(TestProfile profile, KeyCode profiles)
-        {
-            var config = new ConfigFile(Path.Combine(profile.ConfigDir, "isimp.Example.cfg"), true);
-            var entry = config.Bind("Keys", "Open", new KeyboardShortcut(KeyCode.H), "Opens it.");
-            entry.Value = new KeyboardShortcut(profiles);
-
-            var bind = new BindEntry
-            {
-                Id = BindIds.Config("isimp.Example", "Keys", "Open"),
-                OwnerName = "Example",
-                Label = "Open",
-                Source = BindSource.ModTyped,
-                Modifiers = ModifierBehavior.Strict,
-                Combo = new KeyCombo(profiles, null),
-                Editable = true,
-                Handle = entry,
-            };
-            return (bind, entry);
-        }
-
         [Fact]
         public void YourFirstKeyRemembersTheOneItReplacedAsTheProfiles()
         {
             using var profile = new TestProfile();
-            var (bind, _) = ModBind(profile, KeyCode.L);
+            var (bind, _) = profile.ModBind(KeyCode.L);
 
             Assert.Null(BindWriter.Apply(bind, new KeyCombo(KeyCode.Q, null), SaveTarget.Personal));
 
@@ -53,7 +32,7 @@ namespace Bindrune.Tests
         public void DefaultPutsTheModsKeyOnTheProfilesSideAndKeepsYoursAsideForJustForYou()
         {
             using var profile = new TestProfile();
-            var (bind, setting) = ModBind(profile, KeyCode.L);
+            var (bind, setting) = profile.ModBind(KeyCode.L);
             Assert.Null(BindWriter.Apply(bind, new KeyCombo(KeyCode.Q, null), SaveTarget.Personal));
 
             Assert.Null(BindWriter.Reset(bind));
@@ -70,7 +49,7 @@ namespace Bindrune.Tests
         public void WholeProfileGivesTheBindBackToTheProfilesKeyAndMineReturnsToYours()
         {
             using var profile = new TestProfile();
-            var (bind, setting) = ModBind(profile, KeyCode.L);
+            var (bind, setting) = profile.ModBind(KeyCode.L);
             Assert.Null(BindWriter.Apply(bind, new KeyCombo(KeyCode.Q, null), SaveTarget.Personal));
 
             PersonalKeys.UseProfile(bind);
@@ -84,7 +63,7 @@ namespace Bindrune.Tests
         public void WholeProfileOnABindTheProfileLeftWithoutAKeyLeavesItWithoutOne()
         {
             using var profile = new TestProfile();
-            var (bind, setting) = ModBind(profile, KeyCode.None);
+            var (bind, setting) = profile.ModBind(KeyCode.None);
             Assert.Null(BindWriter.Apply(bind, new KeyCombo(KeyCode.W, null), SaveTarget.Personal));
 
             PersonalKeys.UseProfile(bind);
@@ -103,7 +82,7 @@ namespace Bindrune.Tests
         public void GoingBackAndForthKeepsBothKeysAsTheyWere()
         {
             using var profile = new TestProfile();
-            var (bind, setting) = ModBind(profile, KeyCode.L);
+            var (bind, setting) = profile.ModBind(KeyCode.L);
             Assert.Null(BindWriter.Apply(bind, new KeyCombo(KeyCode.Q, null), SaveTarget.Personal));
 
             for (var i = 0; i < 3; i++)
@@ -122,7 +101,7 @@ namespace Bindrune.Tests
         public void ChangingYourKeyAgainKeepsTheProfilesKeyItHadRemembered()
         {
             using var profile = new TestProfile();
-            var (bind, _) = ModBind(profile, KeyCode.L);
+            var (bind, _) = profile.ModBind(KeyCode.L);
 
             Assert.Null(BindWriter.Apply(bind, new KeyCombo(KeyCode.Q, null), SaveTarget.Personal));
             Assert.Null(BindWriter.Apply(bind, new KeyCombo(KeyCode.W, null), SaveTarget.Personal));
@@ -132,16 +111,11 @@ namespace Bindrune.Tests
             Assert.Equal(new KeyCombo(KeyCode.L, null), entry.Profile);
         }
 
-        /// <summary>What a scan found, as BindRegistry.Refresh leaves it.</summary>
-        private static void Scanned(params BindEntry[] binds) =>
-            typeof(Bindrune.Discovery.BindRegistry).GetProperty("All")!.GetSetMethod(true)!
-                .Invoke(null, new object[] { binds.ToList() });
-
         [Fact]
         public void AfterASyncYourKeyGoesBackAndWhatTheProfileSaysIsRememberedEvenNoKey()
         {
             using var profile = new TestProfile();
-            var (bind, setting) = ModBind(profile, KeyCode.None);
+            var (bind, setting) = profile.ModBind(KeyCode.None);
             File.WriteAllLines(profile.KeysFile, new[]
             {
                 KeyLines.StateVersion, "[keys]", $"{bind.Id}\tW\tW\t1",
@@ -150,7 +124,7 @@ namespace Bindrune.Tests
 
             try
             {
-                Scanned(bind);
+                TestProfile.Scanned(bind);
                 PersonalKeys.Reconcile();
 
                 Assert.Equal(KeyCode.W, setting.Value.MainKey);
@@ -163,7 +137,7 @@ namespace Bindrune.Tests
             }
             finally
             {
-                Scanned();
+                TestProfile.Scanned();
             }
         }
 
@@ -171,12 +145,12 @@ namespace Bindrune.Tests
         public void KeysThatCouldNotBeReadAtTheStartAreAskedForAgainAndPutBackOnceTheyCanBe()
         {
             using var profile = new TestProfile();
-            var (bind, setting) = ModBind(profile, KeyCode.L);
+            var (bind, setting) = profile.ModBind(KeyCode.L);
             File.WriteAllLines(profile.KeysFile, new[] { KeyLines.StateVersion, "[keys]", $"{bind.Id}\tQ\tL\t1" });
 
             try
             {
-                Scanned(bind);
+                TestProfile.Scanned(bind);
 
                 // A scanner holds the file as the game starts: the start has to look again.
                 using (TestProfile.Lock(profile.KeysFile))
@@ -192,7 +166,7 @@ namespace Bindrune.Tests
             }
             finally
             {
-                Scanned();
+                TestProfile.Scanned();
             }
         }
 
@@ -200,7 +174,7 @@ namespace Bindrune.Tests
         public void BothKeysAreThereInTheNextGame()
         {
             using var profile = new TestProfile();
-            var (bind, _) = ModBind(profile, KeyCode.L);
+            var (bind, _) = profile.ModBind(KeyCode.L);
             Assert.Null(BindWriter.Apply(bind, new KeyCombo(KeyCode.Q, new[] { KeyCode.LeftAlt }), SaveTarget.Personal));
 
             TestProfile.NewGame();

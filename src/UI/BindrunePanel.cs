@@ -702,7 +702,7 @@ namespace Bindrune.UI
             foreach (var bind in shown)
             {
                 builder.Append(bind.Id).Append('=').Append(bind.Combo);
-                if (PersonalKeys.IsPersonal(bind.Id)) builder.Append('*').Append(ProfileKeyNote(bind, true));
+                if (PersonalKeys.IsPersonal(bind.Id)) builder.Append('*').Append(BindText.ProfileKeyNote(bind, true));
 
                 var worst = ConflictIndex.Worst(bind.Id);
                 if (worst != null) builder.Append('#').Append(worst).Append(ConflictIndex.Live(bind.Id).Count);
@@ -911,7 +911,7 @@ namespace Bindrune.UI
             Cell(row.transform, key, columns.Key, bind.Combo.IsBound ? Color.white : new Color(1f, 1f, 1f, 0.35f), 15);
 
             if (columns.Profile > 0f)
-                Cell(row.transform, ProfileKeyNote(bind, yours), columns.Profile, new Color(1f, 1f, 1f, 0.4f), 12);
+                Cell(row.transform, BindText.ProfileKeyNote(bind, yours), columns.Profile, new Color(1f, 1f, 1f, 0.4f), 12);
         }
 
         private static Color ColorFor(Severity? severity)

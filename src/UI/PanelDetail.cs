@@ -131,7 +131,7 @@ namespace Bindrune.UI
                     Spacer(8f);
                 }
 
-                Wrapped(Behaviour(bind), _detail, width, 13, new Color(1f, 1f, 1f, 0.65f));
+                Wrapped(BindText.Behaviour(bind), _detail, width, 13, new Color(1f, 1f, 1f, 0.65f));
                 Spacer(12f);
             }
 
@@ -197,7 +197,7 @@ namespace Bindrune.UI
                     "Bindrune keeps the key you set here and puts it back each time.",
                 _detail, width, 13, new Color(1f, 1f, 1f, 0.65f));
 
-            var alternate = Alternate(bind);
+            var alternate = BindRegistry.AlternateOf(bind);
             if (alternate == null) return;
 
             Spacer(4f);
@@ -211,19 +211,6 @@ namespace Bindrune.UI
                 Reveal(alternate);
                 ShowDetail();
             });
-        }
-
-        /// <summary>
-        /// The other bind the game reads for the same thing: the same name with Alt on the end,
-        /// as each hotbar slot has. Null unless that bind exists and is one the player can set.
-        /// </summary>
-        private static BindEntry Alternate(BindEntry bind)
-        {
-            if (bind.Source != BindSource.Vanilla) return null;
-
-            var id = BindIds.Vanilla(bind.Label + "Alt");
-            var alternate = BindRegistry.All.FirstOrDefault(b => b.Id == id);
-            return alternate != null && alternate.Editable ? alternate : null;
         }
 
         /// <summary>
@@ -375,16 +362,8 @@ namespace Bindrune.UI
 
                 // A shared key is offered on purpose, but it should say so.
                 if (option.Shared.Count > 0)
-                    Wrapped(SharedWith(option.Shared, bind), _detail, width, 12, new Color(1f, 1f, 1f, 0.5f));
+                    Wrapped(BindText.SharedWith(option.Shared, bind), _detail, width, 12, new Color(1f, 1f, 1f, 0.5f));
             }
-        }
-
-        private static string SharedWith(List<Conflict> shared, BindEntry bind)
-        {
-            if (shared.Count > 1) return $"Shared with {shared.Count} binds, none of which should interfere.";
-
-            var other = shared[0].A.Id == bind.Id ? shared[0].B : shared[0].A;
-            return $"Shared with {other.OwnerName}'s \"{other.Label}\", which should not interfere.";
         }
 
         /// <summary>
@@ -506,20 +485,6 @@ namespace Bindrune.UI
         }
 
         /// <summary>
-        /// What the profile would put here instead, shown only when it actually differs - so the
-        /// column stays empty for the many binds nobody has touched.
-        /// </summary>
-        private static string ProfileKeyNote(BindEntry bind, bool yours)
-        {
-            if (!yours) return "";
-
-            var entry = PersonalKeys.Get(bind.Id);
-            if (entry == null || !entry.Profile.IsBound || entry.Profile.Equals(bind.Combo)) return "";
-
-            return "profile: " + KeyLabels.Of(entry.Profile);
-        }
-
-        /// <summary>
         /// A foldable heading. Returns whether its contents should be drawn, so a section costs
         /// one line until you ask for it.
         /// </summary>
@@ -587,7 +552,7 @@ namespace Bindrune.UI
             var fromMod = source == SituationSource.Mod;
             if (!Section("situations", situations.Count > 0 ? $"Applies when ({situations.Count})" : "Applies when", width)) return;
 
-            var provenance = Provenance(source, bind.OwnerName);
+            var provenance = BindText.Provenance(source, bind.OwnerName);
             if (provenance != null)
             {
                 Wrapped(provenance, _detail, width, 12,
@@ -655,28 +620,6 @@ namespace Bindrune.UI
                     "Two that do apply together are marked as confirmed.",
                 _detail, width, 12, new Color(1f, 1f, 1f, 0.5f));
             Spacer(18f);
-        }
-
-        /// <summary>
-        /// Whose answer is on show, and whether clicking will change it. A mod that describes its
-        /// own bind is final: its author knows when their code runs, and no amount of guessing
-        /// from the outside beats that. Every other source is a starting point you can take over.
-        /// </summary>
-        private static string Provenance(SituationSource source, string ownerName)
-        {
-            switch (source)
-            {
-                case SituationSource.Mod:
-                    return $"{ownerName} describes this bind itself, so these cannot be changed here.";
-                case SituationSource.KeyHints:
-                    return $"Taken from {ownerName}'s own key hints. Change anything to make it yours instead.";
-                case SituationSource.Pack:
-                    return "From the shared list that travels with this profile. Change anything to make it yours instead.";
-                case SituationSource.Game:
-                    return "What the game does with its own bind. Change anything to make it yours instead.";
-                default:
-                    return null;
-            }
         }
 
         /// <summary>
@@ -771,45 +714,6 @@ namespace Bindrune.UI
 
             var scroll = template.GetComponent<ScrollRect>().OrNull() ?? template.GetComponentInChildren<ScrollRect>(true);
             if (scroll != null) scroll.scrollSensitivity = Plugin.ScrollSpeed;
-        }
-
-        /// <summary>
-        /// What is known about this bind, kept to what its storage proves. A setting holding one
-        /// key cannot require a modifier - but its owner may still look at Alt itself, and no
-        /// amount of reading the config would show that, so the wording says so rather than
-        /// stating a behaviour we have not seen.
-        /// </summary>
-        private static string Behaviour(BindEntry bind)
-        {
-            string modifiers;
-            if (bind.Source == BindSource.Gamepad)
-                modifiers = "A gamepad button, read from whichever controller layout you picked. Modifiers do not enter into it.";
-            else if (bind.Modifiers == ModifierBehavior.Required)
-                modifiers = "Fires while this modifier is held, whatever else is held with it.";
-            else if (bind.Modifiers == ModifierBehavior.Strict)
-                modifiers = "Needs exactly these modifiers, and will not fire while any other key is held (including movement keys).";
-            else if (bind.Modifiers == ModifierBehavior.Unknown)
-                modifiers = "Stored as text, so whether modifiers matter here cannot be told from the setting.";
-            else if (bind.Source == BindSource.Vanilla || bind.Source == BindSource.Jotunn)
-                modifiers = "A single key, read without looking at modifiers, so it fires while Alt, Ctrl or Shift are held too.";
-            else
-                modifiers = "A single key, with no modifier to match, so it fires while Alt, Ctrl or Shift are held - " +
-                            "unless the mod checks them in its own code, which the setting does not show.";
-
-            return $"{modifiers}\nFound as: {SourceLabel(bind.Source)}.";
-        }
-
-        /// <summary>Where the bind came from, said in words rather than in the enum's name.</summary>
-        private static string SourceLabel(BindSource source)
-        {
-            switch (source)
-            {
-                case BindSource.Vanilla: return "one of the game's own controls";
-                case BindSource.Gamepad: return "one of the game's gamepad buttons";
-                case BindSource.Jotunn: return "a mod button registered through Jotunn";
-                case BindSource.ModTyped: return "a keybind setting in the mod's config";
-                default: return "a text setting in the mod's config that reads as a key";
-            }
         }
 
         /// <summary>
